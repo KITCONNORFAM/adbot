@@ -1,27 +1,27 @@
-# <div align="center">
+Perfect 👍
+Neeche ONE-PIECE, 100% COPY-PASTE READY README diya hai.
+Bas poora select karo → copy → paste (GitHub / Telegram / Markdown me bilkul sahi chalega).
 
-<img src="# <div align="center">
+⸻
 
-<img src="https://i.ibb.co/p6mFW8JQ/file-3545.jpg" width="100%" style="border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,0.45);" />
+
+<div align="center">
+
+<img src="https://i.ibb.co/p6mFW8JQ/file-3545.jpg" width="100%" style="border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.45);" />
 
 <br><br>
 
 # 🚀 **ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ**
-
 ### ᴘʀᴏғᴇssɪᴏɴᴀʟ ᴍᴜʟᴛɪ-ᴀᴄᴄᴏᴜɴᴛ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sʏsᴛᴇᴍ
 
 <br>
 
 <p>
-<a href="https://t.me/pythontodayz">
-  <img src="https://img.shields.io/badge/ᴊᴏɪɴ-ᴛᴇʟᴇɢʀᴀᴍ-blue?style=for-the-badge&logo=telegram&logoColor=white">
-</a>
-<a>
+  <a href="https://t.me/pythontodayz">
+    <img src="https://img.shields.io/badge/ᴊᴏɪɴ-ᴛᴇʟᴇɢʀᴀᴍ-blue?style=for-the-badge&logo=telegram&logoColor=white">
+  </a>
   <img src="https://img.shields.io/badge/ᴘʏᴛʜᴏɴ-3.10+-yellow?style=for-the-badge&logo=python">
-</a>
-<a>
   <img src="https://img.shields.io/badge/sᴛᴀᴛᴜs-ᴀᴄᴛɪᴠᴇ-success?style=for-the-badge">
-</a>
 </p>
 
 </div>
@@ -30,7 +30,8 @@
 
 ## 🎯 ᴏᴠᴇʀᴠɪᴇᴡ
 
-ᴀ ɴᴇxᴛ-ɢᴇɴ **ᴛᴇʟᴇɢʀᴀᴍ ᴀᴜᴛᴏ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ʙᴏᴛ** ʙᴜɪʟᴛ ғᴏʀ ᴘʀᴏғᴇssɪᴏɴᴀʟs.
+ᴀ ɴᴇxᴛ-ɢᴇɴ **ᴛᴇʟᴇɢʀᴀᴍ ᴀᴜᴛᴏ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ʙᴏᴛ**  
+ʙᴜɪʟᴛ ғᴏʀ ᴘʀᴏғᴇssɪᴏɴᴀʟs ᴛᴏ ᴀᴜᴛᴏᴍᴀᴛᴇ, ᴍᴀɴᴀɢᴇ & sᴄᴀʟᴇ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅs.
 
 | ғᴇᴀᴛᴜʀᴇ | ᴅᴇsᴄʀɪᴘᴛɪᴏɴ |
 |---------|-------------|
@@ -49,309 +50,75 @@
 
 ### 🤖 ᴀᴄᴄᴏᴜɴᴛ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ
 
-```
 ➤ ᴜɴʟɪᴍɪᴛᴇᴅ ᴛᴇʟᴇᴛʜᴏɴ sᴇssɪᴏɴs
 ➤ 2ғᴀ sᴇᴄᴜʀᴇ ʟᴏɢɪɴ
-➤ ᴀᴜᴛᴏ-ʀᴇᴄᴏɴɴᴇᴄᴛ sʏsᴛᴇᴍ
+➤ ᴀᴜᴛᴏ-ʀᴇᴄᴏɴɴᴇᴄᴛ
 ➤ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴏᴜɴᴛ sᴡɪᴛᴄʜɪɴɢ
 ➤ ᴀᴇs-ᴇɴᴄʀʏᴘᴛᴇᴅ sᴛᴏʀᴀɢᴇ
-```
 
 ### 📢 ᴀᴅᴠᴇʀᴛɪsɪɴɢ ᴇɴɢɪɴᴇ
 
-```
 ➣ sᴍᴀʀᴛ ᴀᴜᴛᴏ-ᴛᴀʀɢᴇᴛɪɴɢ
-➣ ᴛᴇxᴛ, ᴍᴇᴅɪᴀ, ʙᴜᴛᴛᴏɴs & ʟɪɴᴋs
+➣ ᴛᴇxᴛ / ᴍᴇᴅɪᴀ / ʙᴜᴛᴛᴏɴs
 ➣ ᴀᴅᴊᴜsᴛᴀʙʟᴇ ᴅᴇʟᴀʏ
-➣ ᴅɪʀᴇᴄᴛ sᴇɴᴅ / ғᴏʀᴡᴀʀᴅ ᴍᴏᴅᴇ
-➣ ᴛᴀʀɢᴇᴛᴇᴅ ᴀᴅᴠᴇʀᴛɪsɪɴɢ
-```
+➣ ᴅɪʀᴇᴄᴛ sᴇɴᴅ & ғᴏʀᴡᴀʀᴅ
 
 ### 💬 ᴀᴜᴛᴏ ғᴇᴀᴛᴜʀᴇs
 
-```
 ✦ ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴛᴏ ᴅᴍs
 ✦ ᴀᴜᴛᴏ ɢʀᴏᴜᴘ ᴊᴏɪɴ
 ✦ ʙʀᴏᴀᴅᴄᴀsᴛ ᴛᴏ ᴀʟʟ ᴜsᴇʀs
 ✦ ᴀᴅᴍɪɴ-ᴏɴʟʏ ᴍᴏᴅᴇ
-```
-
-### 📊 ᴀɴᴀʟʏᴛɪᴄs
-
-```
-■ sᴜᴄᴄᴇssғᴜʟ ᴍᴇssᴀɢᴇs
-■ ғᴀɪʟᴇᴅ ᴅᴇʟɪᴠᴇʀɪᴇs
-■ ɢʀᴏᴜᴘs ᴄᴏᴠᴇʀᴇᴅ
-■ ᴀᴜᴛᴏ ʀᴇᴘʟɪᴇs sᴇɴᴛ
-■ ɢʀᴏᴜᴘs ᴊᴏɪɴᴇᴅ
-```
 
 ---
 
 ## 🏗 ᴘʀᴏᴊᴇᴄᴛ sᴛʀᴜᴄᴛᴜʀᴇ
 
-```
-📦 ᴛᴇʟᴇɢʀᴀᴍ-ᴀᴅ-ʙᴏᴛ
-├── main.py                    # ᴇɴᴛʀʏ ғɪʟᴇ
-├── requirements.txt           # ᴅᴇᴘᴇɴᴅᴇɴᴄɪᴇs
+📦 Telegram-Ad-Bot
+├── main.py
+├── requirements.txt
 └── PyToday/
-    ├── __init__.py
-    ├── config.py              # ᴄᴏɴғɪɢᴜʀᴀᴛɪᴏɴs
-    ├── database.py            # ᴍᴏɴɢᴏᴅʙ ʜᴀɴᴅʟᴇʀ
-    ├── encryption.py          # ᴀᴇs ᴇɴᴄʀʏᴘᴛɪᴏɴ
-    ├── handlers.py            # ʙᴏᴛ ᴄᴏᴍᴍᴀɴᴅs
-    ├── keyboards.py           # ɪɴʟɪɴᴇ ʙᴜᴛᴛᴏɴs
-    └── telethon_handler.py    # sᴇssɪᴏɴ ᴍᴀɴᴀɢᴇʀ
-```
+├── config.py
+├── database.py
+├── encryption.py
+├── handlers.py
+├── keyboards.py
+└── telethon_handler.py
 
 ---
 
 ## ⚙️ ᴄᴏɴғɪɢᴜʀᴀᴛɪᴏɴ
 
-### ᴇɴᴠɪʀᴏɴᴍᴇɴᴛ ᴠᴀʀɪᴀʙʟᴇs
-
 | ᴠᴀʀɪᴀʙʟᴇ | ᴅᴇsᴄʀɪᴘᴛɪᴏɴ |
 |----------|-------------|
-| `BOT_TOKEN` | ᴛᴇʟᴇɢʀᴀᴍ ʙᴏᴛ ᴛᴏᴋᴇɴ |
-| `MONGODB_URI` | ᴍᴏɴɢᴏᴅʙ ᴄᴏɴɴᴇᴄᴛɪᴏɴ |
-| `ADMIN_USER_IDS` | ᴀᴅᴍɪɴ ᴜsᴇʀ ɪᴅs |
-| `ADMIN_ONLY_MODE` | ʀᴇsᴛʀɪᴄᴛ ᴛᴏ ᴀᴅᴍɪɴs |
-| `AUTO_REPLY_TEXT` | ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴍᴇssᴀɢᴇ |
+| `BOT_TOKEN` | Telegram Bot Token |
+| `MONGODB_URI` | MongoDB Connection |
+| `ADMIN_USER_IDS` | Admin User IDs |
+| `AUTO_REPLY_TEXT` | Auto Reply Message |
 
 ---
 
-## 📊 sᴛᴀᴛs ᴘʀᴇᴠɪᴇᴡ
-
-```
-◆ ᴅᴀɪʟʏ ᴘᴇʀғᴏʀᴍᴀɴᴄᴇ
-   ├── ✓ sᴜᴄᴄᴇssғᴜʟ : 1,240
-   ├── ✗ ғᴀɪʟᴇᴅ     : 12
-   ├── ◎ ɢʀᴏᴜᴘs    : 450
-   ├── 💬 ʀᴇᴘʟɪᴇs   : 89
-   └── 🔗 ᴊᴏɪɴᴇᴅ    : 25
-```
-
----
-
-## 💡 ᴜsᴇ ᴄᴀsᴇs
-
-```
-◆ ᴍᴀʀᴋᴇᴛɪɴɢ ᴀɢᴇɴᴄɪᴇs
-◆ ᴄᴏᴍᴍᴜɴɪᴛʏ ᴘʀᴏᴍᴏᴛɪᴏɴ
-◆ ᴛᴇʟᴇɢʀᴀᴍ ɢʀᴏᴡᴛʜ sᴇʀᴠɪᴄᴇs
-◆ ᴇ-ᴄᴏᴍᴍᴇʀᴄᴇ sᴇʟʟᴇʀs
-◆ sᴛᴀʀᴛᴜᴘ ᴘʀᴏᴍᴏᴛɪᴏɴs
-```
-
----
-
-## 🧩 ᴄᴏᴍᴍᴀɴᴅs
-
-| ᴄᴏᴍᴍᴀɴᴅ | ᴅᴇsᴄʀɪᴘᴛɪᴏɴ |
-|---------|-------------|
-| `/start` | sᴛᴀʀᴛ ᴛʜᴇ ʙᴏᴛ |
-| `/broadcast` | sᴇɴᴅ ᴛᴏ ᴀʟʟ ᴜsᴇʀs (ᴀᴅᴍɪɴ) |
-
----
-
-# <div align="center">
+<div align="center">
 
 ## 🤝 ᴄᴏᴍᴍᴜɴɪᴛʏ & sᴜᴘᴘᴏʀᴛ
 
 <a href="https://t.me/pythontodayz">
-<img src="https://img.shields.io/badge/ᴛᴇʟᴇɢʀᴀᴍ-ᴄᴏᴍᴍᴜɴɪᴛʏ-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" height="40">
+<img src="https://img.shields.io/badge/Telegram-Community-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white">
 </a>
 
 <br><br>
 
-### 👨‍💻 ᴅᴇᴠᴇʟᴏᴘᴇʀ — ᴀᴅᴅʏ
+### 👨‍💻 Developer — **Addy**
 
 <a href="https://github.com/PythonTodayz">
-<img src="https://img.shields.io/badge/ɢɪᴛʜᴜʙ-ᴀᴅᴅʏ-181717?style=for-the-badge&logo=github" height="40">
+<img src="https://img.shields.io/badge/GitHub-Addy-181717?style=for-the-badge&logo=github">
 </a>
 
 ---
 
-### 📝 ʟɪᴄᴇɴsᴇ
+### 📝 License
+**MIT License** — Free for personal & commercial use.
 
-**ᴍɪᴛ ʟɪᴄᴇɴsᴇ** — ғʀᴇᴇ ғᴏʀ ᴘᴇʀsᴏɴᴀʟ & ᴄᴏᴍᴍᴇʀᴄɪᴀʟ ᴜsᴇ.
-
-⭐ ɪғ ʏᴏᴜ ғɪɴᴅ ᴛʜɪs ᴜsᴇғᴜʟ, ᴄᴏɴsɪᴅᴇʀ ɢɪᴠɪɴɢ ᴀ **sᴛᴀʀ**.
-
-</div>" width="100%" style="border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,0.45);" />
-
-<br><br>
-
-# 🚀 **ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ**
-
-### ᴘʀᴏғᴇssɪᴏɴᴀʟ ᴍᴜʟᴛɪ-ᴀᴄᴄᴏᴜɴᴛ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sʏsᴛᴇᴍ
-
-<br>
-
-<p>
-<a href="https://t.me/pythontodayz">
-  <img src="https://img.shields.io/badge/ᴊᴏɪɴ-ᴛᴇʟᴇɢʀᴀᴍ-blue?style=for-the-badge&logo=telegram&logoColor=white">
-</a>
-<a>
-  <img src="https://img.shields.io/badge/ᴘʏᴛʜᴏɴ-3.10+-yellow?style=for-the-badge&logo=python">
-</a>
-<a>
-  <img src="https://img.shields.io/badge/sᴛᴀᴛᴜs-ᴀᴄᴛɪᴠᴇ-success?style=for-the-badge">
-</a>
-</p>
-
-</div>
-
----
-
-## 🎯 ᴏᴠᴇʀᴠɪᴇᴡ
-
-ᴀ ɴᴇxᴛ-ɢᴇɴ **ᴛᴇʟᴇɢʀᴀᴍ ᴀᴜᴛᴏ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ʙᴏᴛ** ʙᴜɪʟᴛ ғᴏʀ ᴘʀᴏғᴇssɪᴏɴᴀʟs.
-
-| ғᴇᴀᴛᴜʀᴇ | ᴅᴇsᴄʀɪᴘᴛɪᴏɴ |
-|---------|-------------|
-| ◆ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs | ᴍᴀɴᴀɢᴇ ᴍᴜʟᴛɪᴘʟᴇ ᴀᴄᴄᴏᴜɴᴛs |
-| ◆ ᴀᴜᴛᴏ-ᴀᴅs | sᴇɴᴅ ᴛᴏ ɢʀᴏᴜᴘs & ᴍᴀʀᴋᴇᴛᴘʟᴀᴄᴇs |
-| ◆ 2ғᴀ ʟᴏɢɪɴ | sᴇᴄᴜʀᴇ ᴀᴜᴛʜᴇɴᴛɪᴄᴀᴛɪᴏɴ |
-| ◆ ᴍᴏɴɢᴏᴅʙ | sᴇssɪᴏɴ sᴛᴏʀᴀɢᴇ |
-| ◆ ғᴏʀᴡᴀʀᴅ ᴍᴏᴅᴇ | ᴘʀᴇᴍɪᴜᴍ ᴇᴍᴏᴊɪs ᴘʀᴇsᴇʀᴠᴇᴅ |
-| ◆ ᴀᴜᴛᴏ ʀᴇᴘʟʏ | ᴅᴍ ᴀᴜᴛᴏ-ʀᴇsᴘᴏɴᴅᴇʀ |
-| ◆ ᴀᴜᴛᴏ ᴊᴏɪɴ | ᴀᴜᴛᴏᴍᴀᴛɪᴄ ɢʀᴏᴜᴘ ᴊᴏɪɴɪɴɢ |
-| ◆ ʙʀᴏᴀᴅᴄᴀsᴛ | sᴇɴᴅ ᴛᴏ ᴀʟʟ ᴜsᴇʀs |
-
----
-
-## ⚡ ᴋᴇʏ ғᴇᴀᴛᴜʀᴇs
-
-### 🤖 ᴀᴄᴄᴏᴜɴᴛ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ
-
-```
-➤ ᴜɴʟɪᴍɪᴛᴇᴅ ᴛᴇʟᴇᴛʜᴏɴ sᴇssɪᴏɴs
-➤ 2ғᴀ sᴇᴄᴜʀᴇ ʟᴏɢɪɴ
-➤ ᴀᴜᴛᴏ-ʀᴇᴄᴏɴɴᴇᴄᴛ sʏsᴛᴇᴍ
-➤ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴏᴜɴᴛ sᴡɪᴛᴄʜɪɴɢ
-➤ ᴀᴇs-ᴇɴᴄʀʏᴘᴛᴇᴅ sᴛᴏʀᴀɢᴇ
-```
-
-### 📢 ᴀᴅᴠᴇʀᴛɪsɪɴɢ ᴇɴɢɪɴᴇ
-
-```
-➣ sᴍᴀʀᴛ ᴀᴜᴛᴏ-ᴛᴀʀɢᴇᴛɪɴɢ
-➣ ᴛᴇxᴛ, ᴍᴇᴅɪᴀ, ʙᴜᴛᴛᴏɴs & ʟɪɴᴋs
-➣ ᴀᴅᴊᴜsᴛᴀʙʟᴇ ᴅᴇʟᴀʏ
-➣ ᴅɪʀᴇᴄᴛ sᴇɴᴅ / ғᴏʀᴡᴀʀᴅ ᴍᴏᴅᴇ
-➣ ᴛᴀʀɢᴇᴛᴇᴅ ᴀᴅᴠᴇʀᴛɪsɪɴɢ
-```
-
-### 💬 ᴀᴜᴛᴏ ғᴇᴀᴛᴜʀᴇs
-
-```
-✦ ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴛᴏ ᴅᴍs
-✦ ᴀᴜᴛᴏ ɢʀᴏᴜᴘ ᴊᴏɪɴ
-✦ ʙʀᴏᴀᴅᴄᴀsᴛ ᴛᴏ ᴀʟʟ ᴜsᴇʀs
-✦ ᴀᴅᴍɪɴ-ᴏɴʟʏ ᴍᴏᴅᴇ
-```
-
-### 📊 ᴀɴᴀʟʏᴛɪᴄs
-
-```
-■ sᴜᴄᴄᴇssғᴜʟ ᴍᴇssᴀɢᴇs
-■ ғᴀɪʟᴇᴅ ᴅᴇʟɪᴠᴇʀɪᴇs
-■ ɢʀᴏᴜᴘs ᴄᴏᴠᴇʀᴇᴅ
-■ ᴀᴜᴛᴏ ʀᴇᴘʟɪᴇs sᴇɴᴛ
-■ ɢʀᴏᴜᴘs ᴊᴏɪɴᴇᴅ
-```
-
----
-
-## 🏗 ᴘʀᴏᴊᴇᴄᴛ sᴛʀᴜᴄᴛᴜʀᴇ
-
-```
-📦 ᴛᴇʟᴇɢʀᴀᴍ-ᴀᴅ-ʙᴏᴛ
-├── main.py                    # ᴇɴᴛʀʏ ғɪʟᴇ
-├── requirements.txt           # ᴅᴇᴘᴇɴᴅᴇɴᴄɪᴇs
-└── PyToday/
-    ├── __init__.py
-    ├── config.py              # ᴄᴏɴғɪɢᴜʀᴀᴛɪᴏɴs
-    ├── database.py            # ᴍᴏɴɢᴏᴅʙ ʜᴀɴᴅʟᴇʀ
-    ├── encryption.py          # ᴀᴇs ᴇɴᴄʀʏᴘᴛɪᴏɴ
-    ├── handlers.py            # ʙᴏᴛ ᴄᴏᴍᴍᴀɴᴅs
-    ├── keyboards.py           # ɪɴʟɪɴᴇ ʙᴜᴛᴛᴏɴs
-    └── telethon_handler.py    # sᴇssɪᴏɴ ᴍᴀɴᴀɢᴇʀ
-```
-
----
-
-## ⚙️ ᴄᴏɴғɪɢᴜʀᴀᴛɪᴏɴ
-
-### ᴇɴᴠɪʀᴏɴᴍᴇɴᴛ ᴠᴀʀɪᴀʙʟᴇs
-
-| ᴠᴀʀɪᴀʙʟᴇ | ᴅᴇsᴄʀɪᴘᴛɪᴏɴ |
-|----------|-------------|
-| `BOT_TOKEN` | ᴛᴇʟᴇɢʀᴀᴍ ʙᴏᴛ ᴛᴏᴋᴇɴ |
-| `MONGODB_URI` | ᴍᴏɴɢᴏᴅʙ ᴄᴏɴɴᴇᴄᴛɪᴏɴ |
-| `ADMIN_USER_IDS` | ᴀᴅᴍɪɴ ᴜsᴇʀ ɪᴅs |
-| `ADMIN_ONLY_MODE` | ʀᴇsᴛʀɪᴄᴛ ᴛᴏ ᴀᴅᴍɪɴs |
-| `AUTO_REPLY_TEXT` | ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴍᴇssᴀɢᴇ |
-
----
-
-## 📊 sᴛᴀᴛs ᴘʀᴇᴠɪᴇᴡ
-
-```
-◆ ᴅᴀɪʟʏ ᴘᴇʀғᴏʀᴍᴀɴᴄᴇ
-   ├── ✓ sᴜᴄᴄᴇssғᴜʟ : 1,240
-   ├── ✗ ғᴀɪʟᴇᴅ     : 12
-   ├── ◎ ɢʀᴏᴜᴘs    : 450
-   ├── 💬 ʀᴇᴘʟɪᴇs   : 89
-   └── 🔗 ᴊᴏɪɴᴇᴅ    : 25
-```
-
----
-
-## 💡 ᴜsᴇ ᴄᴀsᴇs
-
-```
-◆ ᴍᴀʀᴋᴇᴛɪɴɢ ᴀɢᴇɴᴄɪᴇs
-◆ ᴄᴏᴍᴍᴜɴɪᴛʏ ᴘʀᴏᴍᴏᴛɪᴏɴ
-◆ ᴛᴇʟᴇɢʀᴀᴍ ɢʀᴏᴡᴛʜ sᴇʀᴠɪᴄᴇs
-◆ ᴇ-ᴄᴏᴍᴍᴇʀᴄᴇ sᴇʟʟᴇʀs
-◆ sᴛᴀʀᴛᴜᴘ ᴘʀᴏᴍᴏᴛɪᴏɴs
-```
-
----
-
-## 🧩 ᴄᴏᴍᴍᴀɴᴅs
-
-| ᴄᴏᴍᴍᴀɴᴅ | ᴅᴇsᴄʀɪᴘᴛɪᴏɴ |
-|---------|-------------|
-| `/start` | sᴛᴀʀᴛ ᴛʜᴇ ʙᴏᴛ |
-| `/broadcast` | sᴇɴᴅ ᴛᴏ ᴀʟʟ ᴜsᴇʀs (ᴀᴅᴍɪɴ) |
-
----
-
-# <div align="center">
-
-## 🤝 ᴄᴏᴍᴍᴜɴɪᴛʏ & sᴜᴘᴘᴏʀᴛ
-
-<a href="https://t.me/pythontodayz">
-<img src="https://img.shields.io/badge/ᴛᴇʟᴇɢʀᴀᴍ-ᴄᴏᴍᴍᴜɴɪᴛʏ-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" height="40">
-</a>
-
-<br><br>
-
-### 👨‍💻 ᴅᴇᴠᴇʟᴏᴘᴇʀ — ᴀᴅᴅʏ
-
-<a href="https://github.com/PythonTodayz">
-<img src="https://img.shields.io/badge/ɢɪᴛʜᴜʙ-ᴀᴅᴅʏ-181717?style=for-the-badge&logo=github" height="40">
-</a>
-
----
-
-### 📝 ʟɪᴄᴇɴsᴇ
-
-**ᴍɪᴛ ʟɪᴄᴇɴsᴇ** — ғʀᴇᴇ ғᴏʀ ᴘᴇʀsᴏɴᴀʟ & ᴄᴏᴍᴍᴇʀᴄɪᴀʟ ᴜsᴇ.
-
-⭐ ɪғ ʏᴏᴜ ғɪɴᴅ ᴛʜɪs ᴜsᴇғᴜʟ, ᴄᴏɴsɪᴅᴇʀ ɢɪᴠɪɴɢ ᴀ **sᴛᴀʀ**.
+⭐ If you like this project, give it a **star**!
 
 </div>
