@@ -2,6 +2,7 @@ import asyncio
 import logging
 import signal
 import sys
+import time
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from telegram.error import NetworkError, TimedOut, RetryAfter, TelegramError
 from PyToday import database
@@ -102,16 +103,16 @@ def main():
             )
         except NetworkError as e:
             logger.error(f"Network error, restarting in {config.RETRY_DELAY}s: {e}")
-            asyncio.get_event_loop().run_until_complete(asyncio.sleep(config.RETRY_DELAY))
+            time.sleep(config.RETRY_DELAY)
         except TimedOut as e:
             logger.error(f"Timeout error, restarting in {config.RETRY_DELAY}s: {e}")
-            asyncio.get_event_loop().run_until_complete(asyncio.sleep(config.RETRY_DELAY))
+            time.sleep(config.RETRY_DELAY)
         except KeyboardInterrupt:
             logger.info("Bot stopped by user")
             break
         except Exception as e:
             logger.error(f"Fatal error, restarting in {config.RETRY_DELAY}s: {e}", exc_info=True)
-            asyncio.get_event_loop().run_until_complete(asyncio.sleep(config.RETRY_DELAY))
+            time.sleep(config.RETRY_DELAY)
 
 if __name__ == "__main__":
     main()
