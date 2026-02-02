@@ -4,38 +4,63 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MONGODB_URI = os.getenv("MONGODB_URI", "mongodb+srv://:@cluster0.obhmjth.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-BOT_TOKEN = os.getenv("BOT_TOKEN", "7315481856:")
+# MongoDB Configuration
+MONGODB_URI = os.getenv("MONGODB_URI", "")
 
-ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", "a7e5f2d8c9b1a0f3e4d2c8b7a6f5e1d3c9a8b7f6e5d4c3b2a1f0e9d8c7b6a5")
+# Bot Configuration
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+
+# Encryption Key
+ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", "")
 if not ENCRYPTION_KEY:
     ENCRYPTION_KEY = secrets.token_urlsafe(32)
 
-ADMIN_USER_IDS = [int(x) for x in os.getenv("ADMIN_USER_IDS", "6510174019").split(",") if x.strip()]
+# Admin Configuration
+ADMIN_USER_IDS = [int(x) for x in os.getenv("ADMIN_USER_IDS", "").split(",") if x.strip()]
 
+# Sessions Directory
 SESSIONS_DIR = "sessions"
 os.makedirs(SESSIONS_DIR, exist_ok=True)
 
+# Bot Info
 BOT_USERNAME = os.getenv("BOT_USERNAME", "PyToday Adbot")
 ACCOUNT_NAME_SUFFIX = os.getenv("ACCOUNT_NAME_SUFFIX", "PyAds")
 ACCOUNT_BIO_TEMPLATE = os.getenv("ACCOUNT_BIO_TEMPLATE", "Smart Ads")
 
+# Media
 START_IMAGE_URL = os.getenv("START_IMAGE_URL", "https://i.ibb.co/p6mFW8JQ/file-3545.jpg")
 
+# Admin Only Mode
 ADMIN_ONLY_MODE = os.getenv("ADMIN_ONLY_MODE", "False").lower() == "true"
 
+# Auto Reply Configuration
 AUTO_REPLY_ENABLED = os.getenv("AUTO_REPLY_ENABLED", "False").lower() == "true"
 AUTO_REPLY_TEXT = os.getenv("AUTO_REPLY_TEXT", "I'm currently unavailable. Go ahead and send your message, I will reply as soon as I can.")
 
+# Auto Group Join Configuration
 AUTO_GROUP_JOIN_ENABLED = os.getenv("AUTO_GROUP_JOIN_ENABLED", "False").lower() == "true"
 
-FORCE_SUB_CHANNEL = os.getenv("FORCE_SUB_CHANNEL", "")
-FORCE_SUB_GROUP = os.getenv("FORCE_SUB_GROUP", "")
+# Force Subscribe Configuration (Using IDs instead of links)
 FORCE_SUB_ENABLED = os.getenv("FORCE_SUB_ENABLED", "False").lower() == "true"
+FORCE_SUB_CHANNEL_ID = os.getenv("FORCE_SUB_CHANNEL_ID", "")  # Channel ID (e.g., -1001234567890)
+FORCE_SUB_GROUP_ID = os.getenv("FORCE_SUB_GROUP_ID", "")  # Group ID (e.g., -1001234567890)
 
-SQLITE_DB_PATH = "bot_data.db"
+# Logs Channel Configuration
+LOGS_CHANNEL_ID = os.getenv("LOGS_CHANNEL_ID", "")  # Channel ID for logs (e.g., -1001234567890)
 
-CONNECTION_POOL_SIZE = 10
-REQUEST_TIMEOUT = 30
-MAX_RETRIES = 3
-RETRY_DELAY = 5
+# Database
+SQLITE_DB_PATH = os.getenv("SQLITE_DB_PATH", "bot_data.db")
+
+# Connection Settings
+CONNECTION_POOL_SIZE = int(os.getenv("CONNECTION_POOL_SIZE", "10"))
+REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "30"))
+MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))
+RETRY_DELAY = int(os.getenv("RETRY_DELAY", "5"))
+
+# Group Links File - Auto-detect path
+import os as _os
+_script_dir = _os.path.dirname(_os.path.abspath(__file__))
+_default_group_file = _os.path.join(_script_dir, '..', 'group_mps.txt')
+if not _os.path.exists(_default_group_file):
+    _default_group_file = 'group_mps.txt'
+GROUP_LINKS_FILE = os.getenv("GROUP_LINKS_FILE", _default_group_file)

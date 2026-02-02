@@ -50,11 +50,12 @@ def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, a
         [InlineKeyboardButton("▤ sᴛᴀᴛɪsᴛɪᴄs", callback_data="statistics")],
         [InlineKeyboardButton(f"✉ {forward_mode} ⟨{forward_status}⟩", callback_data="toggle_forward_mode"),
          InlineKeyboardButton(f"⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ ⟨{auto_reply_status}⟩", callback_data="auto_reply_menu")],
-        [InlineKeyboardButton(f"⊕ ᴀᴜᴛᴏ ᴊᴏɪɴ ⟨{auto_join_status}⟩", callback_data="toggle_auto_group_join")]
+        [InlineKeyboardButton(f"⊕ ᴀᴜᴛᴏ ᴊᴏɪɴ ⟨{auto_join_status}⟩", callback_data="toggle_auto_group_join")],
+        [InlineKeyboardButton("◉ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="logs_channel_menu")]
     ]
     
     if is_admin_user:
-        keyboard[-1].append(InlineKeyboardButton(f"⊗ ғᴏʀᴄᴇ sᴜʙ ⟨{force_sub_status}⟩", callback_data="force_sub_menu"))
+        keyboard.append([InlineKeyboardButton(f"⊗ ғᴏʀᴄᴇ sᴜʙ ⟨{force_sub_status}⟩", callback_data="force_sub_menu")])
     
     keyboard.append([InlineKeyboardButton("◎ ᴛᴀʀɢᴇᴛɪɴɢ", callback_data="target_adv")])
     keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")])
@@ -66,19 +67,19 @@ def force_sub_keyboard(force_sub_enabled=False):
     
     keyboard = [
         [InlineKeyboardButton(f"{toggle_text}", callback_data="toggle_force_sub")],
-        [InlineKeyboardButton("◈ sᴇᴛ ᴄʜᴀɴɴᴇʟ", callback_data="set_force_channel"),
-         InlineKeyboardButton("◉ sᴇᴛ ɢʀᴏᴜᴘ", callback_data="set_force_group")],
+        [InlineKeyboardButton("◈ sᴇᴛ ᴄʜᴀɴɴᴇʟ ɪᴅ", callback_data="set_force_channel"),
+         InlineKeyboardButton("◉ sᴇᴛ ɢʀᴏᴜᴘ ɪᴅ", callback_data="set_force_group")],
         [InlineKeyboardButton("◐ ᴠɪᴇᴡ sᴇᴛᴛɪɴɢs", callback_data="view_force_sub")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def force_sub_join_keyboard(channel_link=None, group_link=None):
+def force_sub_join_keyboard(channel_id=None, group_id=None):
     keyboard = []
-    if channel_link:
-        keyboard.append([InlineKeyboardButton("◈ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ", url=channel_link)])
-    if group_link:
-        keyboard.append([InlineKeyboardButton("◉ ᴊᴏɪɴ ɢʀᴏᴜᴘ", url=group_link)])
+    if channel_id:
+        keyboard.append([InlineKeyboardButton("◈ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ", url=f"https://t.me/c/{str(channel_id).replace('-100', '')}")])
+    if group_id:
+        keyboard.append([InlineKeyboardButton("◉ ᴊᴏɪɴ ɢʀᴏᴜᴘ", url=f"https://t.me/c/{str(group_id).replace('-100', '')}")])
     keyboard.append([InlineKeyboardButton("↻ ᴄʜᴇᴄᴋ ᴀɢᴀɪɴ", callback_data="check_force_sub")])
     return InlineKeyboardMarkup(keyboard)
 
@@ -380,11 +381,61 @@ def single_account_selection_keyboard(accounts, page=0, per_page=5):
     keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")])
     return InlineKeyboardMarkup(keyboard)
 
+# Admin Panel Keyboard
 def admin_panel_keyboard():
     keyboard = [
         [InlineKeyboardButton("▤ sᴛᴀᴛs", callback_data="admin_stats"),
          InlineKeyboardButton("◈ ʙʀᴏᴀᴅᴄᴀsᴛ", callback_data="admin_broadcast")],
-        [InlineKeyboardButton("⊗ ғᴏʀᴄᴇ sᴜʙ", callback_data="force_sub_menu")],
+        [InlineKeyboardButton("⊗ ғᴏʀᴄᴇ sᴜʙ", callback_data="force_sub_menu"),
+         InlineKeyboardButton("◉ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="logs_channel_menu")],
+        [InlineKeyboardButton("≡ ᴜsᴇʀs", callback_data="admin_users"),
+         InlineKeyboardButton("✕ ʙᴀɴ/ᴜɴʙᴀɴ", callback_data="admin_ban")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+# Logs Channel Keyboard
+def logs_channel_keyboard(has_channel=False, verified=False):
+    if has_channel:
+        if verified:
+            status = "✅ ᴠᴇʀɪғɪᴇᴅ"
+            keyboard = [
+                [InlineKeyboardButton(status, callback_data="logs_status")],
+                [InlineKeyboardButton("✕ ʀᴇᴍᴏᴠᴇ ᴄʜᴀɴɴᴇʟ", callback_data="remove_logs_channel")],
+                [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
+            ]
+        else:
+            status = "⏳ ᴘᴇɴᴅɪɴɢ"
+            keyboard = [
+                [InlineKeyboardButton(status, callback_data="logs_status")],
+                [InlineKeyboardButton("↻ ᴠᴇʀɪғʏ", callback_data="verify_logs_channel")],
+                [InlineKeyboardButton("✕ ʀᴇᴍᴏᴠᴇ ᴄʜᴀɴɴᴇʟ", callback_data="remove_logs_channel")],
+                [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
+            ]
+    else:
+        keyboard = [
+            [InlineKeyboardButton("＋ sᴇᴛ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="set_logs_channel")],
+            [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
+        ]
+    return InlineKeyboardMarkup(keyboard)
+
+# Load Groups Options Keyboard
+def load_groups_options_keyboard():
+    keyboard = [
+        [InlineKeyboardButton("◈ ʟᴏᴀᴅ ᴍʏ ɢʀᴏᴜᴘs", callback_data="load_my_groups")],
+        [InlineKeyboardButton("◉ ʟᴏᴀᴅ ᴅᴇғᴀᴜʟᴛ ɢʀᴏᴜᴘs", callback_data="load_default_groups")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+# Force Join Keyboard (for user settings)
+def force_join_keyboard(enabled=False):
+    status = "● ᴏɴ" if enabled else "○ ᴏғғ"
+    toggle_text = "○ ᴛᴜʀɴ ᴏғғ" if enabled else "● ᴛᴜʀɴ ᴏɴ"
+    
+    keyboard = [
+        [InlineKeyboardButton(f"sᴛᴀᴛᴜs: {status}", callback_data="force_join_status")],
+        [InlineKeyboardButton(f"{toggle_text}", callback_data="toggle_force_join")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
     ]
     return InlineKeyboardMarkup(keyboard)

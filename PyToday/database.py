@@ -51,7 +51,10 @@ async def init_db():
                 selected_groups TEXT DEFAULT '[]',
                 saved_message_id INTEGER,
                 selected_accounts TEXT DEFAULT '[]',
-                selected_single_account TEXT
+                selected_single_account TEXT,
+                logs_channel_id TEXT,
+                logs_channel_set INTEGER DEFAULT 0,
+                force_join_enabled INTEGER DEFAULT 0
             )
         ''')
         
@@ -149,13 +152,12 @@ async def init_db():
             )
         ''')
         
+        # Force Subscribe table (using IDs instead of links)
         await db.execute('''
             CREATE TABLE IF NOT EXISTS force_sub (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 channel_id TEXT,
-                channel_link TEXT,
                 group_id TEXT,
-                group_link TEXT,
                 enabled INTEGER DEFAULT 0
             )
         ''')
@@ -163,6 +165,40 @@ async def init_db():
         existing = await db.execute("SELECT * FROM force_sub WHERE id = 1")
         if not await existing.fetchone():
             await db.execute("INSERT INTO force_sub (id, enabled) VALUES (1, 0)")
+        
+        # Logs Channel table
+        await db.execute('''
+            CREATE TABLE IF NOT EXISTS logs_channels (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER UNIQUE,
+                channel_id TEXT,
+                channel_link TEXT,
+                verified INTEGER DEFAULT 0,
+                created_at TEXT
+            )
+        ''')
+        
+        # Force Join table (for user-specific force join settings)
+        await db.execute('''
+            CREATE TABLE IF NOT EXISTS force_join (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER UNIQUE,
+                enabled INTEGER DEFAULT 0,
+                created_at TEXT
+            )
+        ''')
+        
+        # Auto Join Tasks table
+        await db.execute('''
+            CREATE TABLE IF NOT EXISTS auto_join_tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                account_id INTEGER,
+                status TEXT DEFAULT 'pending',
+                created_at TEXT,
+                completed_at TEXT
+            )
+        ''')
         
         await db.commit()
         logger.info("SQLite database initialized successfully")
@@ -447,6 +483,7 @@ async def mark_user_replied(account_id, user_id: int, username: str = None):
             return True
     return False
 
+# Force Subscribe Functions (using IDs)
 async def get_force_sub_settings():
     async with aiosqlite.connect(sqlite_db_path) as db:
         db.row_factory = aiosqlite.Row
@@ -454,7 +491,7 @@ async def get_force_sub_settings():
         row = await cursor.fetchone()
         if row:
             return dict(row)
-        return {"enabled": 0, "channel_id": None, "channel_link": None, "group_id": None, "group_link": None}
+        return {"enabled": 0, "channel_id": None, "group_id": None}
 
 async def update_force_sub_settings(**kwargs):
     async with aiosqlite.connect(sqlite_db_path) as db:
@@ -468,3 +505,86 @@ async def toggle_force_sub():
     new_status = 0 if settings.get("enabled") else 1
     await update_force_sub_settings(enabled=new_status)
     return new_status == 1
+
+# Logs Channel Functions
+async def get_logs_channel(user_id: int):
+    async with aiosqlite.connect(sqlite_db_path) as db:
+        db.row_factory = aiosqlite.Row
+        cursor = await db.execute("SELECT * FROM logs_channels WHERE user_id = ?", (user_id,))
+        row = await cursor.fetchone()
+        if row:
+            return dict(row)
+        return None
+
+async def set_logs_channel(user_id: int, channel_id: str, channel_link: str = None):
+    async with aiosqlite.connect(sqlite_db_path) as db:
+        await db.execute('''
+            INSERT OR REPLACE INTO logs_channels (user_id, channel_id, channel_link, verified, created_at)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (user_id, channel_id, channel_link, 0, datetime.utcnow().isoformat()))
+        await db.commit()
+    return await get_logs_channel(user_id)
+
+async def verify_logs_channel(user_id: int):
+    async with aiosqlite.connect(sqlite_db_path) as db:
+        await db.execute("UPDATE logs_channels SET verified = 1 WHERE user_id = ?", (user_id,))
+        await db.commit()
+    return await get_logs_channel(user_id)
+
+async def delete_logs_channel(user_id: int):
+    async with aiosqlite.connect(sqlite_db_path) as db:
+        await db.execute("DELETE FROM logs_channels WHERE user_id = ?", (user_id,))
+        await db.commit()
+
+# Force Join Functions (user-specific)
+async def get_force_join_status(user_id: int):
+    async with aiosqlite.connect(sqlite_db_path) as db:
+        db.row_factory = aiosqlite.Row
+        cursor = await db.execute("SELECT * FROM force_join WHERE user_id = ?", (user_id,))
+        row = await cursor.fetchone()
+        if row:
+            return dict(row)
+        return {"enabled": 0}
+
+async def toggle_force_join(user_id: int):
+    status = await get_force_join_status(user_id)
+    new_status = 0 if status.get("enabled") else 1
+    async with aiosqlite.connect(sqlite_db_path) as db:
+        await db.execute('''
+            INSERT OR REPLACE INTO force_join (user_id, enabled, created_at)
+            VALUES (?, ?, ?)
+        ''', (user_id, new_status, datetime.utcnow().isoformat()))
+        await db.commit()
+    return new_status == 1
+
+# Auto Join Tasks
+async def create_auto_join_task(user_id: int, account_id: int):
+    if isinstance(account_id, str):
+        account_id = int(account_id)
+    async with aiosqlite.connect(sqlite_db_path) as db:
+        cursor = await db.execute('''
+            INSERT INTO auto_join_tasks (user_id, account_id, status, created_at)
+            VALUES (?, ?, ?, ?)
+        ''', (user_id, account_id, "pending", datetime.utcnow().isoformat()))
+        await db.commit()
+        return cursor.lastrowid
+
+async def update_auto_join_task(task_id: int, status: str):
+    async with aiosqlite.connect(sqlite_db_path) as db:
+        if status == "completed":
+            await db.execute('''
+                UPDATE auto_join_tasks SET status = ?, completed_at = ? WHERE id = ?
+            ''', (status, datetime.utcnow().isoformat(), task_id))
+        else:
+            await db.execute("UPDATE auto_join_tasks SET status = ? WHERE id = ?", (status, task_id))
+        await db.commit()
+
+async def get_pending_auto_join_tasks(user_id: int = None):
+    async with aiosqlite.connect(sqlite_db_path) as db:
+        db.row_factory = aiosqlite.Row
+        if user_id:
+            cursor = await db.execute("SELECT * FROM auto_join_tasks WHERE user_id = ? AND status = ?", (user_id, "pending"))
+        else:
+            cursor = await db.execute("SELECT * FROM auto_join_tasks WHERE status = ?", ("pending",))
+        rows = await cursor.fetchall()
+        return [dict(row) for row in rows]
