@@ -2,7 +2,7 @@ import motor.motor_asyncio
 import aiosqlite
 from datetime import datetime
 from bson import ObjectId
-from PyToday import *
+from PyToday import config
 import asyncio
 import logging
 

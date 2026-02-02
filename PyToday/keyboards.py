@@ -2,12 +2,12 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 def main_menu_keyboard():
     keyboard = [
-        [InlineKeyboardButton("• ᴀᴅᴠᴇʀᴛɪsɪɴɢ •", callback_data="advertising_menu"),
-         InlineKeyboardButton("• ᴀᴄᴄᴏᴜɴᴛs •", callback_data="accounts_menu")],
-        [InlineKeyboardButton("• ʟᴏᴀᴅ ɢᴄs/ᴍᴘs •", callback_data="load_groups"),
-         InlineKeyboardButton("• sᴇᴛ ᴀᴅ ᴛᴇxᴛ •", callback_data="set_ad_text")],
-        [InlineKeyboardButton("• sᴇᴛᴛɪɴɢs •", callback_data="settings"),
-         InlineKeyboardButton("• sᴜᴘᴘᴏʀᴛ •", callback_data="support")]
+        [InlineKeyboardButton("ᴀᴅᴠᴇʀᴛɪsɪɴɢ", callback_data="advertising_menu"),
+         InlineKeyboardButton("ᴀᴄᴄᴏᴜɴᴛs", callback_data="accounts_menu")],
+        [InlineKeyboardButton("ʟᴏᴀᴅ ɢᴄs/ᴍᴘs", callback_data="load_groups"),
+         InlineKeyboardButton("sᴇᴛ ᴀᴅ ᴛᴇxᴛ", callback_data="set_ad_text")],
+        [InlineKeyboardButton("sᴇᴛᴛɪɴɢs", callback_data="settings"),
+         InlineKeyboardButton("sᴜᴘᴘᴏʀᴛ", callback_data="support")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -37,7 +37,7 @@ def support_keyboard():
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, auto_group_join=False, force_sub=False):
+def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, auto_group_join=False, force_sub=False, is_admin_user=False):
     forward_status = "●" if use_forward else "○"
     forward_mode = "ғᴏʀᴡᴀʀᴅ" if use_forward else "sᴇɴᴅ"
     auto_reply_status = "●" if auto_reply else "○"
@@ -50,11 +50,14 @@ def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, a
         [InlineKeyboardButton("▤ sᴛᴀᴛɪsᴛɪᴄs", callback_data="statistics")],
         [InlineKeyboardButton(f"✉ {forward_mode} ⟨{forward_status}⟩", callback_data="toggle_forward_mode"),
          InlineKeyboardButton(f"⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ ⟨{auto_reply_status}⟩", callback_data="auto_reply_menu")],
-        [InlineKeyboardButton(f"⊕ ᴀᴜᴛᴏ ᴊᴏɪɴ ⟨{auto_join_status}⟩", callback_data="toggle_auto_group_join"),
-         InlineKeyboardButton(f"⊗ ғᴏʀᴄᴇ sᴜʙ ⟨{force_sub_status}⟩", callback_data="force_sub_menu")],
-        [InlineKeyboardButton("◎ ᴛᴀʀɢᴇᴛɪɴɢ", callback_data="target_adv")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
+        [InlineKeyboardButton(f"⊕ ᴀᴜᴛᴏ ᴊᴏɪɴ ⟨{auto_join_status}⟩", callback_data="toggle_auto_group_join")]
     ]
+    
+    if is_admin_user:
+        keyboard[-1].append(InlineKeyboardButton(f"⊗ ғᴏʀᴄᴇ sᴜʙ ⟨{force_sub_status}⟩", callback_data="force_sub_menu"))
+    
+    keyboard.append([InlineKeyboardButton("◎ ᴛᴀʀɢᴇᴛɪɴɢ", callback_data="target_adv")])
+    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")])
     return InlineKeyboardMarkup(keyboard)
 
 def force_sub_keyboard(force_sub_enabled=False):
