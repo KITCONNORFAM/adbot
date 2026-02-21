@@ -63,7 +63,7 @@ async def start_web_server():
         app.router.add_get('/health', health_check)
         
         # Get port from environment variable or default to 8080
-        port = int(os.getenv('PORT', 8080))
+        port = int(os.getenv('PORT', 8081))
         
         runner = web.AppRunner(app)
         await runner.setup()

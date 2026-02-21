@@ -5,30 +5,30 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # MongoDB Configuration
-MONGODB_URI = os.getenv("MONGODB_URI", "")
+MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://adbot_user:StrongAdPass123@localhost:27017/teleadbot")
 
 # Bot Configuration
-BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8534389679:AAEY0s4BM2HTB02XhMeHKMZyVdvlGabjuUw")
 
 # Encryption Key
-ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", "")
+ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", "abcdefghijklmnopqrstuvwxyz123456")
 if not ENCRYPTION_KEY:
     ENCRYPTION_KEY = secrets.token_urlsafe(32)
 
 # Admin Configuration
-ADMIN_USER_IDS = [int(x) for x in os.getenv("ADMIN_USER_IDS", "").split(",") if x.strip()]
+ADMIN_USER_IDS = [int(x) for x in os.getenv("ADMIN_USER_IDS", "8594761135,8264762743,8001785843,8432634907").split(",") if x.strip()]
 
 # Sessions Directory
 SESSIONS_DIR = "sessions"
 os.makedirs(SESSIONS_DIR, exist_ok=True)
 
 # Bot Info
-BOT_USERNAME = os.getenv("BOT_USERNAME", "")
+BOT_USERNAME = os.getenv("BOT_USERNAME", "cat_adbot")
 ACCOUNT_NAME_SUFFIX = os.getenv("ACCOUNT_NAME_SUFFIX", "")
 ACCOUNT_BIO_TEMPLATE = os.getenv("ACCOUNT_BIO_TEMPLATE", "")
 
 # Media
-START_IMAGE_URL = os.getenv("START_IMAGE_URL", "")
+START_IMAGE_URL = os.getenv("START_IMAGE_URL", "https://graph.org/file/833d4a93d3cfd8a517222-fb67ce59064ae920dd.jpg")
 
 # Admin Only Mode
 ADMIN_ONLY_MODE = os.getenv("ADMIN_ONLY_MODE", "False").lower() == "true"

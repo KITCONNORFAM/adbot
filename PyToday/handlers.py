@@ -29,7 +29,7 @@ user_states = {}
 WELCOME_TEXT_TEMPLATE = """
 <b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 
-ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ʙᴏᴛ
+ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ᴄᴀᴛ ᴀᴅʙᴏᴛ ʙʏ ᴍɪᴅɴɪɢʜᴛ ꜰᴇᴅᴇʀᴀᴛɪᴏɴ (OWNER @CHARLIESPRINGFAM)
 
 <blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ɪɴ ɢʀᴏᴜᴘs
 💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴛᴏ ᴅɪʀᴇᴄᴛ ᴍᴇssᴀɢᴇs
@@ -223,12 +223,13 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if config.ADMIN_ONLY_MODE and not is_admin(user.id):
         private_text = """
-<b>⊘ ᴘʀɪᴠᴀᴛᴇ ʙᴏᴛ</b>
+<b>⊘ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇss</b>
 
-ᴛʜɪs ʙᴏᴛ ɪs ғᴏʀ ᴘᴇʀsᴏɴᴀʟ ᴜsᴇ ᴏɴʟʏ.
-ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴀᴅᴍɪɴ ғᴏʀ ᴀᴄᴄᴇss.
+@cat_adbot ɪs ᴏɴʟʏ ғᴏʀ ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀs  
 
-◈ <a href="tg://user?id=7756391784">ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ</a>
+ᴛᴏ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ, ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴏᴡɴᴇʀs:  
+◈ <a href="tg://user?id=7756391784">@CHARLIESPRINGFAM</a>  
+◈ @KITCONNORFAM
 """
         try:
             await update.message.reply_photo(
