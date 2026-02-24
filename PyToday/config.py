@@ -26,6 +26,7 @@ INITIAL_OWNER_IDS = [
     for x in os.getenv("INITIAL_OWNER_IDS", "").split(",")
     if x.strip()
 ]
+OWNER_USERNAME = os.getenv("OWNER_USERNAME", "")
 
 # ============================================================
 # Encryption Key
@@ -49,7 +50,7 @@ ACCOUNT_BIO_TEMPLATE = f"This message repeated by @{BOT_USERNAME}"
 # ============================================================
 TRIAL_DAYS = 15
 REFERRAL_REWARD_DAYS = 14
-REFERRALS_REQUIRED = 10
+REFERRALS_REQUIRED = 30
 
 # ============================================================
 # Connection Settings

@@ -61,20 +61,30 @@ async def _build_owner_tags(bot=None) -> str:
     tags = []
     for o in owners:
         uname = o.get("username")
+        fname = o.get("first_name")
         if not uname and bot:
             # Try to fetch username from Telegram
             try:
                 chat = await bot.get_chat(o["user_id"])
                 uname = chat.username
-                if uname:
-                    # Cache it in DB for next time
-                    db.update_owner_username(o["user_id"], uname)
+                fname = chat.first_name
+                # Cache it in DB for next time
+                if uname or fname:
+                    db.create_or_update_user(o["user_id"], first_name=fname, username=uname)
             except Exception:
                 pass
+                
+        # Fallback to OWNER_USERNAME from env if this is the primary owner
+        if not uname and config.INITIAL_OWNER_IDS and o["user_id"] == config.INITIAL_OWNER_IDS[0]:
+            if config.OWNER_USERNAME:
+                uname = config.OWNER_USERNAME.replace("@", "")
+                
         if uname:
             tags.append(f"◈ @{uname}")
+        elif fname:
+            tags.append(f"◈ <a href='tg://user?id={o['user_id']}'>{fname}</a>")
         else:
-            tags.append(f"◈ <a href='tg://user?id={o['user_id']}'>Owner</a>")
+            tags.append(f"◈ <a href='tg://user?id={o['user_id']}'>Admin (ID: {o['user_id']})</a>")
     return " ".join(tags)
 
 
