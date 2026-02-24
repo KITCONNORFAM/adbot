@@ -142,53 +142,42 @@ def main():
     print(f"║  @{config.BOT_USERNAME:<33}║")
     print("╚══════════════════════════════════════╝")
 
-    while True:
-        try:
-            application = (
-                Application.builder()
-                .token(config.BOT_TOKEN)
-                .post_init(post_init)
-                .build()
-            )
+    application = (
+        Application.builder()
+        .token(config.BOT_TOKEN)
+        .post_init(post_init)
+        .build()
+    )
 
-            # ── Owner Commands
-            application.add_handler(CommandHandler("start", start_command))
-            application.add_handler(CommandHandler("addprem", cmd_addprem))
-            application.add_handler(CommandHandler("removeprem", cmd_removeprem))
-            application.add_handler(CommandHandler("ban", cmd_ban))
-            application.add_handler(CommandHandler("unban", cmd_unban))
-            application.add_handler(CommandHandler("addowner", cmd_addowner))
-            application.add_handler(CommandHandler("removeowner", cmd_removeowner))
-            application.add_handler(CommandHandler("stats", cmd_stats))
-            application.add_handler(CommandHandler("broadcast", cmd_broadcast))
+    # ── Owner Commands
+    application.add_handler(CommandHandler("start", start_command))
+    application.add_handler(CommandHandler("addprem", cmd_addprem))
+    application.add_handler(CommandHandler("removeprem", cmd_removeprem))
+    application.add_handler(CommandHandler("ban", cmd_ban))
+    application.add_handler(CommandHandler("unban", cmd_unban))
+    application.add_handler(CommandHandler("addowner", cmd_addowner))
+    application.add_handler(CommandHandler("removeowner", cmd_removeowner))
+    application.add_handler(CommandHandler("stats", cmd_stats))
+    application.add_handler(CommandHandler("broadcast", cmd_broadcast))
 
-            # ── Callback & Message handlers
-            application.add_handler(CallbackQueryHandler(handle_callback))
-            application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    # ── Callback & Message handlers
+    application.add_handler(CallbackQueryHandler(handle_callback))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-            application.add_error_handler(error_handler)
+    application.add_error_handler(error_handler)
 
-            logger.info("🤖 Bot polling started...")
-            application.run_polling(
-                allowed_updates=["message", "callback_query"],
-                drop_pending_updates=True,
-                poll_interval=1.0,
-                timeout=30
-            )
-
-        except NetworkError as e:
-            logger.error(f"Network error, restarting in {config.RETRY_DELAY}s: {e}")
-            time.sleep(config.RETRY_DELAY)
-        except TimedOut as e:
-            logger.error(f"Timeout error, restarting in {config.RETRY_DELAY}s: {e}")
-            time.sleep(config.RETRY_DELAY)
-        except KeyboardInterrupt:
-            logger.info("Bot stopped by user")
-            scheduler.shutdown()
-            break
-        except Exception as e:
-            logger.error(f"Fatal error, restarting in {config.RETRY_DELAY}s: {e}", exc_info=True)
-            time.sleep(config.RETRY_DELAY)
+    logger.info("🤖 Bot polling started...")
+    # run_polling handles reconnects internally via error_handler
+    try:
+        application.run_polling(
+            allowed_updates=["message", "callback_query"],
+            drop_pending_updates=True,
+            poll_interval=1.0,
+            timeout=30
+        )
+    except KeyboardInterrupt:
+        logger.info("Bot stopped by user")
+        scheduler.shutdown()
 
 
 if __name__ == "__main__":

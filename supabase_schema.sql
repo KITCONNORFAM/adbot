@@ -4,7 +4,7 @@
 -- ============================================================
 
 -- USERS / ROLES -----------------------------------------------------------
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS bot_users (
     user_id        BIGINT PRIMARY KEY,
     first_name     TEXT,
     username       TEXT,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- TELEGRAM ACCOUNTS ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS telegram_accounts (
     id                 BIGSERIAL PRIMARY KEY,
-    user_id            BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id            BIGINT NOT NULL REFERENCES bot_users(user_id) ON DELETE CASCADE,
     phone              TEXT,
     api_id             TEXT,
     api_hash           TEXT,
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS target_groups (
 
 -- LOGS CHANNELS (per-user) --------------------------------------------------
 CREATE TABLE IF NOT EXISTS logs_channels (
-    user_id      BIGINT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id      BIGINT PRIMARY KEY REFERENCES bot_users(user_id) ON DELETE CASCADE,
     channel_id   TEXT,
     channel_link TEXT,
     verified     BOOLEAN NOT NULL DEFAULT FALSE,
@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS message_logs (
 INSERT INTO force_sub (id, enabled) VALUES (1, FALSE) ON CONFLICT DO NOTHING;
 
 -- Indexes -------------------------------------------------------------------
-CREATE INDEX IF NOT EXISTS idx_users_role        ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_role        ON bot_users(role);
 CREATE INDEX IF NOT EXISTS idx_accounts_user     ON telegram_accounts(user_id);
 CREATE INDEX IF NOT EXISTS idx_auto_replies_acct ON auto_replies(account_id);
 CREATE INDEX IF NOT EXISTS idx_target_grp_acct   ON target_groups(account_id);

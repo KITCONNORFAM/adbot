@@ -173,7 +173,7 @@ async def init_db():
     db = get_client()
     try:
         # Simple connectivity check – query users table (must exist via supabase_schema.sql)
-        db.table("users").select("user_id").limit(1).execute()
+        db.table("bot_users").select("user_id").limit(1).execute()
         logger.info("\u2705 Supabase connected (schema already present)")
     except Exception as e:
         logger.error(
@@ -189,11 +189,11 @@ async def init_db():
 
 def _upsert_owner_bootstrap(db: Client, user_id: int):
     try:
-        existing = db.table("users").select("user_id, role").eq("user_id", user_id).single().execute()
+        existing = db.table("bot_users").select("user_id, role").eq("user_id", user_id).single().execute()
         if existing.data and existing.data.get("role") != "owner":
-            db.table("users").update({"role": "owner"}).eq("user_id", user_id).execute()
+            db.table("bot_users").update({"role": "owner"}).eq("user_id", user_id).execute()
         elif not existing.data:
-            db.table("users").insert({
+            db.table("bot_users").insert({
                 "user_id": user_id,
                 "role": "owner",
                 "created_at": _now_iso()
@@ -210,7 +210,7 @@ def _upsert_owner_bootstrap(db: Client, user_id: int):
 def get_user(user_id: int) -> Optional[Dict]:
     db = get_client()
     try:
-        result = db.table("users").select("*").eq("user_id", user_id).single().execute()
+        result = db.table("bot_users").select("*").eq("user_id", user_id).single().execute()
         return result.data
     except Exception:
         return None
@@ -227,9 +227,9 @@ def create_or_update_user(user_id: int, first_name: str = None, username: str = 
             "role": "user",
             "created_at": _now_iso()
         }
-        db.table("users").insert(data).execute()
+        db.table("bot_users").insert(data).execute()
     else:
-        db.table("users").update({
+        db.table("bot_users").update({
             "first_name": first_name,
             "username": username
         }).eq("user_id", user_id).execute()
@@ -261,7 +261,7 @@ def get_user_role(user_id: int) -> str:
 
 def _expire_user(user_id: int):
     db = get_client()
-    db.table("users").update({
+    db.table("bot_users").update({
         "role": "user",
         "premium_expiry": None,
         "trial_expiry": None
@@ -289,7 +289,7 @@ def is_banned(user_id: int) -> bool:
 
 def get_all_users() -> List[Dict]:
     db = get_client()
-    result = db.table("users").select("*").execute()
+    result = db.table("bot_users").select("*").execute()
     return result.data or []
 
 
@@ -309,21 +309,21 @@ def get_users_count() -> int:
 def add_owner(user_id: int) -> Dict:
     db = get_client()
     create_or_update_user(user_id)
-    db.table("users").update({"role": "owner"}).eq("user_id", user_id).execute()
+    db.table("bot_users").update({"role": "owner"}).eq("user_id", user_id).execute()
     return get_user(user_id)
 
 
 def remove_owner(user_id: int) -> bool:
     db = get_client()
     if is_owner(user_id):
-        db.table("users").update({"role": "user"}).eq("user_id", user_id).execute()
+        db.table("bot_users").update({"role": "user"}).eq("user_id", user_id).execute()
         return True
     return False
 
 
 def get_all_owners() -> List[Dict]:
     db = get_client()
-    result = db.table("users").select("*").eq("role", "owner").execute()
+    result = db.table("bot_users").select("*").eq("role", "owner").execute()
     return result.data or []
 
 
@@ -347,7 +347,7 @@ def add_premium(user_id: int, days: int) -> Dict:
         base = datetime.now(timezone.utc)
 
     new_expiry = base + timedelta(days=days)
-    db.table("users").update({
+    db.table("bot_users").update({
         "role": "premium",
         "premium_expiry": new_expiry.isoformat(),
         "trial_expiry": None  # clear trial if any
@@ -359,7 +359,7 @@ def remove_premium(user_id: int) -> bool:
     db = get_client()
     user = get_user(user_id)
     if user and user.get("role") == "premium":
-        db.table("users").update({"role": "user", "premium_expiry": None}).eq("user_id", user_id).execute()
+        db.table("bot_users").update({"role": "user", "premium_expiry": None}).eq("user_id", user_id).execute()
         return True
     return False
 
@@ -390,7 +390,7 @@ def activate_trial(user_id: int) -> Dict:
     db = get_client()
     create_or_update_user(user_id)
     expiry = datetime.now(timezone.utc) + timedelta(days=config.TRIAL_DAYS)
-    db.table("users").update({
+    db.table("bot_users").update({
         "role": "trial",
         "trial_used": True,
         "trial_expiry": expiry.isoformat(),
@@ -406,13 +406,13 @@ def activate_trial(user_id: int) -> Dict:
 def ban_user(user_id: int) -> bool:
     db = get_client()
     create_or_update_user(user_id)
-    db.table("users").update({"banned": True}).eq("user_id", user_id).execute()
+    db.table("bot_users").update({"banned": True}).eq("user_id", user_id).execute()
     return True
 
 
 def unban_user(user_id: int) -> bool:
     db = get_client()
-    db.table("users").update({"banned": False}).eq("user_id", user_id).execute()
+    db.table("bot_users").update({"banned": False}).eq("user_id", user_id).execute()
     return True
 
 
@@ -437,7 +437,7 @@ def record_referral(referrer_id: int, referred_id: int) -> bool:
             "created_at": _now_iso()
         }).execute()
         # Increment referrer's count and mark referral on referred user
-        db.table("users").update({
+        db.table("bot_users").update({
             "referred_by": referrer_id
         }).eq("user_id", referred_id).execute()
 
@@ -816,21 +816,21 @@ def sweep_expired_roles():
     now_iso = _now_iso()
 
     # Premium expired
-    expired_premium = (db.table("users")
+    expired_premium = (db.table("bot_users")
                        .select("user_id")
                        .eq("role", "premium")
                        .lt("premium_expiry", now_iso)
                        .execute())
     for u in (expired_premium.data or []):
-        db.table("users").update({"role": "user", "premium_expiry": None}).eq("user_id", u["user_id"]).execute()
+        db.table("bot_users").update({"role": "user", "premium_expiry": None}).eq("user_id", u["user_id"]).execute()
         logger.info(f"Premium expired for user {u['user_id']}")
 
     # Trial expired
-    expired_trial = (db.table("users")
+    expired_trial = (db.table("bot_users")
                      .select("user_id")
                      .eq("role", "trial")
                      .lt("trial_expiry", now_iso)
                      .execute())
     for u in (expired_trial.data or []):
-        db.table("users").update({"role": "user", "trial_expiry": None}).eq("user_id", u["user_id"]).execute()
+        db.table("bot_users").update({"role": "user", "trial_expiry": None}).eq("user_id", u["user_id"]).execute()
         logger.info(f"Trial expired for user {u['user_id']}")
