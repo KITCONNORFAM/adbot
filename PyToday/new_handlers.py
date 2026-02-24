@@ -148,7 +148,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             owner_tags=owner_tags
         )
         kb = get_non_premium_keyboard(user.id, referral_count=ref_count,
-                                      referrals_required=config.REFERRALS_REQUIRED)
+                                      referrals_required=config.REFERRALS_REQUIRED,
+                                      trial_used=db.has_used_trial(user.id))
         try:
             await update.message.reply_photo(
                 photo=config.START_IMAGE_URL,

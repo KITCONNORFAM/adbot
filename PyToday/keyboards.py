@@ -444,13 +444,14 @@ def force_join_keyboard(enabled=False):
 # ─────────────────────────────────────────
 # Non-Premium / Guest Start Keyboard
 # ─────────────────────────────────────────
-def get_non_premium_keyboard(user_id: int, referral_count: int = 0, referrals_required: int = 10):
+def get_non_premium_keyboard(user_id: int, referral_count: int = 0, referrals_required: int = 10, trial_used: bool = False):
     progress = f"{referral_count}/{referrals_required}"
     keyboard = [
         [InlineKeyboardButton("✅ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ", callback_data="buy_premium")],
-        [InlineKeyboardButton("🎁 ᴀᴄᴛɪᴠᴀᴛᴇ 1 ᴍᴏɴᴛʜ ᴛʀɪᴀʟ", callback_data="activate_trial")],
-        [InlineKeyboardButton(f"🔥 ɢᴇᴛ 14 ᴅᴀʏs ғʀᴇᴇ ({progress} ɪɴᴠɪᴛᴇs)", callback_data="referral_info")],
     ]
+    if not trial_used:
+        keyboard.append([InlineKeyboardButton("🎁 ᴀᴄᴛɪᴠᴀᴛᴇ 15 ᴅᴀʏs ᴛʀɪᴀʟ", callback_data="activate_trial")])
+    keyboard.append([InlineKeyboardButton(f"🔥 ɢᴇᴛ 14 ᴅᴀʏs ғʀᴇᴇ ({progress} ɪɴᴠɪᴛᴇs)", callback_data="referral_info")])
     return InlineKeyboardMarkup(keyboard)
 
 

@@ -758,7 +758,7 @@ async def show_main_menu(query, context=None):
         from PyToday.new_handlers import NON_PREMIUM_TEXT, _build_owner_tags
         owner_tags = await _build_owner_tags(context.bot)
         text = NON_PREMIUM_TEXT.format(bot_username=config.BOT_USERNAME, owner_tags=owner_tags)
-        await send_new_message(query, text, get_non_premium_keyboard(user_id, ref_count))
+        await send_new_message(query, text, get_non_premium_keyboard(user_id, ref_count, trial_used=db.has_used_trial(user_id)))
         return
 
     total_users = db.get_users_count()

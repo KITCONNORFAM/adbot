@@ -139,7 +139,8 @@ def access_required(func):
             )
             if update.message:
                 from PyToday.keyboards import get_non_premium_keyboard
-                await update.message.reply_text(msg, reply_markup=get_non_premium_keyboard(user.id))
+                from PyToday import database as _db
+                await update.message.reply_text(msg, reply_markup=get_non_premium_keyboard(user.id, trial_used=_db.has_used_trial(user.id)))
             elif update.callback_query:
                 await update.callback_query.answer("⊘ Premium access required.", show_alert=True)
             return

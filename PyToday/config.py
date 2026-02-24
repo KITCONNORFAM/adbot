@@ -47,7 +47,7 @@ ACCOUNT_BIO_TEMPLATE = f"This message repeated by @{BOT_USERNAME}"
 # ============================================================
 # Trial & Referral Config
 # ============================================================
-TRIAL_DAYS = 30
+TRIAL_DAYS = 15
 REFERRAL_REWARD_DAYS = 14
 REFERRALS_REQUIRED = 10
 
