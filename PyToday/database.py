@@ -574,38 +574,48 @@ def increment_stat(account_id, field: str, amount: int = 1):
 
 def get_sequential_replies(account_id) -> List[Dict]:
     db = get_client()
-    result = (db.table("auto_replies")
-              .select("*")
-              .eq("account_id", int(account_id))
-              .eq("type", "sequential")
-              .order("reply_order")
-              .execute())
-    return result.data or []
+    try:
+        result = (db.table("auto_replies")
+                  .select("*")
+                  .eq("account_id", int(account_id))
+                  .eq("type", "sequential")
+                  .order("reply_order")
+                  .execute())
+        return result.data or []
+    except Exception:
+        return []
 
 
 def get_keyword_replies(account_id) -> List[Dict]:
     db = get_client()
-    result = (db.table("auto_replies")
-              .select("*")
-              .eq("account_id", int(account_id))
-              .eq("type", "keyword")
-              .execute())
-    return result.data or []
+    try:
+        result = (db.table("auto_replies")
+                  .select("*")
+                  .eq("account_id", int(account_id))
+                  .eq("type", "keyword")
+                  .execute())
+        return result.data or []
+    except Exception:
+        return []
 
 
 def add_reply(account_id, reply_type: str, message_text: str = None,
               trigger_keyword: str = None, media_file_id: str = None, order: int = 0) -> Dict:
     db = get_client()
-    result = db.table("auto_replies").insert({
-        "account_id": int(account_id),
-        "type": reply_type,
-        "trigger_keyword": trigger_keyword,
-        "message_text": message_text,
-        "media_file_id": media_file_id,
-        "reply_order": order,
-        "created_at": _now_iso()
-    }).execute()
-    return result.data[0] if result.data else {}
+    try:
+        result = db.table("auto_replies").insert({
+            "account_id": int(account_id),
+            "type": reply_type,
+            "trigger_keyword": trigger_keyword,
+            "message_text": message_text,
+            "media_file_id": media_file_id,
+            "reply_order": order,
+            "created_at": _now_iso()
+        }).execute()
+        return result.data[0] if result.data else {}
+    except Exception as e:
+        logger.error(f"add_reply error: {e}")
+        return {}
 
 
 def delete_reply(reply_id: int) -> bool:
@@ -616,46 +626,53 @@ def delete_reply(reply_id: int) -> bool:
 
 def clear_replies(account_id, reply_type: str = None) -> bool:
     db = get_client()
-    query = db.table("auto_replies").delete().eq("account_id", int(account_id))
-    if reply_type:
-        query = query.eq("type", reply_type)
-    query.execute()
+    try:
+        query = db.table("auto_replies").delete().eq("account_id", int(account_id))
+        if reply_type:
+            query = query.eq("type", reply_type)
+        query.execute()
+    except Exception:
+        pass
     return True
 
 
 def get_next_sequential_reply(account_id, from_user_id: int) -> Optional[Dict]:
     """Gets the next sequential reply in rotation, cycling through all replies."""
     db = get_client()
-    replies = get_sequential_replies(account_id)
-    if not replies:
+    try:
+        replies = get_sequential_replies(account_id)
+        if not replies:
+            return None
+
+        result = (db.table("auto_reply_state")
+                  .select("*")
+                  .eq("account_id", int(account_id))
+                  .eq("from_user_id", from_user_id)
+                  .execute())
+        state = result.data[0] if result.data else None
+        next_idx = state["next_index"] if state else 0
+        if next_idx >= len(replies):
+            next_idx = 0
+
+        reply = replies[next_idx]
+        new_idx = (next_idx + 1) % len(replies)
+
+        if state:
+            db.table("auto_reply_state").update({
+                "next_index": new_idx,
+                "replied_at": _now_iso()
+            }).eq("account_id", int(account_id)).eq("from_user_id", from_user_id).execute()
+        else:
+            db.table("auto_reply_state").insert({
+                "account_id": int(account_id),
+                "from_user_id": from_user_id,
+                "next_index": new_idx,
+                "replied_at": _now_iso()
+            }).execute()
+        return reply
+    except Exception as e:
+        logger.error(f"get_next_sequential_reply error: {e}")
         return None
-
-    result = (db.table("auto_reply_state")
-              .select("*")
-              .eq("account_id", int(account_id))
-              .eq("from_user_id", from_user_id)
-              .execute())
-    state = result.data[0] if result.data else None
-    next_idx = state["next_index"] if state else 0
-    if next_idx >= len(replies):
-        next_idx = 0
-
-    reply = replies[next_idx]
-    new_idx = (next_idx + 1) % len(replies)
-
-    if state:
-        db.table("auto_reply_state").update({
-            "next_index": new_idx,
-            "replied_at": _now_iso()
-        }).eq("account_id", int(account_id)).eq("from_user_id", from_user_id).execute()
-    else:
-        db.table("auto_reply_state").insert({
-            "account_id": int(account_id),
-            "from_user_id": from_user_id,
-            "next_index": new_idx,
-            "replied_at": _now_iso()
-        }).execute()
-    return reply
 
 
 def find_keyword_reply(account_id, text: str) -> Optional[Dict]:
@@ -675,8 +692,11 @@ def find_keyword_reply(account_id, text: str) -> Optional[Dict]:
 
 def get_target_groups(account_id) -> List[Dict]:
     db = get_client()
-    result = db.table("target_groups").select("*").eq("account_id", int(account_id)).execute()
-    return result.data or []
+    try:
+        result = db.table("target_groups").select("*").eq("account_id", int(account_id)).execute()
+        return result.data or []
+    except Exception:
+        return []
 
 
 def add_target_group(account_id, group_id: int, group_title: str = None) -> bool:
@@ -748,13 +768,19 @@ def delete_logs_channel(user_id: int):
 
 def get_force_sub_settings() -> Dict:
     db = get_client()
-    result = db.table("force_sub").select("*").eq("id", 1).single().execute()
-    return result.data or {"enabled": False, "channel_id": None, "group_id": None}
+    try:
+        result = db.table("force_sub").select("*").eq("id", 1).single().execute()
+        return result.data or {"enabled": False, "channel_id": None, "group_id": None}
+    except Exception:
+        return {"enabled": False, "channel_id": None, "group_id": None}
 
 
 def update_force_sub_settings(**kwargs) -> bool:
     db = get_client()
-    db.table("force_sub").update(kwargs).eq("id", 1).execute()
+    try:
+        db.table("force_sub").update(kwargs).eq("id", 1).execute()
+    except Exception as e:
+        logger.error(f"update_force_sub_settings error: {e}")
     return True
 
 
