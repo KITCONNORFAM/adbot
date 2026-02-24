@@ -432,10 +432,104 @@ def load_groups_options_keyboard():
 def force_join_keyboard(enabled=False):
     status = "● ᴏɴ" if enabled else "○ ᴏғғ"
     toggle_text = "○ ᴛᴜʀɴ ᴏғғ" if enabled else "● ᴛᴜʀɴ ᴏɴ"
-    
+
     keyboard = [
         [InlineKeyboardButton(f"sᴛᴀᴛᴜs: {status}", callback_data="force_join_status")],
         [InlineKeyboardButton(f"{toggle_text}", callback_data="toggle_force_join")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
     ]
     return InlineKeyboardMarkup(keyboard)
+
+
+# ─────────────────────────────────────────
+# Non-Premium / Guest Start Keyboard
+# ─────────────────────────────────────────
+def get_non_premium_keyboard(user_id: int, referral_count: int = 0, referrals_required: int = 10):
+    progress = f"{referral_count}/{referrals_required}"
+    keyboard = [
+        [InlineKeyboardButton("✅ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ", callback_data="buy_premium")],
+        [InlineKeyboardButton("🎁 ᴀᴄᴛɪᴠᴀᴛᴇ 1 ᴍᴏɴᴛʜ ᴛʀɪᴀʟ", callback_data="activate_trial")],
+        [InlineKeyboardButton(f"🔥 ɢᴇᴛ 14 ᴅᴀʏs ғʀᴇᴇ ({progress} ɪɴᴠɪᴛᴇs)", callback_data="referral_info")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+# ─────────────────────────────────────────
+# Premium Benefits Info Keyboard
+# ─────────────────────────────────────────
+def premium_benefits_keyboard():
+    keyboard = [
+        [InlineKeyboardButton("✅ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ", callback_data="buy_premium")],
+        [InlineKeyboardButton("🔥 ɪɴᴠɪᴛᴇ & ᴇᴀʀɴ", callback_data="referral_info")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+# ─────────────────────────────────────────
+# Referral Info Keyboard
+# ─────────────────────────────────────────
+def referral_keyboard(invite_link: str):
+    keyboard = [
+        [InlineKeyboardButton("🔗 sʜᴀʀᴇ ᴍʏ ʀᴇғᴇʀʀᴀʟ ʟɪɴᴋ", url=f"https://t.me/share/url?url={invite_link}&text=Join%20using%20my%20link%20and%20get%20rewards!")],
+        [InlineKeyboardButton("↻ ʀᴇғʀᴇsʜ ᴘʀᴏɢʀᴇss", callback_data="referral_info")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+# ─────────────────────────────────────────
+# Advanced Auto Reply Keyboard
+# ─────────────────────────────────────────
+def auto_reply_advanced_keyboard(auto_reply_enabled: bool = False, account_id=None):
+    toggle_text = "○ ᴛᴜʀɴ ᴏғғ" if auto_reply_enabled else "● ᴛᴜʀɴ ᴏɴ"
+    acc_suffix = f"_{account_id}" if account_id else ""
+    keyboard = [
+        [InlineKeyboardButton(f"{toggle_text}", callback_data=f"toggle_auto_reply{acc_suffix}")],
+        [InlineKeyboardButton("➕ sᴇǫ. ʀᴇᴘʟʏ", callback_data=f"add_seq_reply{acc_suffix}"),
+         InlineKeyboardButton("🔑 ᴋᴇʏᴡᴏʀᴅ ʀᴇᴘʟʏ", callback_data=f"add_kw_reply{acc_suffix}")],
+        [InlineKeyboardButton("👁 ᴠɪᴇᴡ ʀᴇᴘʟɪᴇs", callback_data=f"view_all_replies{acc_suffix}"),
+         InlineKeyboardButton("✕ ᴄʟᴇᴀʀ ᴀʟʟ", callback_data=f"clear_replies{acc_suffix}")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+# ─────────────────────────────────────────
+# Per-Account Settings Keyboard
+# ─────────────────────────────────────────
+def account_settings_keyboard(account_id, settings: dict = None):
+    s = settings or {}
+    gap = s.get("gap_seconds", 5)
+    delay = s.get("round_delay", 30)
+    interval = s.get("time_interval", 60)
+    sleep_status = "●" if s.get("auto_sleep") else "○"
+    forward_status = "●" if s.get("use_forward_mode") else "○"
+
+    keyboard = [
+        [InlineKeyboardButton(f"⏱ ɪɴᴛᴇʀᴠᴀʟ: {interval}s", callback_data=f"accset_interval_{account_id}")],
+        [InlineKeyboardButton(f"⏸ ɢᴀᴘ: {gap}s", callback_data=f"accset_gap_{account_id}"),
+         InlineKeyboardButton(f"🔄 ʀᴏᴜɴᴅ ᴅᴇʟᴀʏ: {delay}s", callback_data=f"accset_rdelay_{account_id}")],
+        [InlineKeyboardButton(f"😴 ᴀᴜᴛᴏ sʟᴇᴇᴘ ⟨{sleep_status}⟩", callback_data=f"accset_sleep_{account_id}"),
+         InlineKeyboardButton(f"✉ ғᴡᴅ ᴍᴏᴅᴇ ⟨{forward_status}⟩", callback_data=f"accset_fwd_{account_id}")],
+        [InlineKeyboardButton("⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ", callback_data=f"acc_auto_reply_{account_id}")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="my_accounts")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+# ─────────────────────────────────────────
+# Owner Management Keyboard (accessible via /start for owners)
+# ─────────────────────────────────────────
+def owner_panel_keyboard():
+    keyboard = [
+        [InlineKeyboardButton("▤ sᴛᴀᴛs", callback_data="owner_stats"),
+         InlineKeyboardButton("📢 ʙʀᴏᴀᴅᴄᴀsᴛ", callback_data="owner_broadcast")],
+        [InlineKeyboardButton("💎 ᴀᴅᴅ ᴘʀᴇᴍɪᴜᴍ", callback_data="owner_addprem"),
+         InlineKeyboardButton("🚫 ʙᴀɴ ᴜsᴇʀ", callback_data="owner_ban")],
+        [InlineKeyboardButton("⊗ ғᴏʀᴄᴇ sᴜʙ", callback_data="force_sub_menu"),
+         InlineKeyboardButton("◉ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="logs_channel_menu")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+

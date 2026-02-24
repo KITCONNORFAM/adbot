@@ -5,7 +5,8 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from telegram.error import BadRequest
 from telegram.constants import ParseMode
-from PyToday import database
+from PyToday import database as _old_db  # legacy compat shim
+from PyToday import database as db        # new Supabase DB
 from PyToday.encryption import encrypt_data, decrypt_data
 from PyToday.keyboards import (
     main_menu_keyboard, otp_keyboard, accounts_keyboard,
@@ -17,11 +18,18 @@ from PyToday.keyboards import (
     selected_groups_keyboard, target_groups_list_keyboard, remove_groups_keyboard,
     single_account_selection_keyboard, auto_reply_settings_keyboard,
     back_to_auto_reply_keyboard, force_sub_keyboard, force_sub_join_keyboard,
-    admin_panel_keyboard, logs_channel_keyboard, load_groups_options_keyboard,
-    force_join_keyboard
+    logs_channel_keyboard, load_groups_options_keyboard,
+    force_join_keyboard, owner_panel_keyboard
 )
 from PyToday import telethon_handler
 from PyToday import config
+from PyToday.new_handlers import (
+    cb_activate_trial, cb_buy_premium, cb_referral_info,
+    cb_owner_panel, cb_owner_stats, cb_owner_addprem, cb_owner_ban,
+    cb_account_settings, cb_accset_sleep, cb_accset_fwd,
+    cb_acc_auto_reply, cb_toggle_auto_reply as cb_toggle_auto_reply_new,
+    cb_view_all_replies, cb_clear_replies
+)
 
 logger = logging.getLogger(__name__)
 user_states = {}
@@ -49,7 +57,8 @@ MENU_TEXT_TEMPLATE = """
 
 
 def is_admin(user_id):
-    return user_id in config.ADMIN_USER_IDS
+    """Legacy helper – now checks if user is an Owner in DB."""
+    return db.is_owner(user_id)
 
 
 async def safe_edit_message(query, text, parse_mode="HTML", reply_markup=None):
@@ -418,18 +427,19 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.answer()
 
+    # ── Ban check on every callback
+    if db.is_banned(user_id):
+        await query.answer("🚫 You are banned from using this bot.", show_alert=True)
+        return
+
     # Check force subscribe for all callbacks except check_force_sub
     if data != "check_force_sub":
-        force_sub_settings = await database.get_force_sub_settings()
+        force_sub_settings = db.get_force_sub_settings()
         if force_sub_settings and force_sub_settings.get('enabled', False):
             is_joined = await check_force_sub_required(user_id, context)
             if not is_joined:
                 await send_force_sub_message(update, context)
                 return
-
-    if config.ADMIN_ONLY_MODE and not is_admin(user_id):
-        await query.answer("⚠️ This bot is for personal use only.", show_alert=True)
-        return
 
     if data.startswith("otp_"):
         await handle_otp_input(query, user_id, data, context)
@@ -659,22 +669,103 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "toggle_force_join":
         await toggle_force_join_callback(query, user_id)
 
+    # ── NEW: Trial / Referral / Premium callbacks ──────────────────────────
+    elif data == "activate_trial":
+        await cb_activate_trial(query, user_id, context)
+
+    elif data == "buy_premium":
+        await cb_buy_premium(query, user_id, context)
+
+    elif data == "referral_info":
+        await cb_referral_info(query, user_id, context)
+
+    # ── Owner panel inline callbacks ──────────────────────────────────────
+    elif data == "owner_panel":
+        await cb_owner_panel(query, user_id)
+
+    elif data == "owner_stats":
+        await cb_owner_stats(query, user_id)
+
+    elif data == "owner_addprem":
+        await cb_owner_addprem(query, user_id)
+
+    elif data == "owner_ban":
+        await cb_owner_ban(query, user_id)
+
+    # ── Per-account settings callbacks ───────────────────────────────────
+    elif data.startswith("acc_settings_"):
+        account_id = data.split("acc_settings_")[1]
+        await cb_account_settings(query, account_id, user_id)
+
+    elif data.startswith("accset_sleep_"):
+        account_id = data.split("accset_sleep_")[1]
+        await cb_accset_sleep(query, account_id, user_id)
+
+    elif data.startswith("accset_fwd_"):
+        account_id = data.split("accset_fwd_")[1]
+        await cb_accset_fwd(query, account_id, user_id)
+
+    # ── Per-account auto-reply advanced callbacks ────────────────────────
+    elif data.startswith("acc_auto_reply_"):
+        account_id = data.split("acc_auto_reply_")[1]
+        await cb_acc_auto_reply(query, account_id, user_id)
+
+    elif data.startswith("toggle_auto_reply_"):
+        account_id = data.split("toggle_auto_reply_")[1]
+        await cb_toggle_auto_reply_new(query, account_id, user_id)
+
+    elif data.startswith("view_all_replies_"):
+        account_id = data.split("view_all_replies_")[1]
+        await cb_view_all_replies(query, account_id)
+
+    elif data.startswith("clear_replies_"):
+        account_id = data.split("clear_replies_")[1]
+        await cb_clear_replies(query, account_id, user_id)
+
+    elif data.startswith("add_seq_reply_"):
+        account_id = data.split("add_seq_reply_")[1]
+        user_states[user_id] = {"state": "awaiting_seq_reply", "account_id": account_id}
+        await query.message.reply_text(
+            "✏️ <b>Add Sequential Reply</b>\n\nSend your reply text (or send a photo/media with caption):",
+            parse_mode="HTML"
+        )
+
+    elif data.startswith("add_kw_reply_"):
+        account_id = data.split("add_kw_reply_")[1]
+        user_states[user_id] = {"state": "awaiting_kw_keyword", "account_id": account_id}
+        await query.message.reply_text(
+            "🔑 <b>Add Keyword Reply</b>\n\nFirst, send the <b>trigger keyword</b> (e.g. <code>price</code>):",
+            parse_mode="HTML"
+        )
+
 
 async def show_main_menu(query, context=None):
     if user_states.get(query.from_user.id):
         del user_states[query.from_user.id]
 
-    total_users = await database.get_bot_users_count()
     first_name = query.from_user.first_name
+    user_id = query.from_user.id
 
-    if context and context.user_data.get('first_name'):
-        first_name = context.user_data.get('first_name')
+    # Check if user still has access
+    role = db.get_user_role(user_id)
+    if db.is_banned(user_id):
+        await query.answer("🚫 You are banned.", show_alert=True)
+        return
+    if role == "user":
+        from PyToday.new_handlers import cb_buy_premium
+        ref_count = db.get_referral_count(user_id)
+        from PyToday.keyboards import get_non_premium_keyboard
+        from PyToday.new_handlers import NON_PREMIUM_TEXT, _build_owner_tags
+        owner_tags = _build_owner_tags()
+        text = NON_PREMIUM_TEXT.format(bot_username=config.BOT_USERNAME, owner_tags=owner_tags)
+        await send_new_message(query, text, get_non_premium_keyboard(user_id, ref_count))
+        return
 
+    total_users = db.get_users_count()
     menu_text = WELCOME_TEXT_TEMPLATE.format(
         first_name=first_name,
         total_users=total_users
     )
-
     await send_new_message(query, menu_text, main_menu_keyboard())
 
 
@@ -730,11 +821,16 @@ async def show_support(query):
 
 
 async def show_settings(query, user_id):
-    user = await database.get_user(user_id)
-    use_multiple = user.get('use_multiple_accounts', False) if user else False
-    use_forward = user.get('use_forward_mode', False) if user else False
-    auto_reply = user.get('auto_reply_enabled', False) if user else False
-    auto_group_join = user.get('auto_group_join_enabled', False) if user else False
+    # Fetch account-level settings for the user's primary account
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    use_multiple = len(accounts) > 1
+    use_forward = False
+    auto_reply = False
+    auto_group_join = False
+    if accounts:
+        s = db.get_account_settings(accounts[0]["id"])
+        use_forward = s.get("use_forward_mode", False) if s else False
+        auto_reply = s.get("auto_reply_enabled", False) if s else False
 
     mode_text = "📱📱 Multiple" if use_multiple else "📱 Single"
     forward_text = "✉️ Forward" if use_forward else "📤 Send"
@@ -751,10 +847,11 @@ async def show_settings(query, user_id):
 🔹 <b>Auto Reply:</b> {auto_reply_text}
 🔹 <b>Auto Join:</b> {auto_join_text}
 
-<i>Tap to change settings:</i>
+<i>Tap to change settings:
+For per-account config, open My Accounts → select account.</i>
 """
 
-    force_sub_settings = await database.get_force_sub_settings()
+    force_sub_settings = db.get_force_sub_settings()
     force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
 
     await send_new_message(query, settings_text, settings_keyboard(use_multiple, use_forward, auto_reply, auto_group_join, force_sub_enabled, is_admin(user_id)))

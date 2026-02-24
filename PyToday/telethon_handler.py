@@ -9,7 +9,7 @@ from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Channel, Chat, InputPeerChannel, InputPeerSelf
 from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError, PhoneCodeExpiredError, PasswordHashInvalidError, UserAlreadyParticipantError, InviteHashExpiredError, InviteHashInvalidError
 from datetime import datetime
-from PyToday import database
+from PyToday import database as db   # new Supabase DB
 from PyToday.encryption import encrypt_data, decrypt_data
 from PyToday import config
 
@@ -40,35 +40,29 @@ async def send_code(api_id, api_hash, phone):
         await client.disconnect()
         return {"success": False, "error": str(e)}
 
-async def verify_code(api_id, api_hash, phone, code, phone_code_hash, session_string):
+async def verify_code(api_id, api_hash, phone, code, phone_code_hash, session_string, user_id: int = None):
     client = TelegramClient(StringSession(session_string), api_id, api_hash)
     await client.connect()
-    
+
     try:
         await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
         new_session = client.session.save()
-        
-        if config.ACCOUNT_NAME_SUFFIX or config.ACCOUNT_BIO_TEMPLATE:
+
+        # Apply branding ONLY for trial users
+        if user_id and db.get_user_role(user_id) == "trial":
             try:
                 me = await client.get_me()
                 current_name = me.first_name or ""
-                new_first_name = current_name
-                if config.ACCOUNT_NAME_SUFFIX and config.ACCOUNT_NAME_SUFFIX not in current_name:
-                    new_first_name = f"{current_name} {config.ACCOUNT_NAME_SUFFIX}"
-                
-                if config.ACCOUNT_NAME_SUFFIX:
-                    await client(UpdateProfileRequest(first_name=new_first_name))
-                    logger.info(f"Name updated after login: {new_first_name}")
-                
-                if config.ACCOUNT_BIO_TEMPLATE:
-                    await asyncio.sleep(0.5)
-                    await client(UpdateProfileRequest(about=config.ACCOUNT_BIO_TEMPLATE))
-                    logger.info(f"Bio updated after login: {config.ACCOUNT_BIO_TEMPLATE}")
-                
+                suffix = config.ACCOUNT_NAME_SUFFIX
+                if suffix and suffix not in current_name:
+                    await client(UpdateProfileRequest(first_name=f"{current_name} {suffix}"))
+                await asyncio.sleep(0.5)
+                await client(UpdateProfileRequest(about=config.ACCOUNT_BIO_TEMPLATE))
+                logger.info(f"Trial branding applied for user {user_id} after OTP login")
                 new_session = client.session.save()
-            except Exception as e:
-                logger.warning(f"Failed to update profile after login: {e}")
-        
+            except Exception as brand_err:
+                logger.warning(f"Trial branding failed: {brand_err}")
+
         await client.disconnect()
         return {"success": True, "session_string": new_session}
     except PhoneCodeInvalidError:
@@ -81,7 +75,7 @@ async def verify_code(api_id, api_hash, phone, code, phone_code_hash, session_st
         temp_session = client.session.save()
         await client.disconnect()
         return {
-            "success": False, 
+            "success": False,
             "error": "2FA_REQUIRED",
             "requires_2fa": True,
             "session_string": temp_session
@@ -90,35 +84,29 @@ async def verify_code(api_id, api_hash, phone, code, phone_code_hash, session_st
         await client.disconnect()
         return {"success": False, "error": str(e)}
 
-async def verify_2fa_password(api_id, api_hash, password, session_string):
+async def verify_2fa_password(api_id, api_hash, password, session_string, user_id: int = None):
     client = TelegramClient(StringSession(session_string), api_id, api_hash)
     await client.connect()
-    
+
     try:
         await client.sign_in(password=password)
         new_session = client.session.save()
-        
-        if config.ACCOUNT_NAME_SUFFIX or config.ACCOUNT_BIO_TEMPLATE:
+
+        # Apply branding ONLY for trial users
+        if user_id and db.get_user_role(user_id) == "trial":
             try:
                 me = await client.get_me()
                 current_name = me.first_name or ""
-                new_first_name = current_name
-                if config.ACCOUNT_NAME_SUFFIX and config.ACCOUNT_NAME_SUFFIX not in current_name:
-                    new_first_name = f"{current_name} {config.ACCOUNT_NAME_SUFFIX}"
-                
-                if config.ACCOUNT_NAME_SUFFIX:
-                    await client(UpdateProfileRequest(first_name=new_first_name))
-                    logger.info(f"Name updated after 2FA: {new_first_name}")
-                
-                if config.ACCOUNT_BIO_TEMPLATE:
-                    await asyncio.sleep(0.5)
-                    await client(UpdateProfileRequest(about=config.ACCOUNT_BIO_TEMPLATE))
-                    logger.info(f"Bio updated after 2FA: {config.ACCOUNT_BIO_TEMPLATE}")
-                
+                suffix = config.ACCOUNT_NAME_SUFFIX
+                if suffix and suffix not in current_name:
+                    await client(UpdateProfileRequest(first_name=f"{current_name} {suffix}"))
+                await asyncio.sleep(0.5)
+                await client(UpdateProfileRequest(about=config.ACCOUNT_BIO_TEMPLATE))
+                logger.info(f"Trial branding applied for user {user_id} after 2FA")
                 new_session = client.session.save()
-            except Exception as e:
-                logger.warning(f"Failed to update profile after 2FA: {e}")
-        
+            except Exception as brand_err:
+                logger.warning(f"Trial branding failed: {brand_err}")
+
         await client.disconnect()
         return {"success": True, "session_string": new_session}
     except PasswordHashInvalidError:
@@ -726,30 +714,143 @@ async def apply_profile_changes(api_id, api_hash, session_string):
     try:
         client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
-        
+
         if not await client.is_user_authorized():
             await client.disconnect()
             return {"success": False, "error": "Not authorized"}
-        
+
         me = await client.get_me()
         current_name = me.first_name or ""
-        
+
         new_first_name = current_name
         if config.ACCOUNT_NAME_SUFFIX and config.ACCOUNT_NAME_SUFFIX not in current_name:
             new_first_name = f"{current_name} {config.ACCOUNT_NAME_SUFFIX}"
-        
+
         await client(UpdateProfileRequest(
             first_name=new_first_name,
             about=config.ACCOUNT_BIO_TEMPLATE
         ))
-        
+
         new_session = client.session.save()
         await client.disconnect()
-        
+
         return {"success": True, "session_string": new_session, "first_name": new_first_name}
     except Exception as e:
         logger.error(f"Error applying profile changes: {e}")
         return {"success": False, "error": str(e)}
+
+
+async def apply_trial_branding(account_id):
+    """
+    Applies bot username watermark to Name and Bio of the linked Telegram account.
+    Called only for Trial users.
+    Premium accounts are NEVER touched.
+    """
+    try:
+        account = db.get_account(account_id)
+        if not account:
+            return {"success": False, "error": "Account not found"}
+
+        api_id = decrypt_data(account.get('api_id', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
+
+        client = TelegramClient(StringSession(session_string), int(api_id), api_hash)
+        await client.connect()
+
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
+
+        me = await client.get_me()
+        current_name = me.first_name or ""
+        suffix = config.ACCOUNT_NAME_SUFFIX  # "| @cat_adbot"
+        bio = config.ACCOUNT_BIO_TEMPLATE    # "This message repeated by @cat_adbot"
+
+        new_name = f"{current_name} {suffix}" if suffix not in current_name else current_name
+        await client(UpdateProfileRequest(first_name=new_name, about=bio))
+        new_session = client.session.save()
+        await client.disconnect()
+
+        logger.info(f"Trial branding applied to account {account_id}: {new_name}")
+        return {"success": True, "new_name": new_name}
+    except Exception as e:
+        logger.error(f"Trial branding failed for account {account_id}: {e}")
+        return {"success": False, "error": str(e)}
+
+
+async def start_auto_reply_listener_advanced(account_id, user_id: int):
+    """
+    Advanced auto-reply listener with sequential + keyword reply support.
+    Uses per-account reply config from Supabase.
+    """
+    try:
+        if isinstance(account_id, str):
+            account_id = int(account_id)
+
+        account = db.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            logger.warning(f"Cannot start advanced auto-reply for account {account_id}: not logged in")
+            return False
+
+        api_id = decrypt_data(account.get('api_id', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
+
+        client_key = f"adv_{account_id}"
+        if client_key in active_clients:
+            return True
+
+        client = TelegramClient(StringSession(session_string), int(api_id), api_hash)
+        await client.connect()
+
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return False
+
+        @client.on(events.NewMessage(incoming=True))
+        async def handle_dm(event):
+            try:
+                if not (event.is_private and not event.message.out):
+                    return
+                sender = await event.get_sender()
+                if not sender or sender.bot:
+                    return
+
+                from_id = sender.id
+                text = event.message.text or ""
+
+                # Keyword reply takes priority
+                kw_reply = db.find_keyword_reply(account_id, text)
+                if kw_reply:
+                    if kw_reply.get("media_file_id"):
+                        await event.respond(file=kw_reply["media_file_id"],
+                                            message=kw_reply.get("message_text") or "")
+                    else:
+                        await event.respond(kw_reply["message_text"])
+                    db.increment_stat(account_id, "replies_triggered")
+                    return
+
+                # Sequential reply
+                seq_reply = db.get_next_sequential_reply(account_id, from_id)
+                if seq_reply:
+                    if seq_reply.get("media_file_id"):
+                        await event.respond(file=seq_reply["media_file_id"],
+                                            message=seq_reply.get("message_text") or "")
+                    else:
+                        await event.respond(seq_reply.get("message_text") or "")
+                    db.increment_stat(account_id, "replies_triggered")
+
+            except Exception as e:
+                logger.error(f"Advanced auto-reply handler error: {e}")
+
+        active_clients[client_key] = client
+        asyncio.get_event_loop().create_task(client.run_until_disconnected())
+        logger.info(f"Advanced auto-reply listener started for account {account_id}")
+        return True
+    except Exception as e:
+        logger.error(f"Error starting advanced auto-reply listener: {e}")
+        return False
 
 async def start_auto_reply_listener(account_id, user_id, reply_text):
     try:

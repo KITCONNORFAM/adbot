@@ -4,63 +4,69 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# MongoDB Configuration
-MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://adbot_user:StrongAdPass123@localhost:27017/teleadbot")
+# ============================================================
+# Supabase Configuration (replaces MongoDB + SQLite)
+# ============================================================
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
+# ============================================================
 # Bot Configuration
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8534389679:AAEY0s4BM2HTB02XhMeHKMZyVdvlGabjuUw")
+# ============================================================
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+BOT_USERNAME = os.getenv("BOT_USERNAME", "cat_adbot")
 
+# ============================================================
+# Owner Bootstrap
+# ============================================================
+# Used ONLY for the very first boot to seed the owner into DB.
+# After that, all owners are managed via /addowner command.
+INITIAL_OWNER_IDS = [
+    int(x.strip())
+    for x in os.getenv("INITIAL_OWNER_IDS", "").split(",")
+    if x.strip()
+]
+
+# ============================================================
 # Encryption Key
+# ============================================================
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", "abcdefghijklmnopqrstuvwxyz123456")
 if not ENCRYPTION_KEY:
     ENCRYPTION_KEY = secrets.token_urlsafe(32)
 
-# Admin Configuration
-ADMIN_USER_IDS = [int(x) for x in os.getenv("ADMIN_USER_IDS", "8594761135,8264762743,8001785843,8432634907").split(",") if x.strip()]
+# ============================================================
+# Media & Branding
+# ============================================================
+START_IMAGE_URL = os.getenv(
+    "START_IMAGE_URL",
+    "https://graph.org/file/833d4a93d3cfd8a517222-fb67ce59064ae920dd.jpg"
+)
+ACCOUNT_NAME_SUFFIX = f"| @{BOT_USERNAME}"
+ACCOUNT_BIO_TEMPLATE = f"This message repeated by @{BOT_USERNAME}"
 
-# Sessions Directory
-SESSIONS_DIR = "sessions"
-os.makedirs(SESSIONS_DIR, exist_ok=True)
+# ============================================================
+# Trial & Referral Config
+# ============================================================
+TRIAL_DAYS = 30
+REFERRAL_REWARD_DAYS = 14
+REFERRALS_REQUIRED = 10
 
-# Bot Info
-BOT_USERNAME = os.getenv("BOT_USERNAME", "cat_adbot")
-ACCOUNT_NAME_SUFFIX = os.getenv("ACCOUNT_NAME_SUFFIX", "")
-ACCOUNT_BIO_TEMPLATE = os.getenv("ACCOUNT_BIO_TEMPLATE", "")
-
-# Media
-START_IMAGE_URL = os.getenv("START_IMAGE_URL", "https://graph.org/file/833d4a93d3cfd8a517222-fb67ce59064ae920dd.jpg")
-
-# Admin Only Mode
-ADMIN_ONLY_MODE = os.getenv("ADMIN_ONLY_MODE", "False").lower() == "true"
-
-# Auto Reply Configuration
-AUTO_REPLY_ENABLED = os.getenv("AUTO_REPLY_ENABLED", "False").lower() == "true"
-AUTO_REPLY_TEXT = os.getenv("AUTO_REPLY_TEXT", "")
-
-# Auto Group Join Configuration
-AUTO_GROUP_JOIN_ENABLED = os.getenv("AUTO_GROUP_JOIN_ENABLED", "False").lower() == "true"
-
-# Force Subscribe Configuration (Using IDs instead of links)
-FORCE_SUB_ENABLED = os.getenv("FORCE_SUB_ENABLED", "False").lower() == "true"
-FORCE_SUB_CHANNEL_ID = os.getenv("FORCE_SUB_CHANNEL_ID", "")  # Channel ID (e.g., -1001234567890)
-FORCE_SUB_GROUP_ID = os.getenv("FORCE_SUB_GROUP_ID", "")  # Group ID (e.g., -1001234567890)
-
-# Logs Channel Configuration
-LOGS_CHANNEL_ID = os.getenv("LOGS_CHANNEL_ID", "")  # Channel ID for logs (e.g., -1001234567890)
-
-# Database
-SQLITE_DB_PATH = os.getenv("SQLITE_DB_PATH", "bot_data.db")
-
+# ============================================================
 # Connection Settings
-CONNECTION_POOL_SIZE = int(os.getenv("CONNECTION_POOL_SIZE", "10"))
+# ============================================================
 REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "30"))
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))
 RETRY_DELAY = int(os.getenv("RETRY_DELAY", "5"))
 
-# Group Links File - Auto-detect path
-import os as _os
-_script_dir = _os.path.dirname(_os.path.abspath(__file__))
-_default_group_file = _os.path.join(_script_dir, '..', 'group_mps.txt')
-if not _os.path.exists(_default_group_file):
-    _default_group_file = 'group_mps.txt'
+# ============================================================
+# Group Links File
+# ============================================================
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+_default_group_file = os.path.join(_script_dir, '..', 'group_mps.txt')
 GROUP_LINKS_FILE = os.getenv("GROUP_LINKS_FILE", _default_group_file)
+
+# ============================================================
+# Sessions Directory
+# ============================================================
+SESSIONS_DIR = "sessions"
+os.makedirs(SESSIONS_DIR, exist_ok=True)
