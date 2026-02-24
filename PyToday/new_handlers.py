@@ -54,17 +54,27 @@ WELCOME_TEXT = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 <i>ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ:</i>"""
 
 
-def _build_owner_tags() -> str:
+async def _build_owner_tags(bot=None) -> str:
     owners = db.get_all_owners()
     if not owners:
         return "◈ @owneruserid"
     tags = []
     for o in owners:
         uname = o.get("username")
+        if not uname and bot:
+            # Try to fetch username from Telegram
+            try:
+                chat = await bot.get_chat(o["user_id"])
+                uname = chat.username
+                if uname:
+                    # Cache it in DB for next time
+                    db.update_owner_username(o["user_id"], uname)
+            except Exception:
+                pass
         if uname:
             tags.append(f"◈ @{uname}")
         else:
-            tags.append(f"◈ ID:{o['user_id']}")
+            tags.append(f"◈ <a href='tg://user?id={o['user_id']}'>Owner</a>")
     return " ".join(tags)
 
 
@@ -78,23 +88,30 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db.create_or_update_user(user.id, user.first_name, user.username)
 
     # ── Referral tracking from deep link: /start <referrer_id>
+    # Works for ALL users who haven't been referred yet (not just first-timers)
     if context.args:
         try:
-            referrer_id = int(context.args[0])
-            recorded = db.record_referral(referrer_id, user.id)
-            if recorded:
-                try:
-                    count = db.get_referral_count(referrer_id)
-                    remaining = config.REFERRALS_REQUIRED - (count % config.REFERRALS_REQUIRED)
-                    await context.bot.send_message(
-                        referrer_id,
-                        f"🎉 <b>New Referral!</b>\n\n"
-                        f"Someone joined using your link. "
-                        f"You need <b>{remaining}</b> more referral(s) for +14 days Premium!",
-                        parse_mode="HTML",
-                    )
-                except Exception:
-                    pass
+            arg = context.args[0]
+            # Strip prefix if present (e.g. "ref_123" → 123)
+            referrer_id = int(arg.replace("ref_", "").strip())
+            if referrer_id != user.id:  # no self-referral
+                existing_user = db.get_user(user.id)
+                # Allow referral if user hasn't been referred yet
+                if not (existing_user and existing_user.get("referred_by")):
+                    recorded = db.record_referral(referrer_id, user.id)
+                    if recorded:
+                        try:
+                            count = db.get_referral_count(referrer_id)
+                            remaining = config.REFERRALS_REQUIRED - (count % config.REFERRALS_REQUIRED)
+                            await context.bot.send_message(
+                                referrer_id,
+                                f"🎉 <b>New Referral!</b>\n\n"
+                                f"Someone joined using your link. "
+                                f"You need <b>{remaining}</b> more referral(s) for +14 days Premium!",
+                                parse_mode="HTML",
+                            )
+                        except Exception:
+                            pass
         except (ValueError, TypeError):
             pass
 
@@ -105,7 +122,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ── Non-premium / regular user → show upgrade screen
     if role == "user":
         ref_count = db.get_referral_count(user.id)
-        owner_tags = _build_owner_tags()
+        owner_tags = await _build_owner_tags(context.bot)
         text = NON_PREMIUM_TEXT.format(
             bot_username=config.BOT_USERNAME,
             owner_tags=owner_tags

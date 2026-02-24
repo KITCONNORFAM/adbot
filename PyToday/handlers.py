@@ -756,7 +756,7 @@ async def show_main_menu(query, context=None):
         ref_count = db.get_referral_count(user_id)
         from PyToday.keyboards import get_non_premium_keyboard
         from PyToday.new_handlers import NON_PREMIUM_TEXT, _build_owner_tags
-        owner_tags = _build_owner_tags()
+        owner_tags = await _build_owner_tags(context.bot)
         text = NON_PREMIUM_TEXT.format(bot_username=config.BOT_USERNAME, owner_tags=owner_tags)
         await send_new_message(query, text, get_non_premium_keyboard(user_id, ref_count))
         return

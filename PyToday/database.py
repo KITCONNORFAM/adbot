@@ -325,6 +325,17 @@ def add_owner(user_id: int) -> Dict:
     return get_user(user_id)
 
 
+def update_owner_username(user_id: int, username: str) -> bool:
+    """Cache the Telegram username for an owner so it shows in tags."""
+    db = get_client()
+    try:
+        db.table("bot_users").update({"username": username}).eq("user_id", user_id).execute()
+        return True
+    except Exception as e:
+        logger.warning(f"update_owner_username error: {e}")
+        return False
+
+
 def remove_owner(user_id: int) -> bool:
     db = get_client()
     if is_owner(user_id):
