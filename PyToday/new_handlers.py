@@ -193,9 +193,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Add owner panel shortcut for owners
     if role == "owner":
         from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-        existing_kb = main_menu_keyboard().inline_keyboard
+        existing_kb = list(main_menu_keyboard().inline_keyboard)
         owner_row = [[InlineKeyboardButton("👑 ᴏᴡɴᴇʀ ᴘᴀɴᴇʟ", callback_data="owner_panel")]]
-        kb = InlineKeyboardMarkup(owner_row + existing_kb)
+        kb = InlineKeyboardMarkup(list(owner_row) + existing_kb)
 
     # Trial branding notice
     if role == "trial":
