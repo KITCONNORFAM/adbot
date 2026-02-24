@@ -172,11 +172,15 @@ async def init_db():
     """Initialize the database. Call once at bot startup."""
     db = get_client()
     try:
-        db.rpc("exec_sql", {"query": SUPABASE_SCHEMA_SQL}).execute()
-        logger.info("✅ Supabase schema initialized")
-    except Exception:
-        # Tables may already exist – that's fine on subsequent boots.
-        logger.info("✅ Supabase connected (schema already present)")
+        # Simple connectivity check – query users table (must exist via supabase_schema.sql)
+        db.table("users").select("user_id").limit(1).execute()
+        logger.info("\u2705 Supabase connected (schema already present)")
+    except Exception as e:
+        logger.error(
+            f"Supabase connectivity check failed: {e}\n"
+            "Make sure you have run supabase_schema.sql in your Supabase SQL Editor!"
+        )
+        raise
 
     # Seed initial owners from env into DB (idempotent)
     for owner_id in config.INITIAL_OWNER_IDS:
@@ -475,8 +479,11 @@ def get_accounts(user_id: int, logged_in_only: bool = False) -> List[Dict]:
 
 def get_account(account_id) -> Optional[Dict]:
     db = get_client()
-    result = db.table("telegram_accounts").select("*").eq("id", int(account_id)).single().execute()
-    return result.data
+    try:
+        result = db.table("telegram_accounts").select("*").eq("id", int(account_id)).single().execute()
+        return result.data
+    except Exception:
+        return None
 
 
 def create_account(user_id: int, phone: str, api_id: str, api_hash: str) -> Dict:
@@ -521,8 +528,11 @@ def count_accounts(user_id: int, logged_in_only: bool = True) -> int:
 
 def get_account_settings(account_id) -> Dict:
     db = get_client()
-    result = db.table("account_settings").select("*").eq("account_id", int(account_id)).single().execute()
-    return result.data or {}
+    try:
+        result = db.table("account_settings").select("*").eq("account_id", int(account_id)).single().execute()
+        return result.data or {}
+    except Exception:
+        return {}
 
 
 def update_account_settings(account_id, **kwargs) -> bool:
@@ -541,8 +551,11 @@ def update_account_settings(account_id, **kwargs) -> bool:
 
 def get_account_stats(account_id) -> Dict:
     db = get_client()
-    result = db.table("account_stats").select("*").eq("account_id", int(account_id)).single().execute()
-    return result.data or {}
+    try:
+        result = db.table("account_stats").select("*").eq("account_id", int(account_id)).single().execute()
+        return result.data or {}
+    except Exception:
+        return {}
 
 
 def increment_stat(account_id, field: str, amount: int = 1):
@@ -699,8 +712,11 @@ def clear_target_groups(account_id) -> int:
 
 def get_logs_channel(user_id: int) -> Optional[Dict]:
     db = get_client()
-    result = db.table("logs_channels").select("*").eq("user_id", user_id).single().execute()
-    return result.data
+    try:
+        result = db.table("logs_channels").select("*").eq("user_id", user_id).single().execute()
+        return result.data
+    except Exception:
+        return None
 
 
 def set_logs_channel(user_id: int, channel_id: str, channel_link: str = None) -> Dict:

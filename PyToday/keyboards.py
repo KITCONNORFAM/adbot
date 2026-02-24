@@ -532,4 +532,3 @@ def owner_panel_keyboard():
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
-

@@ -130,10 +130,11 @@ def access_required(func):
                 await update.message.reply_text("🚫 You are banned.")
             return
         if not check_access(user.id):
+            from PyToday import config as _cfg
             owners = db.get_all_owners()
             owner_tags = " ".join([f"◈ @{o['username']}" if o.get("username") else f"◈ ID:{o['user_id']}" for o in owners]) or "◈ @owneruserid"
             msg = (
-                f"⊘ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇss @{db.get_client() and ''} ɪs ᴏɴʟʏ ғᴏʀ ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀs "
+                f"⊘ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇss @{_cfg.BOT_USERNAME} ɪs ᴏɴʟʏ ғᴏʀ ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀs "
                 f"ᴛᴏ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ, ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴏᴡɴᴇʀs: {owner_tags}"
             )
             if update.message:
