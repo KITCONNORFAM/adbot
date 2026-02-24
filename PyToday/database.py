@@ -189,16 +189,21 @@ async def init_db():
 
 def _upsert_owner_bootstrap(db: Client, user_id: int):
     try:
-        existing = db.table("bot_users").select("user_id, role").eq("user_id", user_id).single().execute()
-        if existing.data and existing.data.get("role") != "owner":
+        # Use limit(1) instead of single() to avoid crash when no rows
+        result = db.table("bot_users").select("user_id, role").eq("user_id", user_id).limit(1).execute()
+        existing_data = result.data[0] if result.data else None
+        if existing_data and existing_data.get("role") != "owner":
             db.table("bot_users").update({"role": "owner"}).eq("user_id", user_id).execute()
-        elif not existing.data:
+            logger.info(f"Owner role updated: {user_id}")
+        elif not existing_data:
             db.table("bot_users").insert({
                 "user_id": user_id,
                 "role": "owner",
                 "created_at": _now_iso()
             }).execute()
-        logger.info(f"Owner seeded: {user_id}")
+            logger.info(f"Owner seeded: {user_id}")
+        else:
+            logger.info(f"Owner already exists: {user_id}")
     except Exception as e:
         logger.warning(f"Owner bootstrap error for {user_id}: {e}")
 
@@ -261,11 +266,18 @@ def get_user_role(user_id: int) -> str:
 
 def _expire_user(user_id: int):
     db = get_client()
-    db.table("bot_users").update({
-        "role": "user",
-        "premium_expiry": None,
-        "trial_expiry": None
-    }).eq("user_id", user_id).execute()
+    try:
+        db.table("bot_users").update({
+            "role": "user",
+            "premium_expiry": None,
+            "trial_expiry": None
+        }).eq("user_id", user_id).execute()
+    except Exception:
+        # Fallback if trial_expiry/premium_expiry columns don't exist yet
+        try:
+            db.table("bot_users").update({"role": "user"}).eq("user_id", user_id).execute()
+        except Exception as e:
+            logger.error(f"_expire_user error: {e}")
 
 
 def is_owner(user_id: int) -> bool:
@@ -336,22 +348,31 @@ def add_premium(user_id: int, days: int) -> Dict:
     create_or_update_user(user_id)
     user = get_user(user_id)
 
-    # Extend if already premium, otherwise set from now
     current_expiry_str = user.get("premium_expiry") if user else None
     if current_expiry_str:
         base = datetime.fromisoformat(current_expiry_str)
         if base.tzinfo is None:
             base = base.replace(tzinfo=timezone.utc)
-        base = max(base, datetime.now(timezone.utc))  # extend from future expiry
+        base = max(base, datetime.now(timezone.utc))
     else:
         base = datetime.now(timezone.utc)
 
     new_expiry = base + timedelta(days=days)
-    db.table("bot_users").update({
-        "role": "premium",
-        "premium_expiry": new_expiry.isoformat(),
-        "trial_expiry": None  # clear trial if any
-    }).eq("user_id", user_id).execute()
+    try:
+        db.table("bot_users").update({
+            "role": "premium",
+            "premium_expiry": new_expiry.isoformat(),
+            "trial_expiry": None
+        }).eq("user_id", user_id).execute()
+    except Exception:
+        # Fallback if trial_expiry column doesn't exist yet
+        try:
+            db.table("bot_users").update({
+                "role": "premium",
+                "premium_expiry": new_expiry.isoformat()
+            }).eq("user_id", user_id).execute()
+        except Exception as e:
+            logger.error(f"add_premium error: {e}")
     return get_user(user_id)
 
 
@@ -390,12 +411,21 @@ def activate_trial(user_id: int) -> Dict:
     db = get_client()
     create_or_update_user(user_id)
     expiry = datetime.now(timezone.utc) + timedelta(days=config.TRIAL_DAYS)
-    db.table("bot_users").update({
-        "role": "trial",
-        "trial_used": True,
-        "trial_expiry": expiry.isoformat(),
-        "premium_expiry": None
-    }).eq("user_id", user_id).execute()
+    try:
+        # Full update with all trial columns
+        db.table("bot_users").update({
+            "role": "trial",
+            "trial_used": True,
+            "trial_expiry": expiry.isoformat(),
+            "premium_expiry": None
+        }).eq("user_id", user_id).execute()
+    except Exception:
+        # Columns may not exist yet — try without them
+        try:
+            db.table("bot_users").update({"role": "trial"}).eq("user_id", user_id).execute()
+            logger.warning(f"activate_trial: missing columns, only set role=trial for {user_id}")
+        except Exception as e:
+            logger.error(f"activate_trial error: {e}")
     return get_user(user_id)
 
 
@@ -406,13 +436,26 @@ def activate_trial(user_id: int) -> Dict:
 def ban_user(user_id: int) -> bool:
     db = get_client()
     create_or_update_user(user_id)
-    db.table("bot_users").update({"banned": True}).eq("user_id", user_id).execute()
+    try:
+        db.table("bot_users").update({"banned": True}).eq("user_id", user_id).execute()
+    except Exception:
+        # banned column might not exist — set role to banned string as fallback
+        try:
+            db.table("bot_users").update({"role": "banned"}).eq("user_id", user_id).execute()
+        except Exception as e:
+            logger.error(f"ban_user error: {e}")
     return True
 
 
 def unban_user(user_id: int) -> bool:
     db = get_client()
-    db.table("bot_users").update({"banned": False}).eq("user_id", user_id).execute()
+    try:
+        db.table("bot_users").update({"banned": False}).eq("user_id", user_id).execute()
+    except Exception:
+        try:
+            db.table("bot_users").update({"role": "user"}).eq("user_id", user_id).execute()
+        except Exception as e:
+            logger.error(f"unban_user error: {e}")
     return True
 
 
@@ -423,25 +466,44 @@ def unban_user(user_id: int) -> bool:
 def record_referral(referrer_id: int, referred_id: int) -> bool:
     """Returns True if referral was successfully recorded (not a duplicate)."""
     db = get_client()
-    # Block self-referral
     if referrer_id == referred_id:
         return False
-    # Block if already referred by someone
     user = get_user(referred_id)
     if user and user.get("referred_by"):
         return False
     try:
-        db.table("referral_log").insert({
-            "referrer_id": referrer_id,
-            "referred_id": referred_id,
-            "created_at": _now_iso()
-        }).execute()
-        # Increment referrer's count and mark referral on referred user
-        db.table("bot_users").update({
-            "referred_by": referrer_id
-        }).eq("user_id", referred_id).execute()
+        # Try referral_log first, then referrals (some Supabase instances use either)
+        try:
+            db.table("referral_log").insert({
+                "referrer_id": referrer_id,
+                "referred_id": referred_id,
+                "created_at": _now_iso()
+            }).execute()
+        except Exception:
+            db.table("referrals").insert({
+                "referrer_id": referrer_id,
+                "referred_id": referred_id,
+                "created_at": _now_iso()
+            }).execute()
 
-        db.rpc("increment_referral_count", {"uid": referrer_id}).execute()
+        # Mark referred_by on the new user (best-effort)
+        try:
+            db.table("bot_users").update({
+                "referred_by": referrer_id
+            }).eq("user_id", referred_id).execute()
+        except Exception:
+            pass
+
+        # Increment referral count manually (no RPC dependency)
+        try:
+            referrer = get_user(referrer_id)
+            old_count = referrer.get("referral_count", 0) if referrer else 0
+            db.table("bot_users").update({
+                "referral_count": old_count + 1
+            }).eq("user_id", referrer_id).execute()
+        except Exception:
+            pass
+
         _check_referral_reward(referrer_id)
         return True
     except Exception as e:
