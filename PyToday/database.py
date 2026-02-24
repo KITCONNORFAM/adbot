@@ -515,21 +515,34 @@ def record_referral(referrer_id: int, referred_id: int) -> bool:
         except Exception:
             pass
 
-        _check_referral_reward(referrer_id)
-        return True
+        reward_info = _check_referral_reward(referrer_id)
+        return True, reward_info
     except Exception as e:
         logger.warning(f"Referral already recorded or error: {e}")
-        return False
+        return False, None
 
 
-def _check_referral_reward(referrer_id: int):
+def _check_referral_reward(referrer_id: int) -> Optional[Dict]:
     user = get_user(referrer_id)
     if not user:
-        return
+        return None
     count = user.get("referral_count", 0)
     if count > 0 and count % config.REFERRALS_REQUIRED == 0:
-        add_premium(referrer_id, config.REFERRAL_REWARD_DAYS)
+        updated_user = add_premium(referrer_id, config.REFERRAL_REWARD_DAYS)
         logger.info(f"🎁 Referral reward granted to {referrer_id} – +{config.REFERRAL_REWARD_DAYS} days")
+        
+        # Parse expiry date for notification
+        expiry_str = updated_user.get("premium_expiry")
+        expiry_dt = None
+        if expiry_str:
+            expiry_dt = datetime.fromisoformat(expiry_str)
+        
+        return {
+            "days": config.REFERRAL_REWARD_DAYS,
+            "invites": config.REFERRALS_REQUIRED,
+            "expiry": expiry_dt
+        }
+    return None
 
 
 def get_referral_count(user_id: int) -> int:
@@ -906,30 +919,57 @@ def get_global_stats() -> Dict:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# EXPIRY SCHEDULER HELPER (called by APScheduler cron job)
+# EXPIRY SCHEDULER HELPER (called by PTB job_queue every 30 min)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def sweep_expired_roles():
-    """Demote expired premium/trial users. Run as a scheduled cron job."""
+def sweep_expired_roles() -> Dict:
+    """
+    Demote expired premium/trial users.
+    Returns dict: { 'expired_premium': [user_ids], 'expired_trial': [user_ids] }
+    so the caller (main.py) can send Telegram notifications.
+    """
     db = get_client()
     now_iso = _now_iso()
+    result = {"expired_premium": [], "expired_trial": []}
 
-    # Premium expired
-    expired_premium = (db.table("bot_users")
-                       .select("user_id")
-                       .eq("role", "premium")
-                       .lt("premium_expiry", now_iso)
-                       .execute())
-    for u in (expired_premium.data or []):
-        db.table("bot_users").update({"role": "user", "premium_expiry": None}).eq("user_id", u["user_id"]).execute()
-        logger.info(f"Premium expired for user {u['user_id']}")
+    try:
+        # Premium expired
+        expired_premium = (db.table("bot_users")
+                           .select("user_id")
+                           .eq("role", "premium")
+                           .lt("premium_expiry", now_iso)
+                           .execute())
+        for u in (expired_premium.data or []):
+            uid = u["user_id"]
+            try:
+                db.table("bot_users").update({
+                    "role": "user", "premium_expiry": None
+                }).eq("user_id", uid).execute()
+                result["expired_premium"].append(uid)
+                logger.info(f"Premium expired for user {uid}")
+            except Exception as e:
+                logger.error(f"sweep premium error for {uid}: {e}")
+    except Exception as e:
+        logger.error(f"sweep_expired_roles premium query error: {e}")
 
-    # Trial expired
-    expired_trial = (db.table("bot_users")
-                     .select("user_id")
-                     .eq("role", "trial")
-                     .lt("trial_expiry", now_iso)
-                     .execute())
-    for u in (expired_trial.data or []):
-        db.table("bot_users").update({"role": "user", "trial_expiry": None}).eq("user_id", u["user_id"]).execute()
-        logger.info(f"Trial expired for user {u['user_id']}")
+    try:
+        # Trial expired
+        expired_trial = (db.table("bot_users")
+                         .select("user_id")
+                         .eq("role", "trial")
+                         .lt("trial_expiry", now_iso)
+                         .execute())
+        for u in (expired_trial.data or []):
+            uid = u["user_id"]
+            try:
+                db.table("bot_users").update({
+                    "role": "user", "trial_expiry": None, "trial_used": True
+                }).eq("user_id", uid).execute()
+                result["expired_trial"].append(uid)
+                logger.info(f"Trial expired for user {uid}")
+            except Exception as e:
+                logger.error(f"sweep trial error for {uid}: {e}")
+    except Exception as e:
+        logger.error(f"sweep_expired_roles trial query error: {e}")
+
+    return result

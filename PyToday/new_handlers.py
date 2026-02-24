@@ -100,19 +100,34 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Support both plain ID "12345" and prefixed "ref_12345"
             referrer_id = int(arg.replace("ref_", "").strip())
             if referrer_id != user.id:
-                recorded = db.record_referral(referrer_id, user.id)
+                recorded, reward_info = db.record_referral(referrer_id, user.id)
                 if recorded:
                     # Notify the referrer
                     try:
-                        count = db.get_referral_count(referrer_id)
-                        remaining = config.REFERRALS_REQUIRED - (count % config.REFERRALS_REQUIRED)
-                        await context.bot.send_message(
-                            referrer_id,
-                            f"🎉 <b>New Referral!</b>\n\n"
-                            f"Someone joined using your link.\n"
-                            f"You need <b>{remaining}</b> more referral(s) for +14 days Premium!",
-                            parse_mode="HTML",
-                        )
+                        if reward_info:
+                            # They just hit the milestone (e.g. 10 invites)
+                            days = reward_info["days"]
+                            invites = reward_info["invites"]
+                            expiry_str = reward_info["expiry"].strftime("%Y-%m-%d %H:%M UTC") if reward_info.get("expiry") else "Unknown"
+                            
+                            await context.bot.send_message(
+                                referrer_id,
+                                f"🎉 <b>{invites} Invites Consumed!</b>\n\n"
+                                f"Your {days} Days Premium has been activated.\n"
+                                f"⏳ <b>Expires on:</b> {expiry_str}",
+                                parse_mode="HTML",
+                            )
+                        else:
+                            # Normal referral, no reward yet
+                            count = db.get_referral_count(referrer_id)
+                            remaining = config.REFERRALS_REQUIRED - (count % config.REFERRALS_REQUIRED)
+                            await context.bot.send_message(
+                                referrer_id,
+                                f"🎉 <b>New Referral!</b>\n\n"
+                                f"Someone joined using your link.\n"
+                                f"You need <b>{remaining}</b> more referral(s) for +14 days Premium!",
+                                parse_mode="HTML",
+                            )
                     except Exception:
                         pass
                     # Build notice for the new user

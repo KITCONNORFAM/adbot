@@ -17,8 +17,7 @@ from PyToday.owner_commands import (
 )
 from PyToday.handlers import handle_callback, handle_message
 
-# APScheduler for expiry cron
-from apscheduler.schedulers.background import BackgroundScheduler
+# We now use PTB JobQueue instead of APScheduler for context.bot access
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -68,21 +67,58 @@ async def post_init(application):
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Expiry Scheduler (runs every 30 minutes)
+# Expiry Scheduler (runs every 30 minutes via PTB JobQueue)
 # ──────────────────────────────────────────────────────────────────────────────
 
-def start_scheduler():
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(
-        database.sweep_expired_roles,
-        trigger="interval",
-        minutes=30,
-        id="expiry_sweep",
-        replace_existing=True
-    )
-    scheduler.start()
-    logger.info("🕐 Expiry scheduler started (runs every 30 min)")
-    return scheduler
+from PyToday.keyboards import get_non_premium_keyboard
+
+async def _check_expiries_job(context):
+    """Called by PTB JobQueue every 30 minutes."""
+    try:
+        results = database.sweep_expired_roles()
+        bot = context.bot
+        
+        # Notify Premium expiries
+        for uid in results.get("expired_premium", []):
+            try:
+                ref_count = database.get_referral_count(uid)
+                kb = get_non_premium_keyboard(uid, referral_count=ref_count, 
+                                              referrals_required=config.REFERRALS_REQUIRED, 
+                                              trial_used=database.has_used_trial(uid))
+                await bot.send_message(
+                    uid,
+                    "⚠️ <b>Your Premium Subscription has expired!</b>\n\n"
+                    "Your account has been downgraded to standard. "
+                    "To regain access to Premium features, please renew your subscription or invite more users.",
+                    parse_mode="HTML",
+                    reply_markup=kb
+                )
+            except Exception as e:
+                logger.error(f"Failed to notify premium expiry for {uid}: {e}")
+
+        # Notify Trial expiries
+        for uid in results.get("expired_trial", []):
+            try:
+                from PyToday.new_handlers import _build_owner_tags
+                owner_tags = await _build_owner_tags(bot)
+                ref_count = database.get_referral_count(uid)
+                kb = get_non_premium_keyboard(uid, referral_count=ref_count, 
+                                              referrals_required=config.REFERRALS_REQUIRED, 
+                                              trial_used=True)
+                
+                await bot.send_message(
+                    uid,
+                    f"⚠️ <b>Your Free Trial has ended!</b>\n\n"
+                    f"Your {config.TRIAL_DAYS}-day free trial has expired.\n\n"
+                    f"ᴛᴏ ᴘᴜʀᴄʜᴀsᴇ ᴘʀᴇᴍɪᴜᴍ, ᴄᴏɴᴛᴀᴄᴛ ᴀɴ ᴏᴡɴᴇʀ:\n{owner_tags}",
+                    parse_mode="HTML",
+                    reply_markup=kb
+                )
+            except Exception as e:
+                logger.error(f"Failed to notify trial expiry for {uid}: {e}")
+                
+    except Exception as e:
+        logger.error(f"Expiry Job error: {e}")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -122,9 +158,6 @@ def main():
     if not config.SUPABASE_URL or not config.SUPABASE_KEY:
         print("ERROR: SUPABASE_URL and SUPABASE_KEY must be set in environment variables!")
         return
-
-    # Start scheduler in background
-    scheduler = start_scheduler()
 
     # Start web server in a daemon thread
     def run_web():
@@ -177,7 +210,6 @@ def main():
         )
     except KeyboardInterrupt:
         logger.info("Bot stopped by user")
-        scheduler.shutdown()
 
 
 if __name__ == "__main__":
