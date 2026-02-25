@@ -23,8 +23,7 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Stop existing tmux/screen sessions if any
-pkill -f "python3 main.py" 2>/dev/null && echo "⏹  Stopped existing bot process" || true
+
 
 # Write the systemd service file
 cat > "$SERVICE_FILE" << EOF
