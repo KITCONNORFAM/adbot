@@ -872,23 +872,20 @@ For per-account config, open My Accounts → select account.</i>
 
 
 async def toggle_forward_mode(query, user_id):
-    """Toggle forward mode - FIXED to persist correctly"""
-    user = await database.get_user(user_id)
-    current_mode = user.get('use_forward_mode', False) if user else False
+    """Toggle forward mode for first active account."""
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    if not accounts:
+        await query.answer("⚠️ No accounts connected. Add an account first.", show_alert=True)
+        return
+    acc = accounts[0]
+    s = db.get_account_settings(acc["id"]) or {}
+    current_mode = s.get("use_forward_mode", False)
     new_mode = not current_mode
-
-    # Update database first
-    await database.update_user(user_id, use_forward_mode=new_mode)
-
-    # Get updated user data
-    user = await database.get_user(user_id)
-    use_multiple = user.get('use_multiple_accounts', False) if user else False
-    auto_reply = user.get('auto_reply_enabled', False) if user else False
-    auto_group_join = user.get('auto_group_join_enabled', False) if user else False
+    db.update_account_settings(acc["id"], use_forward_mode=new_mode)
 
     if new_mode:
         mode_text = "<b>✉️ ғᴏʀᴡᴀʀᴅ ᴍᴏᴅᴇ</b>"
-        description = "<i>Messages will be forwarded from Saved Messages with premium emojis preserved</i>"
+        description = "<i>Messages will be forwarded from Saved Messages</i>"
         icon = "🟢"
     else:
         mode_text = "<b>📤 sᴇɴᴅ ᴍᴏᴅᴇ</b>"
@@ -899,22 +896,19 @@ async def toggle_forward_mode(query, user_id):
 {icon} <b>ᴍᴏᴅᴇ ᴄʜᴀɴɢᴇᴅ</b>
 
 ✅ Changed to: {mode_text}
-
 {description}
 """
-
-    force_sub_settings = await database.get_force_sub_settings()
-    force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
-
-    # Use back_to_settings_keyboard to return to settings menu properly
     await send_new_message(query, result_text, back_to_settings_keyboard())
 
 
 async def show_auto_reply_menu(query, user_id):
-    user = await database.get_user(user_id)
-    auto_reply = user.get('auto_reply_enabled', False) if user else False
-    reply_text = user.get('auto_reply_text', '') if user else ''
-    is_custom = bool(reply_text)
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    auto_reply = False
+    is_custom = False
+    if accounts:
+        s = db.get_account_settings(accounts[0]["id"]) or {}
+        auto_reply = s.get("auto_reply_enabled", False)
+        is_custom = bool(s.get("sequential_replies") or s.get("keyword_replies"))
 
     status = "🟢 ON" if auto_reply else "🔴 OFF"
     text_type = "Custom" if is_custom else "Default"
@@ -929,52 +923,46 @@ async def show_auto_reply_menu(query, user_id):
 
 <i>Manage your auto-reply settings:</i>
 """
-
     await send_new_message(query, menu_text, auto_reply_settings_keyboard(auto_reply))
 
 
 async def toggle_auto_reply(query, user_id):
-    user = await database.get_user(user_id)
-    current_mode = user.get('auto_reply_enabled', False) if user else False
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    if not accounts:
+        await query.answer("⚠️ No accounts connected.", show_alert=True)
+        return
+    acc = accounts[0]
+    s = db.get_account_settings(acc["id"]) or {}
+    current_mode = s.get("auto_reply_enabled", False)
     new_mode = not current_mode
-
-    await database.update_user(user_id, auto_reply_enabled=new_mode)
-
-    user = await database.get_user(user_id)
-    reply_text = user.get('auto_reply_text', '') if user else ''
-    final_text = reply_text if reply_text else config.AUTO_REPLY_TEXT
+    db.update_account_settings(acc["id"], auto_reply_enabled=new_mode)
 
     if new_mode:
-        started = await telethon_handler.start_all_auto_reply_listeners(user_id, final_text)
-        status_detail = f"Started for {started} account(s)"
+        await telethon_handler.start_all_auto_reply_listeners(user_id, config.AUTO_REPLY_TEXT)
+        status_detail = "Auto-reply started"
     else:
-        stopped = await telethon_handler.stop_all_auto_reply_listeners(user_id)
-        status_detail = f"Stopped for {stopped} account(s)"
+        await telethon_handler.stop_all_auto_reply_listeners(user_id)
+        status_detail = "Auto-reply stopped"
 
     status = "🟢 ON" if new_mode else "🔴 OFF"
-    is_custom = bool(reply_text)
-    text_type = "Custom" if is_custom else "Default"
-
     result_text = f"""
 <b>💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ</b>
 
 ✅ Auto Reply is now: <b>{status}</b>
 📊 {status_detail}
-
-🔹 <b>Text Type:</b> {text_type}
 """
-
     await send_new_message(query, result_text, auto_reply_settings_keyboard(new_mode))
 
 
 async def set_default_reply_text(query, user_id):
-    await database.update_user(user_id, auto_reply_text='')
-
-    user = await database.get_user(user_id)
-    auto_reply = user.get('auto_reply_enabled', False) if user else False
-
-    if auto_reply:
-        await telethon_handler.start_all_auto_reply_listeners(user_id, config.AUTO_REPLY_TEXT)
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    if accounts:
+        s = db.get_account_settings(accounts[0]["id"]) or {}
+        auto_reply = s.get("auto_reply_enabled", False)
+        if auto_reply:
+            await telethon_handler.start_all_auto_reply_listeners(user_id, config.AUTO_REPLY_TEXT)
+    else:
+        auto_reply = False
 
     result_text = f"""
 <b>📝 ᴅᴇғᴀᴜʟᴛ ᴛᴇxᴛ sᴇᴛ</b>
@@ -983,7 +971,6 @@ async def set_default_reply_text(query, user_id):
 
 {config.AUTO_REPLY_TEXT}
 """
-
     await send_new_message(query, result_text, auto_reply_settings_keyboard(auto_reply))
 
 
@@ -1030,9 +1017,14 @@ async def delete_reply_text(query, user_id):
 
 
 async def view_reply_text(query, user_id):
-    user = await database.get_user(user_id)
-    custom_text = user.get('auto_reply_text', '') if user else ''
-    auto_reply = user.get('auto_reply_enabled', False) if user else False
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    auto_reply = False
+    custom_text = ""
+    if accounts:
+        s = db.get_account_settings(accounts[0]["id"]) or {}
+        auto_reply = s.get("auto_reply_enabled", False)
+        replies = s.get("sequential_replies") or []
+        custom_text = replies[0].get("text", "") if replies else ""
 
     if custom_text:
         text_type = "Custom"
@@ -1049,27 +1041,28 @@ async def view_reply_text(query, user_id):
 <b>📝 Text:</b>
 {display_text}
 """
-
     await send_new_message(query, result_text, auto_reply_settings_keyboard(auto_reply))
 
 
 async def toggle_auto_group_join(query, user_id):
-    """Toggle auto group join - FIXED to work correctly"""
-    user = await database.get_user(user_id)
-    current_mode = user.get('auto_group_join_enabled', False) if user else False
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    if not accounts:
+        await query.answer("⚠️ No accounts connected.", show_alert=True)
+        return
+    acc = accounts[0]
+    s = db.get_account_settings(acc["id"]) or {}
+    current_mode = s.get("auto_group_join", False)
     new_mode = not current_mode
+    db.update_account_settings(acc["id"], auto_group_join=new_mode)
 
-    # Update database
-    await database.update_user(user_id, auto_group_join_enabled=new_mode)
-
-    # Get fresh user data
-    user = await database.get_user(user_id)
-    use_multiple = user.get('use_multiple_accounts', False) if user else False
-    use_forward = user.get('use_forward_mode', False) if user else False
-    auto_reply = user.get('auto_reply_enabled', False) if user else False
+    accounts_all = db.get_accounts(user_id, logged_in_only=True)
+    use_multiple = len(accounts_all) > 1
+    use_forward = s.get("use_forward_mode", False)
+    auto_reply = s.get("auto_reply_enabled", False)
+    force_sub_settings = db.get_force_sub_settings() or {}
+    force_sub_enabled = force_sub_settings.get('enabled', False)
 
     status = "🟢 ON" if new_mode else "🔴 OFF"
-
     result_text = f"""
 <b>🔗 ᴀᴜᴛᴏ ɢʀᴏᴜᴘ ᴊᴏɪɴ</b>
 
@@ -1077,16 +1070,15 @@ async def toggle_auto_group_join(query, user_id):
 
 <i>When enabled, accounts will auto-join groups from links</i>
 """
-
-    force_sub_settings = await database.get_force_sub_settings()
-    force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
-
     await send_new_message(query, result_text, settings_keyboard(use_multiple, use_forward, auto_reply, new_mode, force_sub_enabled, is_admin(user_id)))
 
 
 async def show_target_adv(query, user_id):
-    user = await database.get_user(user_id)
-    target_mode = user.get('target_mode', 'all') if user else 'all'
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    target_mode = "all"
+    if accounts:
+        s = db.get_account_settings(accounts[0]["id"]) or {}
+        target_mode = s.get("target_mode", "all")
 
     target_text = f"""
 <b>🎯 ᴛᴀʀɢᴇᴛ ᴀᴅᴠᴇʀᴛɪsɪɴɢ</b>
@@ -1096,12 +1088,13 @@ async def show_target_adv(query, user_id):
 📢 <b>All Groups</b> - Send to all groups
 🎯 <b>Selected</b> - Send to specific groups
 """
-
     await send_new_message(query, target_text, target_adv_keyboard(target_mode))
 
 
 async def set_target_all_groups(query, user_id):
-    await database.update_user(user_id, target_mode="all")
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    if accounts:
+        db.update_account_settings(accounts[0]["id"], target_mode="all")
 
     result_text = """
 <b>✅ ᴛᴀʀɢᴇᴛ sᴇᴛ</b>
@@ -1110,14 +1103,15 @@ async def set_target_all_groups(query, user_id):
 
 <i>Messages will be sent to all groups</i>
 """
-
     await send_new_message(query, result_text, target_adv_keyboard("all"))
 
 
 async def show_selected_groups_menu(query, user_id):
-    await database.update_user(user_id, target_mode="selected")
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    if accounts:
+        db.update_account_settings(accounts[0]["id"], target_mode="selected")
 
-    target_groups = await database.get_target_groups(user_id)
+    target_groups = db.get_target_groups(user_id)
 
     menu_text = f"""
 <b>🎯 sᴇʟᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs</b>
@@ -1128,7 +1122,6 @@ async def show_selected_groups_menu(query, user_id):
 ➖ Remove groups
 📋 View all selected
 """
-
     await send_new_message(query, menu_text, selected_groups_keyboard())
 
 
