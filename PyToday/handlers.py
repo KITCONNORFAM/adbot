@@ -45,7 +45,7 @@ WELCOME_TEXT_TEMPLATE = """
 📊 ᴅᴇᴛᴀɪʟᴇᴅ sᴛᴀᴛɪsᴛɪᴄs ᴛʀᴀᴄᴋɪɴɢ
 👤 ᴍᴜʟᴛɪᴘʟᴇ ᴀᴄᴄᴏᴜɴᴛ sᴜᴘᴘᴏʀᴛ
 ⏰ sᴄʜᴇᴅᴜʟᴇᴅ ᴍᴇssᴀɢᴇ sᴇɴᴅɪɴɢ</blockquote>
-
+{expiry_line}
 <i>ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ:</i>
 """
 
@@ -762,9 +762,23 @@ async def show_main_menu(query, context=None):
         return
 
     total_users = db.get_users_count()
+
+    # ── Live expiry display for premium / trial users
+    expiry_line = ""
+    if role in ("premium", "trial"):
+        expiry = db.get_premium_expiry(user_id)
+        if expiry:
+            expiry_str = expiry.strftime("%d %b %Y, %H:%M UTC")
+            icon = "🎁" if role == "trial" else "💎"
+            label = "Trial" if role == "trial" else "Premium"
+            expiry_line = f"\n{icon} <b>{label} active</b> — expires <b>{expiry_str}</b>\n"
+        else:
+            expiry_line = "\n⚠️ <i>Expiry date not found – contact support</i>\n"
+
     menu_text = WELCOME_TEXT_TEMPLATE.format(
         first_name=first_name,
-        total_users=total_users
+        total_users=total_users,
+        expiry_line=expiry_line
     )
     await send_new_message(query, menu_text, main_menu_keyboard())
 

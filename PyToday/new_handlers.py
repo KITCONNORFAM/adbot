@@ -50,7 +50,7 @@ WELCOME_TEXT = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 📊 ᴅᴇᴛᴀɪʟᴇᴅ sᴛᴀᴛɪsᴛɪᴄs ᴛʀᴀᴄᴋɪɴɢ
 👤 ᴍᴜʟᴛɪᴘʟᴇ ᴀᴄᴄᴏᴜɴᴛ sᴜᴘᴘᴏʀᴛ
 ⏰ sᴄʜᴇᴅᴜʟᴇᴅ ᴍᴇssᴀɢᴇ sᴇɴᴅɪɴɢ</blockquote>
-
+{expiry_line}
 <i>ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ:</i>"""
 
 
@@ -187,21 +187,30 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # ── Owner, Premium, Trial → main dashboard
-    welcome = WELCOME_TEXT.format(first_name=user.first_name)
+    # Compute live expiry line for display
+    expiry_line = ""
+    if role == "owner":
+        expiry_line = "\n👑 <b>Owner</b> — lifetime access\n"
+    elif role in ("premium", "trial"):
+        expiry = db.get_premium_expiry(user.id)
+        if expiry:
+            expiry_str = expiry.strftime("%d %b %Y, %H:%M UTC")
+            icon = "🎁" if role == "trial" else "💎"
+            label = "Trial" if role == "trial" else "Premium"
+            expiry_line = f"\n{icon} <b>{label} active</b> — expires <b>{expiry_str}</b>\n"
+        else:
+            expiry_line = "\n⚠️ <i>Expiry date missing — contact support</i>\n"
+
+    welcome = WELCOME_TEXT.format(first_name=user.first_name, expiry_line=expiry_line)
     kb = main_menu_keyboard()
 
     # Add owner panel shortcut for owners
-    if role == "owner":
+    if role == "owner" or db.is_owner(user.id):
         from telegram import InlineKeyboardButton, InlineKeyboardMarkup
         existing_kb = list(main_menu_keyboard().inline_keyboard)
         owner_row = [[InlineKeyboardButton("👑 ᴏᴡɴᴇʀ ᴘᴀɴᴇʟ", callback_data="owner_panel")]]
         kb = InlineKeyboardMarkup(list(owner_row) + existing_kb)
 
-    # Trial branding notice
-    if role == "trial":
-        expiry = db.get_premium_expiry(user.id)
-        expiry_str = expiry.strftime("%d %b %Y") if expiry else "?"
-        welcome += f"\n\n🎁 <i>Trial active – expires <b>{expiry_str}</b></i>"
 
     try:
         await update.message.reply_photo(
