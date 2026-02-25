@@ -207,7 +207,7 @@ async def send_force_sub_message(update: Update, context: ContextTypes.DEFAULT_T
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
-    db.save_bot_user(
+    db.create_or_update_user(
         user_id=user.id,
         username=user.username,
         first_name=user.first_name,
@@ -216,7 +216,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     db_user = db.get_user(user.id)
     if not db_user:
-        db.create_user(
+        db.create_or_update_user(
             user_id=user.id,
             username=user.username,
             first_name=user.first_name
@@ -230,7 +230,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await send_force_sub_message(update, context)
             return
 
-    if config.ADMIN_ONLY_MODE and not is_admin(user.id):
+    if config.ADMIN_ONLY_MODE and not db.is_owner(user.id):
         private_text = """
 <b>âŠ˜ á´˜Ê€á´‡á´Éªá´œá´ á´€á´„á´„á´‡ss</b>
 
@@ -250,7 +250,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(private_text, parse_mode="HTML")
         return
 
-    total_users = db.get_bot_users_count()
+    total_users = db.get_users_count()
 
     welcome_text = WELCOME_TEXT_TEMPLATE.format(
         first_name=user.first_name,
@@ -280,7 +280,7 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Admin panel command"""
     user = update.effective_user
 
-    if not is_admin(user.id):
+    if not db.is_owner(user.id):
         await update.message.reply_text("<b>âŠ˜ á´›ÊœÉªs á´„á´á´á´á´€É´á´… Éªs á´É´ÊŸÊ Ò“á´Ê€ á´€á´…á´ÉªÉ´s.</b>", parse_mode="HTML")
         return
 
@@ -305,7 +305,7 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
-    if not is_admin(user.id):
+    if not db.is_owner(user.id):
         await update.message.reply_text("<b>âŠ˜ á´›ÊœÉªs á´„á´á´á´á´€É´á´… Éªs á´É´ÊŸÊ Ò“á´Ê€ á´€á´…á´ÉªÉ´s.</b>", parse_mode="HTML")
         return
 
@@ -321,7 +321,7 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_states[user.id] = {"state": "broadcasting", "data": {}}
 
-    all_users = db.get_all_bot_users()
+    all_users = db.get_all_users()
     sent = 0
     failed = 0
 
@@ -868,7 +868,7 @@ For per-account config, open My Accounts â†’ select account.</i>
     force_sub_settings = db.get_force_sub_settings()
     force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
 
-    await send_new_message(query, settings_text, settings_keyboard(use_multiple, use_forward, auto_reply, auto_group_join, force_sub_enabled, is_admin(user_id)))
+    await send_new_message(query, settings_text, settings_keyboard(use_multiple, use_forward, auto_reply, auto_group_join, force_sub_enabled, db.is_owner(user_id)))
 
 
 async def toggle_forward_mode(query, user_id):
@@ -1070,7 +1070,7 @@ async def toggle_auto_group_join(query, user_id):
 
 <i>When enabled, accounts will auto-join groups from links</i>
 """
-    await send_new_message(query, result_text, settings_keyboard(use_multiple, use_forward, auto_reply, new_mode, force_sub_enabled, is_admin(user_id)))
+    await send_new_message(query, result_text, settings_keyboard(use_multiple, use_forward, auto_reply, new_mode, force_sub_enabled, db.is_owner(user_id)))
 
 
 async def show_target_adv(query, user_id):
@@ -1081,12 +1081,12 @@ async def show_target_adv(query, user_id):
         target_mode = s.get("target_mode", "all")
 
     target_text = f"""
-<b>ðŸŽ¯ á´›á´€Ê€É¢á´‡á´› á´€á´…á´ á´‡Ê€á´›ÉªsÉªÉ´É¢</b>
+<b>🎯 ᴛᴀʀɢᴇᴛ ᴀᴅᴠᴇʀᴛɪsɪɴɢ</b>
 
-<b>ðŸ“Š Current Mode:</b> <code>{target_mode.upper()}</code>
+<b>📊 Current Mode:</b> <code>{target_mode.upper()}</code>
 
-ðŸ“¢ <b>All Groups</b> - Send to all groups
-ðŸŽ¯ <b>Selected</b> - Send to specific groups
+📢 <b>All Groups</b> - Send to all groups
+🎯 <b>Selected</b> - Send to specific groups
 """
     await send_new_message(query, target_text, target_adv_keyboard(target_mode))
 
@@ -1665,7 +1665,7 @@ async def set_single_mode(query, user_id):
         await send_new_message(
             query,
             "<b>âŒ No logged in accounts</b>\n\n<i>Please add an account first.</i>",
-            settings_keyboard(False, False, False, False, force_sub_enabled, is_admin(user_id))
+            settings_keyboard(False, False, False, False, force_sub_enabled, db.is_owner(user_id))
         )
         return
 
@@ -1683,7 +1683,7 @@ async def set_single_mode(query, user_id):
         force_sub_settings = db.get_force_sub_settings()
         force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
 
-        await send_new_message(query, result_text, settings_keyboard(False, use_forward, auto_reply, auto_group_join, force_sub_enabled, is_admin(user_id)))
+        await send_new_message(query, result_text, settings_keyboard(False, use_forward, auto_reply, auto_group_join, force_sub_enabled, db.is_owner(user_id)))
     else:
         await send_new_message(
             query,
@@ -1701,7 +1701,7 @@ async def set_multiple_mode(query, user_id, context):
         await send_new_message(
             query,
             "<b>âŒ Need at least 2 accounts</b>\n\n<i>Add more accounts for multiple mode.</i>",
-            settings_keyboard(False, False, False, False, force_sub_enabled, is_admin(user_id))
+            settings_keyboard(False, False, False, False, force_sub_enabled, db.is_owner(user_id))
         )
         return
 
@@ -1770,7 +1770,7 @@ async def confirm_account_selection(query, user_id, context):
     force_sub_settings = db.get_force_sub_settings()
     force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
 
-    await send_new_message(query, result_text, settings_keyboard(True, use_forward, auto_reply, auto_group_join, force_sub_enabled, is_admin(user_id)))
+    await send_new_message(query, result_text, settings_keyboard(True, use_forward, auto_reply, auto_group_join, force_sub_enabled, db.is_owner(user_id)))
 
 
 async def show_my_accounts(query, user_id, page=0):
@@ -1811,7 +1811,7 @@ async def select_single_account(query, user_id, account_id):
     force_sub_settings = db.get_force_sub_settings()
     force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
 
-    await send_new_message(query, result_text, settings_keyboard(False, use_forward, auto_reply, auto_group_join, force_sub_enabled, is_admin(user_id)))
+    await send_new_message(query, result_text, settings_keyboard(False, use_forward, auto_reply, auto_group_join, force_sub_enabled, db.is_owner(user_id)))
 
 
 async def show_single_account_page(query, user_id, page):
@@ -2459,25 +2459,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Admin Panel Functions
 async def show_admin_stats(query, user_id):
-    if not is_admin(user_id):
+    if not db.is_owner(user_id):
         await query.answer("âš ï¸ Only admin can access this!", show_alert=True)
         return
 
-    total_users = db.get_bot_users_count()
-    all_users = db.get_all_bot_users()
+    total_users = db.get_users_count()
+    all_users = db.get_all_users()
 
-    # Get total accounts
-    total_accounts = 0
-    logged_in_accounts = 0
+    # Get total accounts via Supabase
     try:
-        async with database.aiosqlite.connect(database.sqlite_db_path) as db:
-            cursor = await db.execute("SELECT COUNT(*) FROM telegram_accounts")
-            total_accounts = (await cursor.fetchone())[0]
-
-            cursor = await db.execute("SELECT COUNT(*) FROM telegram_accounts WHERE is_logged_in = 1")
-            logged_in_accounts = (await cursor.fetchone())[0]
+        total_accounts = db.count_accounts() or 0
+        all_accs = db.get_accounts(None) or []
+        logged_in_accounts = len([a for a in all_accs if a.get('is_logged_in')])
     except Exception as e:
-        logger.error(f"Error getting account stats: {e}")
+        logger.error(f'Error getting account stats: {e}')
+        total_accounts = 0
+        logged_in_accounts = 0
 
     stats_text = f"""
 <b>â—ˆ Ê™á´á´› sá´›á´€á´›Éªsá´›Éªá´„s â—ˆ</b>
@@ -2493,7 +2490,7 @@ async def show_admin_stats(query, user_id):
 
 
 async def prompt_admin_broadcast(query, user_id):
-    if not is_admin(user_id):
+    if not db.is_owner(user_id):
         await query.answer("âš ï¸ Only admin can access this!", show_alert=True)
         return
 
@@ -2517,11 +2514,11 @@ Or send /cancel to cancel.
 
 
 async def show_admin_users(query, user_id):
-    if not is_admin(user_id):
+    if not db.is_owner(user_id):
         await query.answer("âš ï¸ Only admin can access this!", show_alert=True)
         return
 
-    all_users = db.get_all_bot_users()
+    all_users = db.get_all_users()
 
     users_text = f"""
 <b>â—ˆ á´œsá´‡Ê€s ÊŸÉªsá´› â—ˆ</b>
@@ -2544,7 +2541,7 @@ async def show_admin_users(query, user_id):
 
 
 async def show_ban_menu(query, user_id):
-    if not is_admin(user_id):
+    if not db.is_owner(user_id):
         await query.answer("âš ï¸ Only admin can access this!", show_alert=True)
         return
 
@@ -2564,7 +2561,7 @@ async def show_ban_menu(query, user_id):
 
 # Force Sub Functions (Admin only)
 async def show_force_sub_menu(query, user_id):
-    if not is_admin(user_id):
+    if not db.is_owner(user_id):
         await query.answer("âš ï¸ Only admin can access this!", show_alert=True)
         return
 
@@ -2585,7 +2582,7 @@ async def show_force_sub_menu(query, user_id):
 
 
 async def toggle_force_sub(query, user_id):
-    if not is_admin(user_id):
+    if not db.is_owner(user_id):
         await query.answer("âš ï¸ Only admin can access this!", show_alert=True)
         return
 
@@ -2605,7 +2602,7 @@ Status: <b>{status}</b>
 
 
 async def prompt_set_force_channel(query, user_id):
-    if not is_admin(user_id):
+    if not db.is_owner(user_id):
         await query.answer("âš ï¸ Only admin can access this!", show_alert=True)
         return
 
@@ -2628,7 +2625,7 @@ async def prompt_set_force_channel(query, user_id):
 
 
 async def prompt_set_force_group(query, user_id):
-    if not is_admin(user_id):
+    if not db.is_owner(user_id):
         await query.answer("âš ï¸ Only admin can access this!", show_alert=True)
         return
 
@@ -2651,7 +2648,7 @@ async def prompt_set_force_group(query, user_id):
 
 
 async def view_force_sub_settings(query, user_id):
-    if not is_admin(user_id):
+    if not db.is_owner(user_id):
         await query.answer("âš ï¸ Only admin can access this!", show_alert=True)
         return
 
