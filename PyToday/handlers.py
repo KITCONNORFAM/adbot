@@ -1496,11 +1496,11 @@ async def load_account_groups_page(query, user_id, account_id, page, context):
 
 
 async def show_statistics(query, user_id):
-    accounts = await database.get_accounts(user_id, logged_in_only=True)
+    accounts = db.get_accounts(user_id, logged_in_only=True)
 
     if not accounts:
         stats_text = """
-<b>📊 sᴛᴀᴛɪsᴛɪᴄs</b>
+<b>📊 sᴛᴀᴛɪ sᴛɪᴄs</b>
 
 <i>No accounts found. Add an account first.</i>
 """
@@ -1514,16 +1514,14 @@ async def show_statistics(query, user_id):
         if account.get('account_username'):
             display_name = f"{display_name} (@{account.get('account_username')})"
 
-        stats = await database.get_account_stats(account["_id"])
+        acc_id = account.get("id", account.get("_id", ""))
+        stats = db.get_account_stats(acc_id) if hasattr(db, 'get_account_stats') else {}
 
-        if stats:
-            sent = stats.get("messages_sent", 0)
-            failed = stats.get("messages_failed", 0)
-            groups = stats.get("groups_count", 0) + stats.get("marketplaces_count", 0)
-            replies = stats.get("auto_replies_sent", 0)
-            joined = stats.get("groups_joined", 0)
-        else:
-            sent = failed = groups = replies = joined = 0
+        sent = (stats or {}).get("messages_sent", 0)
+        failed = (stats or {}).get("messages_failed", 0)
+        groups = (stats or {}).get("groups_count", 0) + (stats or {}).get("marketplaces_count", 0)
+        replies = (stats or {}).get("auto_replies_sent", 0)
+        joined = (stats or {}).get("groups_joined", 0)
 
         stats_text += f"""
 <b>📱 {display_name[:30]}</b>
@@ -1535,13 +1533,15 @@ async def show_statistics(query, user_id):
     stats_text += f"""
 <b>📱 Total Accounts:</b> <code>{len(accounts)}</code>
 """
-
     await send_new_message(query, stats_text, back_to_settings_keyboard())
 
 
 async def show_ad_text_menu(query, user_id):
-    user = await database.get_user(user_id)
-    ad_text = user.get('ad_text') if user else None
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    ad_text = None
+    if accounts:
+        s = db.get_account_settings(accounts[0]["id"]) or {}
+        ad_text = s.get("ad_text")
     ad_status = "✅ Set" if ad_text else "❌ Not Set"
 
     menu_text = f"""
@@ -1551,13 +1551,15 @@ async def show_ad_text_menu(query, user_id):
 
 <i>Select an option:</i>
 """
-
     await send_new_message(query, menu_text, ad_text_menu_keyboard())
 
 
 async def show_saved_ad_text(query, user_id):
-    user = await database.get_user(user_id)
-    ad_text = user.get('ad_text') if user else None
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    ad_text = None
+    if accounts:
+        s = db.get_account_settings(accounts[0]["id"]) or {}
+        ad_text = s.get("ad_text")
 
     if ad_text:
         display_text = f"""
@@ -1571,7 +1573,6 @@ async def show_saved_ad_text(query, user_id):
 
 <i>No ad text saved.</i>
 """
-
     await send_new_message(query, display_text, ad_text_back_keyboard())
 
 
@@ -1593,14 +1594,15 @@ async def prompt_ad_text(query, user_id):
 
 
 async def delete_ad_text(query, user_id):
-    await database.update_user(user_id, ad_text=None)
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    if accounts:
+        db.update_account_settings(accounts[0]["id"], ad_text=None)
 
     result_text = """
 <b>🗑️ ᴀᴅ ᴛᴇxᴛ ᴅᴇʟᴇᴛᴇᴅ</b>
 
 ✅ Your ad text has been deleted.
 """
-
     await send_new_message(query, result_text, ad_text_menu_keyboard())
 
 
@@ -1626,7 +1628,9 @@ async def set_time_interval(query, user_id, time_val):
 
     try:
         seconds = int(time_val)
-        await database.update_user(user_id, time_interval=seconds)
+        accounts = db.get_accounts(user_id, logged_in_only=True)
+        if accounts:
+            db.update_account_settings(accounts[0]["id"], time_interval=seconds)
 
         if seconds < 60:
             time_display = f"{seconds} seconds"
