@@ -973,3 +973,30 @@ def sweep_expired_roles() -> Dict:
         logger.error(f"sweep_expired_roles trial query error: {e}")
 
     return result
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SHIM FUNCTIONS
+# ══════════════════════════════════════════════════════════════════════════════
+
+def update_user(user_id: int, **kwargs) -> bool:
+    try:
+        get_client().table('bot_users').update(kwargs).eq('user_id', user_id).execute()
+        return True
+    except Exception as e:
+        logger.error(f'update_user error for {user_id}: {e}')
+        return False
+
+def get_force_join_status(user_id: int):
+    try:
+        return get_force_sub_settings() or {}
+    except Exception:
+        return {}
+
+def toggle_force_join(user_id: int) -> bool:
+    try:
+        current = get_force_sub_settings() or {}
+        new_val = not current.get('enabled', False)
+        update_force_sub_settings({'enabled': new_val})
+        return new_val
+    except Exception:
+        return False
