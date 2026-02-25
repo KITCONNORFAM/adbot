@@ -692,6 +692,9 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "owner_ban":
         await cb_owner_ban(query, user_id)
 
+    elif data == "owner_broadcast":
+        await prompt_admin_broadcast(query, user_id)
+
     # â”€â”€ Per-account settings callbacks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     elif data.startswith("acc_settings_"):
         account_id = data.split("acc_settings_")[1]
@@ -704,6 +707,21 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data.startswith("accset_fwd_"):
         account_id = data.split("accset_fwd_")[1]
         await cb_accset_fwd(query, account_id, user_id)
+
+    elif data.startswith("accset_interval_"):
+        account_id = data.split("accset_interval_")[1]
+        user_states[user_id] = {"state": "awaiting_accset_interval", "account_id": account_id}
+        await query.message.reply_text("⏱ <b>Set Time Interval</b>\n\nSend the delay in seconds (e.g. <code>60</code>):", parse_mode="HTML")
+
+    elif data.startswith("accset_gap_"):
+        account_id = data.split("accset_gap_")[1]
+        user_states[user_id] = {"state": "awaiting_accset_gap", "account_id": account_id}
+        await query.message.reply_text("⏸ <b>Set Gap</b>\n\nSend the gap in seconds between messages (e.g. <code>5</code>):", parse_mode="HTML")
+
+    elif data.startswith("accset_rdelay_"):
+        account_id = data.split("accset_rdelay_")[1]
+        user_states[user_id] = {"state": "awaiting_accset_rdelay", "account_id": account_id}
+        await query.message.reply_text("🔄 <b>Set Round Delay</b>\n\nSend the round delay in seconds (e.g. <code>30</code>):", parse_mode="HTML")
 
     # â”€â”€ Per-account auto-reply advanced callbacks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     elif data.startswith("acc_auto_reply_"):
@@ -2245,6 +2263,45 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "<b>âŒ Please send a valid number</b>",
                 parse_mode="HTML"
             )
+
+    elif current_state == "awaiting_accset_interval":
+        try:
+            seconds = int(text)
+            if seconds < 10:
+                await update.message.reply_text("<b>❌ Time must be at least 10 seconds</b>", parse_mode="HTML")
+                return
+            account_id = user_states[user_id].get("account_id")
+            db.update_account_settings(account_id, {"time_interval": seconds})
+            if user_id in user_states:
+                del user_states[user_id]
+            await update.message.reply_text(f"<b>✅ Interval set to {seconds} seconds</b>", parse_mode="HTML")
+            await cb_account_settings(update, account_id, user_id)
+        except ValueError:
+            await update.message.reply_text("<b>❌ Please send a valid number</b>", parse_mode="HTML")
+
+    elif current_state == "awaiting_accset_gap":
+        try:
+            seconds = int(text)
+            account_id = user_states[user_id].get("account_id")
+            db.update_account_settings(account_id, {"gap_seconds": seconds})
+            if user_id in user_states:
+                del user_states[user_id]
+            await update.message.reply_text(f"<b>✅ Gap set to {seconds} seconds</b>", parse_mode="HTML")
+            await cb_account_settings(update, account_id, user_id)
+        except ValueError:
+            await update.message.reply_text("<b>❌ Please send a valid number</b>", parse_mode="HTML")
+
+    elif current_state == "awaiting_accset_rdelay":
+        try:
+            seconds = int(text)
+            account_id = user_states[user_id].get("account_id")
+            db.update_account_settings(account_id, {"round_delay": seconds})
+            if user_id in user_states:
+                del user_states[user_id]
+            await update.message.reply_text(f"<b>✅ Round Delay set to {seconds} seconds</b>", parse_mode="HTML")
+            await cb_account_settings(update, account_id, user_id)
+        except ValueError:
+            await update.message.reply_text("<b>❌ Please send a valid number</b>", parse_mode="HTML")
 
     elif current_state == "awaiting_target_group_id":
         try:
