@@ -1141,7 +1141,7 @@ Forward a message from the group to @userinfobot
 
 
 async def remove_target_group(query, user_id, group_id):
-    removed = await database.remove_target_group(user_id, group_id)
+    removed = db.remove_target_group(user_id, group_id)
 
     if removed:
         result_text = f"""
@@ -1155,12 +1155,11 @@ async def remove_target_group(query, user_id, group_id):
 
 Group <code>{group_id}</code> not found.
 """
-
     await send_new_message(query, result_text, selected_groups_keyboard())
 
 
 async def show_remove_target_groups(query, user_id, page=0):
-    target_groups = await database.get_target_groups(user_id)
+    target_groups = db.get_target_groups(user_id)
 
     if not target_groups:
         await send_new_message(
@@ -1178,19 +1177,18 @@ async def show_remove_target_groups(query, user_id, page=0):
 
 
 async def clear_all_target_groups(query, user_id):
-    count = await database.clear_target_groups(user_id)
+    count = db.clear_target_groups(user_id)
 
     result_text = f"""
 <b>🗑️ ɢʀᴏᴜᴘs ᴄʟᴇᴀʀᴇᴅ</b>
 
-✅ Removed <code>{count}</code> groups from target list.
+✅ Removed <code>{count or 0}</code> groups from target list.
 """
-
     await send_new_message(query, result_text, selected_groups_keyboard())
 
 
 async def view_target_groups(query, user_id, page=0):
-    target_groups = await database.get_target_groups(user_id)
+    target_groups = db.get_target_groups(user_id)
 
     if not target_groups:
         await send_new_message(
@@ -1222,7 +1220,7 @@ Get it from: <a href="https://my.telegram.org">my.telegram.org</a>
 
 
 async def show_delete_accounts(query, user_id, page=0):
-    accounts = await database.get_accounts(user_id)
+    accounts = db.get_accounts(user_id)
 
     if not accounts:
         await send_new_message(
@@ -1240,7 +1238,7 @@ async def show_delete_accounts(query, user_id, page=0):
 
 
 async def confirm_delete_account(query, account_id):
-    account = await database.get_account(account_id)
+    account = db.get_account(account_id)
 
     if not account:
         await send_new_message(
@@ -1260,12 +1258,11 @@ Are you sure you want to delete:
 
 <i>This action cannot be undone.</i>
 """
-
     await send_new_message(query, confirm_text, confirm_delete_keyboard(account_id))
 
 
 async def delete_account(query, user_id, account_id):
-    deleted = await database.delete_account(account_id, user_id)
+    deleted = db.delete_account(account_id, user_id)
 
     if deleted:
         result_text = """
@@ -1279,7 +1276,6 @@ Account removed successfully.
 
 Failed to delete account.
 """
-
     await send_new_message(query, result_text, accounts_menu_keyboard())
 
 
@@ -1300,7 +1296,7 @@ Load groups from group_mps.txt file
 
 
 async def load_groups(query, user_id):
-    accounts = await database.get_accounts(user_id, logged_in_only=True)
+    accounts = db.get_accounts(user_id, logged_in_only=True)
 
     if not accounts:
         await send_new_message(
@@ -1312,7 +1308,7 @@ async def load_groups(query, user_id):
 
     if len(accounts) == 1:
         account = accounts[0]
-        account_id = str(account["_id"])
+        account_id = str(account.get("id", account.get("_id", "")))
 
         await send_new_message(
             query,
@@ -1339,7 +1335,6 @@ async def load_groups(query, user_id):
 🏪 <b>Marketplaces:</b> <code>{len(result['marketplaces'])}</code>
 📊 <b>Total:</b> <code>{result['total']}</code>
 """
-
         await send_new_message(query, groups_text, groups_keyboard(all_chats, account_id))
     else:
         await send_new_message(
@@ -1353,7 +1348,7 @@ async def load_default_groups(query, user_id, context):
     """Load groups from group_mps.txt file and auto-join with user's logs channel"""
     try:
         # Check if user has logs channel set and verified
-        logs_channel = await database.get_logs_channel(user_id)
+        logs_channel = db.get_logs_channel(user_id)
         if not logs_channel or not logs_channel.get('verified'):
             await send_new_message(
                 query,
@@ -1403,7 +1398,7 @@ async def load_default_groups(query, user_id, context):
             return
 
         # Get user's accounts
-        accounts = await database.get_accounts(user_id, logged_in_only=True)
+        accounts = db.get_accounts(user_id, logged_in_only=True)
         if not accounts:
             await send_new_message(
                 query,
