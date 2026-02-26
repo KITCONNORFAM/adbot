@@ -110,7 +110,7 @@ async def _check_expiries_job(context):
                     uid,
                     f"⚠️ <b>Your Free Trial has ended!</b>\n\n"
                     f"Your {config.TRIAL_DAYS}-day free trial has expired.\n\n"
-                    f"ᴛᴏ ᴘᴜʀᴄʜᴀsᴇ ᴘʀᴇᴍɪᴜᴍ, ᴄᴏɴᴛᴀᴄᴛ ᴀɴ ᴏᴡɴᴇʀ:\n{owner_tags}",
+                    f"TO PURCHASE PREMIUM, CONTACT AN OWNER:\n{owner_tags}",
                     parse_mode="HTML",
                     reply_markup=kb
                 )
@@ -171,7 +171,7 @@ def main():
     web_thread.start()
 
     print("╔══════════════════════════════════════╗")
-    print("║  🤖 ᴀᴅ ʙᴏᴛ sᴛᴀʀᴛᴇᴅ (Supabase)       ║")
+    print("║  🤖 AD BOT STARTED (Supabase)       ║")
     print(f"║  @{config.BOT_USERNAME:<33}║")
     print("╚══════════════════════════════════════╝")
 

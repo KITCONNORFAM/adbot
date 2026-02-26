@@ -499,22 +499,22 @@ async def log_message_to_channel(logs_channel_id, account_name, group_title, gro
         
         if success:
             log_text = f"""
-<b>✅ ᴍᴇssᴀɢᴇ sᴇɴᴛ</b>
+<b>✅ MESSAGE SENT</b>
 
-<b>ᴀᴄᴄᴏᴜɴᴛ:</b> <code>{account_name}</code>
-<b>ɢʀᴏᴜᴘ:</b> <code>{group_title}</code>
-<b>ɢʀᴏᴜᴘ ɪᴅ:</b> <code>{group_id}</code>
-<b>ᴛɪᴍᴇ:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>ACCOUNT:</b> <code>{account_name}</code>
+<b>GROUP:</b> <code>{group_title}</code>
+<b>GROUP ID:</b> <code>{group_id}</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         else:
             log_text = f"""
-<b>❌ ᴍᴇssᴀɢᴇ ғᴀɪʟᴇᴅ</b>
+<b>❌ MESSAGE FAILED</b>
 
-<b>ᴀᴄᴄᴏᴜɴᴛ:</b> <code>{account_name}</code>
-<b>ɢʀᴏᴜᴘ:</b> <code>{group_title}</code>
-<b>ɢʀᴏᴜᴘ ɪᴅ:</b> <code>{group_id}</code>
-<b>ᴇʀʀᴏʀ:</b> <code>{error or 'Unknown error'}</code>
-<b>ᴛɪᴍᴇ:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>ACCOUNT:</b> <code>{account_name}</code>
+<b>GROUP:</b> <code>{group_title}</code>
+<b>GROUP ID:</b> <code>{group_id}</code>
+<b>ERROR:</b> <code>{error or 'Unknown error'}</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         
         await bot.send_message(int(logs_channel_id), log_text, parse_mode="HTML")
@@ -1020,21 +1020,21 @@ async def log_auto_join_to_channel(logs_channel_id, account_name, group_title, l
         
         if success:
             log_text = f"""
-<b>✅ ɢʀᴏᴜᴘ ᴊᴏɪɴᴇᴅ</b>
+<b>✅ GROUP JOINED</b>
 
-<b>ᴀᴄᴄᴏᴜɴᴛ:</b> <code>{account_name}</code>
-<b>ɢʀᴏᴜᴘ:</b> <code>{group_title}</code>
-<b>ʟɪɴᴋ:</b> <code>{link}</code>
-<b>ᴛɪᴍᴇ:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>ACCOUNT:</b> <code>{account_name}</code>
+<b>GROUP:</b> <code>{group_title}</code>
+<b>LINK:</b> <code>{link}</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         else:
             log_text = f"""
-<b>❌ ɢʀᴏᴜᴘ ᴊᴏɪɴ ғᴀɪʟᴇᴅ</b>
+<b>❌ GROUP JOIN FAILED</b>
 
-<b>ᴀᴄᴄᴏᴜɴᴛ:</b> <code>{account_name}</code>
-<b>ʟɪɴᴋ:</b> <code>{link}</code>
-<b>ᴇʀʀᴏʀ:</b> <code>{error or 'Unknown error'}</code>
-<b>ᴛɪᴍᴇ:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>ACCOUNT:</b> <code>{account_name}</code>
+<b>LINK:</b> <code>{link}</code>
+<b>ERROR:</b> <code>{error or 'Unknown error'}</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         
         await bot.send_message(int(logs_channel_id), log_text, parse_mode="HTML")
@@ -1346,22 +1346,22 @@ async def log_message_to_channel(logs_channel_id, account_name, group_title, gro
         
         if success:
             log_text = f"""
-<b>✅ ᴍᴇssᴀɢᴇ sᴇɴᴛ</b>
+<b>✅ MESSAGE SENT</b>
 
-<b>ᴀᴄᴄᴏᴜɴᴛ:</b> <code>{account_name}</code>
-<b>ɢʀᴏᴜᴘ:</b> <code>{group_title}</code>
-<b>ɢʀᴏᴜᴘ ɪᴅ:</b> <code>{group_id}</code>
-<b>ᴛɪᴍᴇ:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>ACCOUNT:</b> <code>{account_name}</code>
+<b>GROUP:</b> <code>{group_title}</code>
+<b>GROUP ID:</b> <code>{group_id}</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         else:
             log_text = f"""
-<b>❌ ᴍᴇssᴀɢᴇ ғᴀɪʟᴇᴅ</b>
+<b>❌ MESSAGE FAILED</b>
 
-<b>ᴀᴄᴄᴏᴜɴᴛ:</b> <code>{account_name}</code>
-<b>ɢʀᴏᴜᴘ:</b> <code>{group_title}</code>
-<b>ɢʀᴏᴜᴘ ɪᴅ:</b> <code>{group_id}</code>
-<b>ᴇʀʀᴏʀ:</b> <code>{error or 'Unknown error'}</code>
-<b>ᴛɪᴍᴇ:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>ACCOUNT:</b> <code>{account_name}</code>
+<b>GROUP:</b> <code>{group_title}</code>
+<b>GROUP ID:</b> <code>{group_id}</code>
+<b>ERROR:</b> <code>{error or 'Unknown error'}</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         
         await bot.send_message(int(logs_channel_id), log_text, parse_mode="HTML")
@@ -1751,21 +1751,21 @@ async def log_auto_join_to_channel(logs_channel_id, account_name, group_title, l
         
         if success:
             log_text = f"""
-<b>✅ ɢʀᴏᴜᴘ ᴊᴏɪɴᴇᴅ</b>
+<b>✅ GROUP JOINED</b>
 
-<b>ᴀᴄᴄᴏᴜɴᴛ:</b> <code>{account_name}</code>
-<b>ɢʀᴏᴜᴘ:</b> <code>{group_title}</code>
-<b>ʟɪɴᴋ:</b> <code>{link}</code>
-<b>ᴛɪᴍᴇ:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>ACCOUNT:</b> <code>{account_name}</code>
+<b>GROUP:</b> <code>{group_title}</code>
+<b>LINK:</b> <code>{link}</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         else:
             log_text = f"""
-<b>❌ ɢʀᴏᴜᴘ ᴊᴏɪɴ ғᴀɪʟᴇᴅ</b>
+<b>❌ GROUP JOIN FAILED</b>
 
-<b>ᴀᴄᴄᴏᴜɴᴛ:</b> <code>{account_name}</code>
-<b>ʟɪɴᴋ:</b> <code>{link}</code>
-<b>ᴇʀʀᴏʀ:</b> <code>{error or 'Unknown error'}</code>
-<b>ᴛɪᴍᴇ:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>ACCOUNT:</b> <code>{account_name}</code>
+<b>LINK:</b> <code>{link}</code>
+<b>ERROR:</b> <code>{error or 'Unknown error'}</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         
         await bot.send_message(int(logs_channel_id), log_text, parse_mode="HTML")

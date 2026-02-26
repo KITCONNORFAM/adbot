@@ -1,6 +1,6 @@
 """
-database.py – Full Supabase-backed persistence layer.
-Replaces all previous MongoDB (motor) and SQLite (aiosqlite) code.
+database.py - Full Supabase-backed persistence layer.
+Replaces all previous MongoDB (motor) and SQLITE (aiosqlite) code.
 All operations are synchronous Supabase REST calls wrapped in async contexts.
 """
 import logging
@@ -32,7 +32,7 @@ def _now_iso() -> str:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# DATABASE INIT – Create tables via raw Supabase SQL (run once)
+# DATABASE INIT - Create tables via raw Supabase SQL (run once)
 # ══════════════════════════════════════════════════════════════════════════════
 
 SUPABASE_SCHEMA_SQL = """
@@ -172,7 +172,7 @@ async def init_db():
     """Initialize the database. Call once at bot startup."""
     db = get_client()
     try:
-        # Simple connectivity check – query users table (must exist via supabase_schema.sql)
+        # Simple connectivity check - query users table (must exist via supabase_schema.sql)
         db.table("bot_users").select("user_id").limit(1).execute()
         logger.info("\u2705 Supabase connected (schema already present)")
     except Exception as e:
@@ -431,7 +431,7 @@ def activate_trial(user_id: int) -> Dict:
             "premium_expiry": None
         }).eq("user_id", user_id).execute()
     except Exception:
-        # Columns may not exist yet — try without them
+        # Columns may not exist yet - try without them
         try:
             db.table("bot_users").update({"role": "trial"}).eq("user_id", user_id).execute()
             logger.warning(f"activate_trial: missing columns, only set role=trial for {user_id}")
@@ -450,7 +450,7 @@ def ban_user(user_id: int) -> bool:
     try:
         db.table("bot_users").update({"banned": True}).eq("user_id", user_id).execute()
     except Exception:
-        # banned column might not exist — set role to banned string as fallback
+        # banned column might not exist - set role to banned string as fallback
         try:
             db.table("bot_users").update({"role": "banned"}).eq("user_id", user_id).execute()
         except Exception as e:
@@ -529,7 +529,7 @@ def _check_referral_reward(referrer_id: int) -> Optional[Dict]:
     count = user.get("referral_count", 0)
     if count > 0 and count % config.REFERRALS_REQUIRED == 0:
         updated_user = add_premium(referrer_id, config.REFERRAL_REWARD_DAYS)
-        logger.info(f"🎁 Referral reward granted to {referrer_id} – +{config.REFERRAL_REWARD_DAYS} days")
+        logger.info(f"🎁 Referral reward granted to {referrer_id} - +{config.REFERRAL_REWARD_DAYS} days")
         
         # Parse expiry date for notification
         expiry_str = updated_user.get("premium_expiry")
@@ -796,7 +796,7 @@ def add_target_group(account_id, group_id: int, group_title: str = None) -> bool
         }).execute()
         return True
     except Exception:
-        return False  # UNIQUE constraint – already exists
+        return False  # UNIQUE constraint - already exists
 
 
 def remove_target_group(account_id, group_id: int) -> bool:

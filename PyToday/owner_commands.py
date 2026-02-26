@@ -1,5 +1,5 @@
 """
-owner_commands.py – All Owner-exclusive commands.
+owner_commands.py - All Owner-exclusive commands.
 Imported into handlers.py / main.py and registered as CommandHandlers.
 """
 import asyncio
@@ -224,7 +224,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]) or "  None"
 
     text = (
-        f"<b>▤ ʙᴏᴛ sᴛᴀᴛɪsᴛɪᴄs</b>\n\n"
+        f"<b>▤ BOT STATISTICS</b>\n\n"
         f"👥 Total Users: <b>{stats['total_users']}</b>\n"
         f"👑 Owners: <b>{stats['owners']}</b>\n"
         f"💎 Premium: <b>{stats['premium']}</b>\n"
@@ -243,7 +243,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args and not update.message.reply_to_message:
         await update.message.reply_text(
-            "<b>◈ ʙʀᴏᴀᴅᴄᴀsᴛ</b>\n\n"
+            "<b>◈ BROADCAST</b>\n\n"
             "Reply to a message OR send:\n"
             "<code>/broadcast Your message here</code>\n\n"
             "<i>Supports: text, photo, video, document, audio</i>",
@@ -256,7 +256,7 @@ async def cmd_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     failed = 0
 
     status_msg = await update.message.reply_text(
-        f"<b>▸ ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ...</b>\n\n"
+        f"<b>▸ BROADCASTING...</b>\n\n"
         f"◉ Total: <code>{len(all_user_ids)}</code>\n"
         f"● Sent: <code>0</code>\n"
         f"○ Failed: <code>0</code>",
@@ -289,7 +289,7 @@ async def cmd_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if (sent + failed) % 10 == 0:
             try:
                 await status_msg.edit_text(
-                    f"<b>▸ ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ...</b>\n\n"
+                    f"<b>▸ BROADCASTING...</b>\n\n"
                     f"◉ Total: <code>{len(all_user_ids)}</code>\n"
                     f"● Sent: <code>{sent}</code>\n"
                     f"○ Failed: <code>{failed}</code>",
@@ -300,7 +300,7 @@ async def cmd_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await asyncio.sleep(0.05)
 
     await status_msg.edit_text(
-        f"<b>✓ ʙʀᴏᴀᴅᴄᴀsᴛ ᴄᴏᴍᴘʟᴇᴛᴇ</b>\n\n"
+        f"<b>✓ BROADCAST COMPLETE</b>\n\n"
         f"◉ Total: <code>{len(all_user_ids)}</code>\n"
         f"● Sent: <code>{sent}</code>\n"
         f"○ Failed: <code>{failed}</code>",

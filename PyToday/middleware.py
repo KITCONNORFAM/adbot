@@ -1,5 +1,5 @@
 """
-middleware.py – Role-based access control decorators / helpers.
+middleware.py - Role-based access control decorators / helpers.
 
 Usage in handlers:
     from PyToday.middleware import owner_only, premium_only, not_banned
@@ -134,8 +134,8 @@ def access_required(func):
             owners = db.get_all_owners()
             owner_tags = " ".join([f"◈ @{o['username']}" if o.get("username") else f"◈ ID:{o['user_id']}" for o in owners]) or "◈ @owneruserid"
             msg = (
-                f"⊘ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇss @{_cfg.BOT_USERNAME} ɪs ᴏɴʟʏ ғᴏʀ ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀs "
-                f"ᴛᴏ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ, ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴏᴡɴᴇʀs: {owner_tags}"
+                f"⊘ PREMIUM ACCESS @{_cfg.BOT_USERNAME} Is ONLY FOR PREMIUM MEMBERS "
+                f"TO GET PREMIUM, CONTACT THE OWNERS: {owner_tags}"
             )
             if update.message:
                 from PyToday.keyboards import get_non_premium_keyboard
