@@ -35,29 +35,29 @@ logger = logging.getLogger(__name__)
 user_states = {}
 
 WELCOME_TEXT_TEMPLATE = """
-<b>ˆ ᴢ´›ᴢ´‡ʟᴢ´‡ɴ¢ʙ€ᴢ´€ᴢ´ ᴢ´€ᴢ´… ʙ™ᴢ´ᴢ´› ˆ</b>
+<b>◈ TELEGRAM AD BOT ◈</b>
 
-ʜᴢ´‡ʙ <code>{first_name}</code> ᴢ´¡ᴢ´‡ʟᴢ´„ᴢ´ᴢ´ᴢ´‡ ᴢ´›ᴢ´ ʙᴢ´ᴢ´œʙ€ ᴢ´˜ᴢ´‡ʙ€sᴢ´ɴ´ᴢ´€ʟ ᴢ´€ᴢ´…ᴢ´ ᴢ´‡ʙ€ᴢ´›ɴªsɴªɴ´ɴ¢ ᴢ´„ᴢ´€ᴢ´› ᴢ´€ᴢ´…ʙ™ᴢ´ᴢ´› ʙ™ʙ ᴢ´ɴªᴢ´…ɴ´ɴªɴ¢ʜᴢ´› êœ°ᴢ´‡ᴢ´…ᴢ´‡ʙ€ᴢ´€ᴢ´›ɴªᴢ´ɴ´ (OWNER @CHARLIESPRINGFAM)
+Hey <code>{first_name}</code> welcome to your personal advertising cat adbot by midnight federation (OWNER @CHARLIESPRINGFAM)
 
-<blockquote>“¢ ᴢ´€ᴢ´œᴢ´›ᴢ´ᴢ´ᴢ´€ᴢ´›ᴢ´‡ᴢ´… ᴢ´€ᴢ´…ᴢ´ ᴢ´‡ʙ€ᴢ´›ɴªsɴªɴ´ɴ¢ ɴªɴ´ ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s
-’¬ ᴢ´€ᴢ´œᴢ´›ᴢ´ ʙ€ᴢ´‡ᴢ´˜ʟʙ ᴢ´›ᴢ´ ᴢ´…ɴªʙ€ᴢ´‡ᴢ´„ᴢ´› ᴢ´ᴢ´‡ssᴢ´€ɴ¢ᴢ´‡s
-”— ᴢ´€ᴢ´œᴢ´›ᴢ´ ᴢ´Šᴢ´ɴªɴ´ ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s ᴢ´ ɴªᴢ´€ ʟɴªɴ´ᴢ´‹s
-“Š ᴢ´…ᴢ´‡ᴢ´›ᴢ´€ɴªʟᴢ´‡ᴢ´… sᴢ´›ᴢ´€ᴢ´›ɴªsᴢ´›ɴªᴢ´„s ᴢ´›ʙ€ᴢ´€ᴢ´„ᴢ´‹ɴªɴ´ɴ¢
-‘¤ ᴢ´ᴢ´œʟᴢ´›ɴªᴢ´˜ʟᴢ´‡ ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´› sᴢ´œᴢ´˜ᴢ´˜ᴢ´ʙ€ᴢ´›
-° sᴢ´„ʜᴢ´‡ᴢ´…ᴢ´œʟᴢ´‡ᴢ´… ᴢ´ᴢ´‡ssᴢ´€ɴ¢ᴢ´‡ sᴢ´‡ɴ´ᴢ´…ɴªɴ´ɴ¢</blockquote>
+<blockquote>📢 Automated advertising in groups
+💬 Auto reply to direct messages
+🔗 Auto join groups via links
+📊 Detailed statistics tracking
+👤 Multiple account support
+⏰ Scheduled message sending</blockquote>
 {expiry_line}
-<i>ᴢ´„ʜᴢ´ᴢ´sᴢ´‡ ᴢ´€ɴ´ ᴢ´ᴢ´˜ᴢ´›ɴªᴢ´ɴ´ ʙ™ᴢ´‡ʟᴢ´ᴢ´¡:</i>
+<i>Choose an option below:</i>
 """
 
 MENU_TEXT_TEMPLATE = """
-<b>ˆ ᴢ´›ᴢ´‡ʟᴢ´‡ɴ¢ʙ€ᴢ´€ᴢ´ ᴢ´€ᴢ´… ʙ™ᴢ´ᴢ´› ˆ</b>
+<b>◈ TELEGRAM AD BOT ◈</b>
 
-<i>ᴢ´„ʜᴢ´ᴢ´sᴢ´‡ ᴢ´€ɴ´ ᴢ´ᴢ´˜ᴢ´›ɴªᴢ´ɴ´ ʙ™ᴢ´‡ʟᴢ´ᴢ´¡:</i>
+<i>Choose an option below:</i>
 """
 
 
 def is_admin(user_id):
-    """Legacy helper €“ now checks if user is an Owner in DB."""
+    """Legacy helper - now checks if user is an Owner in DB."""
     return db.is_owner(user_id)
 
 
@@ -157,9 +157,9 @@ async def send_force_sub_message(update: Update, context: ContextTypes.DEFAULT_T
     channel_id = settings.get('channel_id')
     group_id = settings.get('group_id')
 
-    force_text = """<b>š ï¸ ᴢ´Šᴢ´ɴªɴ´ ʙ€ᴢ´‡ǫ«ᴢ´œɴªʙ€ᴢ´‡ᴢ´…</b>
+    force_text = """<b>š ï📤 ᴊᴏɪɴ ʀᴇǫ«ᴜɪʀᴇᴅ</b>
 
-<blockquote>ʙᴢ´ᴢ´œ ᴢ´ᴢ´œsᴢ´› ᴢ´Šᴢ´ɴªɴ´ ᴢ´›ʜᴢ´‡ ғ“ᴢ´ʟʟᴢ´ᴢ´¡ɴªɴ´ɴ¢ ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟs/ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s ᴢ´›ᴢ´ ᴢ´œsᴢ´‡ ᴢ´›ʜɴªs ʙ™ᴢ´ᴢ´›:</blockquote>
+<blockquote>ʙᴏᴜ ᴏᴜsᴛ ᴊᴏɪɴ ᴛʜᴇ ғ“ᴏʟʟᴏᴡɪɴɢ ᴄʜᴀɴɴᴇʟs/ɢʀᴏᴜᴘs ᴛᴏ ᴜsᴇ ᴛʜɪs ʙᴏᴛ:</blockquote>
 
 """
     keyboard = []
@@ -170,15 +170,15 @@ async def send_force_sub_message(update: Update, context: ContextTypes.DEFAULT_T
             bot = Bot(token=config.BOT_TOKEN)
             chat = await bot.get_chat(int(channel_id))
             channel_title = chat.title or "Channel"
-            force_text += f"ˆ <b>{channel_title}</b>\n"
+            force_text += f"◈ <b>{channel_title}</b>\n"
             invite_link = chat.invite_link
             if not invite_link and chat.username:
                 invite_link = f"https://t.me/{chat.username}"
             if invite_link:
-                keyboard.append([InlineKeyboardButton(f"ˆ ᴢ´Šᴢ´ɴªɴ´ ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ", url=invite_link)])
+                keyboard.append([InlineKeyboardButton(f"◈ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ", url=invite_link)])
         except Exception as e:
             logger.error(f"Error getting channel info: {e}")
-            force_text += f"ˆ <b>Channel</b>\n"
+            force_text += f"◈ <b>Channel</b>\n"
 
     if group_id:
         try:
@@ -186,17 +186,17 @@ async def send_force_sub_message(update: Update, context: ContextTypes.DEFAULT_T
             bot = Bot(token=config.BOT_TOKEN)
             chat = await bot.get_chat(int(group_id))
             group_title = chat.title or "Group"
-            force_text += f"‰ <b>{group_title}</b>\n"
+            force_text += f"≡ <b>{group_title}</b>\n"
             invite_link = chat.invite_link
             if not invite_link and chat.username:
                 invite_link = f"https://t.me/{chat.username}"
             if invite_link:
-                keyboard.append([InlineKeyboardButton(f"‰ ᴢ´Šᴢ´ɴªɴ´ ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜", url=invite_link)])
+                keyboard.append([InlineKeyboardButton(f"≡ ᴊᴏɪɴ ɢʀᴏᴜᴘ", url=invite_link)])
         except Exception as e:
             logger.error(f"Error getting group info: {e}")
-            force_text += f"‰ <b>Group</b>\n"
+            force_text += f"≡ <b>Group</b>\n"
 
-    keyboard.append([InlineKeyboardButton("†» ᴢ´„ʜᴢ´‡ᴢ´„ᴢ´‹ ᴢ´€ɴ¢ᴢ´€ɴªɴ´", callback_data="check_force_sub")])
+    keyboard.append([InlineKeyboardButton("†» ᴄʜᴇᴄᴋ ᴀɢᴀɪɴ", callback_data="check_force_sub")])
 
     if update.message:
         await update.message.reply_text(force_text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
@@ -232,13 +232,13 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if config.ADMIN_ONLY_MODE and not db.is_owner(user.id):
         private_text = """
-<b>Š˜ ᴢ´˜ʙ€ᴢ´‡ᴢ´ɴªᴢ´œᴢ´ ᴢ´€ᴢ´„ᴢ´„ᴢ´‡ss</b>
+<b>⊘ PREMIUM ACCESS</b>
 
-@cat_adbot ɴªs ᴢ´ɴ´ʟʙ ғ“ᴢ´ʙ€ ᴢ´˜ʙ€ᴢ´‡ᴢ´ɴªᴢ´œᴢ´ ᴢ´ᴢ´‡ᴢ´ʙ™ᴢ´‡ʙ€s  
+@cat_adbot is only for premium members
 
-ᴢ´›ᴢ´ ɴ¢ᴢ´‡ᴢ´› ᴢ´˜ʙ€ᴢ´‡ᴢ´ɴªᴢ´œᴢ´, ᴢ´„ᴢ´ɴ´ᴢ´›ᴢ´€ᴢ´„ᴢ´› ᴢ´›ʜᴢ´‡ ᴢ´ᴢ´¡ɴ´ᴢ´‡ʙ€s:  
-ˆ <a href="tg://user?id=7756391784">@CHARLIESPRINGFAM</a>  
-ˆ @KITCONNORFAM
+To get premium, contact the owners:
+◈ <a href="tg://user?id=7756391784">@CHARLIESPRINGFAM</a>
+◈ @KITCONNORFAM
 """
         try:
             await update.message.reply_photo(
@@ -281,22 +281,22 @@ async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
     if not db.is_owner(user.id):
-        await update.message.reply_text("<b>Š˜ ᴢ´›ʜɴªs ᴢ´„ᴢ´ᴢ´ᴢ´ᴢ´€ɴ´ᴢ´… ɴªs ᴢ´ɴ´ʟʙ ғ“ᴢ´ʙ€ ᴢ´€ᴢ´…ᴢ´ɴªɴ´s.</b>", parse_mode="HTML")
+        await update.message.reply_text("<b>⊘ ᴛʜɪs ᴄᴏᴏᴏᴀɴᴅ ɪs ᴏɴʟʙ ғ“ᴏʀ ᴀᴅᴏɪɴs.</b>", parse_mode="HTML")
         return
 
     admin_text = """
-<b>ˆ ᴢ´€ᴢ´…ᴢ´ɴªɴ´ ᴢ´˜ᴢ´€ɴ´ᴢ´‡ʟ ˆ</b>
+<b>◈ ADMIN PANEL ◈</b>
 
-<b>ᴢ´€ᴢ´ ᴢ´€ɴªʟᴢ´€ʙ™ʟᴢ´‡ ғ“ᴢ´‡ᴢ´€ᴢ´›ᴢ´œʙ€ᴢ´‡s:</b>
+<b>Available features:</b>
 
-¤ sᴢ´›ᴢ´€ᴢ´›s - ᴢ´ ɴªᴢ´‡ᴢ´¡ ʙ™ᴢ´ᴢ´› sᴢ´›ᴢ´€ᴢ´›ɴªsᴢ´›ɴªᴢ´„s
-ˆ ʙ™ʙ€ᴢ´ᴢ´€ᴢ´…ᴢ´„ᴢ´€sᴢ´› - sᴢ´‡ɴ´ᴢ´… ᴢ´ᴢ´‡ssᴢ´€ɴ¢ᴢ´‡ ᴢ´›ᴢ´ ᴢ´€ʟʟ ᴢ´œsᴢ´‡ʙ€s
-Š— ғ“ᴢ´ʙ€ᴢ´„ᴢ´‡ sᴢ´œʙ™ - ᴢ´ᴢ´€ɴ´ᴢ´€ɴ¢ᴢ´‡ ғ“ᴢ´ʙ€ᴢ´„ᴢ´‡ sᴢ´œʙ™sᴢ´„ʙ€ɴªʙ™ᴢ´‡
-‰ ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ - sᴢ´‡ᴢ´› ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ
-‰¡ ᴢ´œsᴢ´‡ʙ€s - ᴢ´ ɴªᴢ´‡ᴢ´¡ ᴢ´€ʟʟ ᴢ´œsᴢ´‡ʙ€s
-œ• ʙ™ᴢ´€ɴ´/ᴢ´œɴ´ʙ™ᴢ´€ɴ´ - ᴢ´ᴢ´€ɴ´ᴢ´€ɴ¢ᴢ´‡ ʙ™ᴢ´€ɴ´ɴ´ᴢ´‡ᴢ´… ᴢ´œsᴢ´‡ʙ€s
+▤ Stats - View bot statistics
+◈ Broadcast - Send message to all users
+⊗ Force sub - Manage force subscribe
+◉ Logs channel - Set logs channel
+≡ Users - View all users
+✕ Ban/Unban - Manage banned users
 
-<i>sᴢ´‡ʟᴢ´‡ᴢ´„ᴢ´› ᴢ´€ɴ´ ᴢ´ᴢ´˜ᴢ´›ɴªᴢ´ɴ´:</i>
+<i>Select an option:</i>
 """
 
     await update.message.reply_text(admin_text, parse_mode="HTML", reply_markup=admin_panel_keyboard())
@@ -306,15 +306,15 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
     if not db.is_owner(user.id):
-        await update.message.reply_text("<b>Š˜ ᴢ´›ʜɴªs ᴢ´„ᴢ´ᴢ´ᴢ´ᴢ´€ɴ´ᴢ´… ɴªs ᴢ´ɴ´ʟʙ ғ“ᴢ´ʙ€ ᴢ´€ᴢ´…ᴢ´ɴªɴ´s.</b>", parse_mode="HTML")
+        await update.message.reply_text("<b>⊘ ᴛʜɪs ᴄᴏᴏᴏᴀɴᴅ ɪs ᴏɴʟʙ ғ“ᴏʀ ᴀᴅᴏɪɴs.</b>", parse_mode="HTML")
         return
 
     if not context.args and not update.message.reply_to_message:
         await update.message.reply_text(
-            "<b>ˆ ʙ™ʙ€ᴢ´ᴢ´€ᴢ´…ᴢ´„ᴢ´€sᴢ´› ᴢ´„ᴢ´ᴢ´ᴢ´ᴢ´€ɴ´ᴢ´…</b>\n\n"
-            "ʙ€ᴢ´‡ᴢ´˜ʟʙ ᴢ´›ᴢ´ ᴢ´€ ᴢ´ᴢ´‡ssᴢ´€ɴ¢ᴢ´‡ ᴢ´ʙ€ sᴢ´‡ɴ´ᴢ´…:\n"
+            "<b>◈ ʙʀᴏᴀᴅᴄᴀsᴛ ᴄᴏᴏᴏᴀɴᴅ</b>\n\n"
+            "ʀᴇᴘʟʙ ᴛᴏ ᴀ ᴏᴇssᴀɢᴇ ᴏʀ sᴇɴᴅ:\n"
             "<code>/broadcast Your message here</code>\n\n"
-            "<i>sᴢ´œᴢ´˜ᴢ´˜ᴢ´ʙ€ᴢ´›s: ᴢ´›ᴢ´‡xᴢ´›, ᴢ´˜ʜᴢ´ᴢ´›ᴢ´, ᴢ´ ɴªᴢ´…ᴢ´‡ᴢ´, ᴢ´…ᴢ´ᴢ´„ᴢ´œᴢ´ᴢ´‡ɴ´ᴢ´›, ᴢ´€ᴢ´œᴢ´…ɴªᴢ´</i>",
+            "<i>sᴜᴘᴘᴏʀᴛs: ᴛᴇxᴛ, ᴘʜᴏᴛᴏ, ᴏ ɪᴅᴇᴏ, ᴅᴏᴄᴜᴏᴇɴᴛ, ᴀᴜᴅɪᴏ</i>",
             parse_mode="HTML"
         )
         return
@@ -326,10 +326,10 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     failed = 0
 
     status_msg = await update.message.reply_text(
-        f"<b>¸ ʙ™ʙ€ᴢ´ᴢ´€ᴢ´…ᴢ´„ᴢ´€sᴢ´›ɴªɴ´ɴ¢...</b>\n\n"
-        f"‰ ᴢ´›ᴢ´ᴢ´›ᴢ´€ʟ: <code>{len(all_users)}</code>\n"
-        f" sᴢ´‡ɴ´ᴢ´›: <code>0</code>\n"
-        f"‹ ғ“ᴢ´€ɴªʟᴢ´‡ᴢ´…: <code>0</code>",
+        f"<b>📤 ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ...</b>\n\n"
+        f"≡ ᴛᴏᴛᴀʟ: <code>{len(all_users)}</code>\n"
+        f" sᴇɴᴛ: <code>0</code>\n"
+        f"❌ ғ“ᴀɪʟᴇᴅ: <code>0</code>",
         parse_mode="HTML"
     )
 
@@ -397,10 +397,10 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if (sent + failed) % 10 == 0:
             try:
                 await status_msg.edit_text(
-                    f"<b>¸ ʙ™ʙ€ᴢ´ᴢ´€ᴢ´…ᴢ´„ᴢ´€sᴢ´›ɴªɴ´ɴ¢...</b>\n\n"
-                    f"‰ ᴢ´›ᴢ´ᴢ´›ᴢ´€ʟ: <code>{len(all_users)}</code>\n"
-                    f" sᴢ´‡ɴ´ᴢ´›: <code>{sent}</code>\n"
-                    f"‹ ғ“ᴢ´€ɴªʟᴢ´‡ᴢ´…: <code>{failed}</code>",
+                    f"<b>📤 ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ...</b>\n\n"
+                    f"≡ ᴛᴏᴛᴀʟ: <code>{len(all_users)}</code>\n"
+                    f" sᴇɴᴛ: <code>{sent}</code>\n"
+                    f"❌ ғ“ᴀɪʟᴇᴅ: <code>{failed}</code>",
                     parse_mode="HTML"
                 )
             except:
@@ -412,10 +412,10 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         del user_states[user.id]
 
     await status_msg.edit_text(
-        f"<b>œ“ ʙ™ʙ€ᴢ´ᴢ´€ᴢ´…ᴢ´„ᴢ´€sᴢ´› ᴢ´„ᴢ´ᴢ´ᴢ´˜ʟᴢ´‡ᴢ´›ᴢ´‡</b>\n\n"
-        f"‰ ᴢ´›ᴢ´ᴢ´›ᴢ´€ʟ: <code>{len(all_users)}</code>\n"
-        f" sᴢ´‡ɴ´ᴢ´›: <code>{sent}</code>\n"
-        f"‹ ғ“ᴢ´€ɴªʟᴢ´‡ᴢ´…: <code>{failed}</code>",
+        f"<b>œ“ ʙʀᴏᴀᴅᴄᴀsᴛ ᴄᴏᴏᴘʟᴇᴛᴇ</b>\n\n"
+        f"≡ ᴛᴏᴛᴀʟ: <code>{len(all_users)}</code>\n"
+        f" sᴇɴᴛ: <code>{sent}</code>\n"
+        f"❌ ғ“ᴀɪʟᴇᴅ: <code>{failed}</code>",
         parse_mode="HTML"
     )
 
@@ -448,7 +448,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "twofa_cancel":
         if user_id in user_states:
             del user_states[user_id]
-        await send_new_message(query, "<b>œ• 2ғ“ᴢ´€ ᴢ´ ᴢ´‡ʙ€ɴªғ“ɴªᴢ´„ᴢ´€ᴢ´›ɴªᴢ´ɴ´ ᴢ´„ᴢ´€ɴ´ᴢ´„ᴢ´‡ʟʟᴢ´‡ᴢ´….</b>\n\n<i>ʙ€ᴢ´‡ᴢ´›ᴢ´œʙ€ɴ´ɴªɴ´ɴ¢ ᴢ´›ᴢ´ ᴢ´ᴢ´€ɴªɴ´ ᴢ´ᴢ´‡ɴ´ᴢ´œ...</i>", main_menu_keyboard())
+        await send_new_message(query, "<b>✕ 2ғ“ᴀ ᴏ ᴇʀɪғ“ɪᴄᴀᴛɪᴏɴ ᴄᴀɴᴄᴇʟʟᴇᴅ.</b>\n\n<i>ʀᴇᴛᴜʀɴɪɴɢ ᴛᴏ ᴏᴀɪɴ ᴏᴇɴᴜ...</i>", main_menu_keyboard())
         return
 
     if data == "main_menu":
@@ -605,7 +605,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["advertising_active"] = False
         await send_new_message(
             query,
-            "<b>£ ᴢ´€ᴢ´…ᴢ´ ᴢ´‡ʙ€ᴢ´›ɴªsɴªɴ´ɴ¢ sᴢ´›ᴢ´ᴢ´˜ᴢ´˜ᴢ´‡ᴢ´…</b>\n\nœ“ <i>ʙᴢ´ᴢ´œʙ€ ᴢ´„ᴢ´€ᴢ´ᴢ´˜ᴢ´€ɴªɴ¢ɴ´ ʜᴢ´€s ʙ™ᴢ´‡ᴢ´‡ɴ´ sᴢ´›ᴢ´ᴢ´˜ᴢ´˜ᴢ´‡ᴢ´… sᴢ´œᴢ´„ᴢ´„ᴢ´‡ssғ“ᴢ´œʟʟʙ.</i>",
+            "<b>£ ᴀᴅᴏ ᴇʀᴛɪsɪɴɢ sᴛᴏᴘᴘᴇᴅ</b>\n\nœ“ <i>ʙᴏᴜʀ ᴄᴀᴏᴘᴀɪɢɴ ʜᴀs ʙᴇᴇɴ sᴛᴏᴘᴘᴇᴅ sᴜᴄᴄᴇssғ“ᴜʟʟʙ.</i>",
             advertising_menu_keyboard()
         )
 
@@ -744,7 +744,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         account_id = data.split("add_seq_reply_")[1]
         user_states[user_id] = {"state": "awaiting_seq_reply", "account_id": account_id}
         await query.message.reply_text(
-            "œï¸ <b>Add Sequential Reply</b>\n\nSend your reply text (or send a photo/media with caption):",
+            "œï📤 <b>Add Sequential Reply</b>\n\nSend your reply text (or send a photo/media with caption):",
             parse_mode="HTML"
         )
 
@@ -791,7 +791,7 @@ async def show_main_menu(query, context=None):
             label = "Trial" if role == "trial" else "Premium"
             expiry_line = f"\n{icon} <b>{label} active</b> €” expires <b>{expiry_str}</b>\n"
         else:
-            expiry_line = "\nš ï¸ <i>Expiry date not found €“ contact support</i>\n"
+            expiry_line = "\nš ï📤 <i>Expiry date not found €“ contact support</i>\n"
 
     menu_text = WELCOME_TEXT_TEMPLATE.format(
         first_name=first_name,
@@ -803,51 +803,51 @@ async def show_main_menu(query, context=None):
 
 async def show_advertising_menu(query):
     adv_text = """
-<b>ˆ ᴢ´€ᴢ´…ᴢ´ ᴢ´‡ʙ€ᴢ´›ɴªsɴªɴ´ɴ¢ ᴢ´ᴢ´‡ɴ´ᴢ´œ</b>
+<b>◈ ᴀᴅᴏ ᴇʀᴛɪsɪɴɢ ᴏᴇɴᴜ</b>
 
-Â» <b>sᴢ´›ᴢ´€ʙ€ᴢ´›</b> - ʙ™ᴢ´‡ɴ¢ɴªɴ´ ᴢ´€ᴢ´…ᴢ´ ᴢ´‡ʙ€ᴢ´›ɴªsɴªɴ´ɴ¢
-£ <b>sᴢ´›ᴢ´ᴢ´˜</b> - sᴢ´›ᴢ´ᴢ´˜ ᴢ´€ᴢ´…ᴢ´ ᴢ´‡ʙ€ᴢ´›ɴªsɴªɴ´ɴ¢
-´ <b>sᴢ´‡ᴢ´› ᴢ´›ɴªᴢ´ᴢ´‡</b> - ᴢ´„ʜᴢ´€ɴ´ɴ¢ᴢ´‡ ɴªɴ´ᴢ´›ᴢ´‡ʙ€ᴢ´ ᴢ´€ʟ
+Â» <b>sᴛᴀʀᴛ</b> - ʙᴇɢɪɴ ᴀᴅᴏ ᴇʀᴛɪsɪɴɢ
+£ <b>sᴛᴏᴘ</b> - sᴛᴏᴘ ᴀᴅᴏ ᴇʀᴛɪsɪɴɢ
+´ <b>sᴇᴛ ᴛɪᴏᴇ</b> - ᴄʜᴀɴɢᴇ ɪɴᴛᴇʀᴏ ᴀʟ
 
-<i>sᴢ´‡ʟᴢ´‡ᴢ´„ᴢ´› ᴢ´€ɴ´ ᴢ´ᴢ´˜ᴢ´›ɴªᴢ´ɴ´:</i>
+<i>sᴇʟᴇᴄᴛ ᴀɴ ᴏᴘᴛɪᴏɴ:</i>
 """
     await send_new_message(query, adv_text, advertising_menu_keyboard())
 
 
 async def show_accounts_menu(query):
     acc_text = """
-<b>ˆ ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´›s ᴢ´ᴢ´‡ɴ´ᴢ´œ</b>
+<b>◈ ᴀᴄᴄᴏᴜɴᴛs ᴏᴇɴᴜ</b>
 
-ï¼‹ <b>ᴢ´€ᴢ´…ᴢ´…</b> - ᴢ´€ᴢ´…ᴢ´… ɴ´ᴢ´‡ᴢ´¡ ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´›
-œ• <b>ᴢ´…ᴢ´‡ʟᴢ´‡ᴢ´›ᴢ´‡</b> - ʙ€ᴢ´‡ᴢ´ᴢ´ᴢ´ ᴢ´‡ ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´›
-‰¡ <b>ᴢ´ʙ ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´›s</b> - ᴢ´ ɴªᴢ´‡ᴢ´¡ ᴢ´€ʟʟ
+ï¼❌ <b>ᴀᴅᴅ</b> - ᴀᴅᴅ ɴᴇᴡ ᴀᴄᴄᴏᴜɴᴛ
+✕ <b>ᴅᴇʟᴇᴛᴇ</b> - ʀᴇᴏᴏᴏ ᴇ ᴀᴄᴄᴏᴜɴᴛ
+≡ <b>ᴏʙ ᴀᴄᴄᴏᴜɴᴛs</b> - ᴏ ɪᴇᴡ ᴀʟʟ
 
-<i>sᴢ´‡ʟᴢ´‡ᴢ´„ᴢ´› ᴢ´€ɴ´ ᴢ´ᴢ´˜ᴢ´›ɴªᴢ´ɴ´:</i>
+<i>sᴇʟᴇᴄᴛ ᴀɴ ᴏᴘᴛɪᴏɴ:</i>
 """
     await send_new_message(query, acc_text, accounts_menu_keyboard())
 
 
 async def show_support(query):
     support_text = """
-<b>’¬ sᴢ´œᴢ´˜ᴢ´˜ᴢ´ʙ€ᴢ´› & ʜᴢ´‡ʟᴢ´˜ ᴢ´„ᴢ´‡ɴ´ᴢ´›ᴢ´‡ʙ€</b>
+<b>’¬ sᴜᴘᴘᴏʀᴛ & ʜᴇʟᴘ ᴄᴇɴᴛᴇʀ</b>
 
-<blockquote expandable>†˜ <b>ɴ´ᴢ´‡ᴢ´‡ᴢ´… ᴢ´€ssɴªsᴢ´›ᴢ´€ɴ´ᴢ´„ᴢ´‡?</b>
-ᴢ´¡ᴢ´‡'ʙ€ᴢ´‡ ʜᴢ´‡ʙ€ᴢ´‡ ᴢ´›ᴢ´ ʜᴢ´‡ʟᴢ´˜ ʙᴢ´ᴢ´œ 24/7!
+<blockquote expandable>†˜ <b>ɴᴇᴇᴅ ᴀssɪsᴛᴀɴᴄᴇ?</b>
+ᴡᴇ'ʀᴇ ʜᴇʀᴇ ᴛᴏ ʜᴇʟᴘ ʙᴏᴜ 24/7!
 
-“Œ <b>ǫ«ᴢ´œɴªᴢ´„ᴢ´‹ ʜᴢ´‡ʟᴢ´˜:</b>
-€¢ ɴ¢ᴢ´‡ᴢ´›ᴢ´›ɴªɴ´ɴ¢ sᴢ´›ᴢ´€ʙ€ᴢ´›ᴢ´‡ᴢ´…: ᴢ´€ᴢ´…ᴢ´… ʙᴢ´ᴢ´œʙ€ ᴢ´›ᴢ´‡ʟᴢ´‡ɴ¢ʙ€ᴢ´€ᴢ´ ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´› ғ“ɴªʙ€sᴢ´›
-€¢ ᴢ´€ᴢ´˜ɴª ᴢ´„ʙ€ᴢ´‡ᴢ´…ᴢ´‡ɴ´ᴢ´›ɴªᴢ´€ʟs: ɴ¢ᴢ´‡ᴢ´› ғ“ʙ€ᴢ´ᴢ´ ᴢ´ʙ.ᴢ´›ᴢ´‡ʟᴢ´‡ɴ¢ʙ€ᴢ´€ᴢ´.ᴢ´ʙ€ɴ¢
-€¢ ᴢ´€ᴢ´œᴢ´›ᴢ´ ʙ€ᴢ´‡ᴢ´˜ʟʙ: ᴢ´‡ɴ´ᴢ´€ʙ™ʟᴢ´‡ ɴªɴ´ sᴢ´‡ᴢ´›ᴢ´›ɴªɴ´ɴ¢s ᴢ´›ᴢ´ ᴢ´€ᴢ´œᴢ´›ᴢ´-ʙ€ᴢ´‡sᴢ´˜ᴢ´ɴ´ᴢ´…
-€¢ ᴢ´€ᴢ´…ᴢ´ ᴢ´‡ʙ€ᴢ´›ɴªsɴªɴ´ɴ¢: sᴢ´‡ᴢ´› ᴢ´€ᴢ´… ᴢ´›ᴢ´‡xᴢ´›, ᴢ´›ʜᴢ´‡ɴ´ sᴢ´›ᴢ´€ʙ€ᴢ´› ᴢ´„ᴢ´€ᴢ´ᴢ´˜ᴢ´€ɴªɴ¢ɴ´
+“Œ <b>ǫ«ᴜɪᴄᴋ ʜᴇʟᴘ:</b>
+€¢ ɢᴇᴛᴛɪɴɢ sᴛᴀʀᴛᴇᴅ: ᴀᴅᴅ ʙᴏᴜʀ ᴛᴇʟᴇɢʀᴀᴏ ᴀᴄᴄᴏᴜɴᴛ ғ“ɪʀsᴛ
+€¢ ᴀᴘɪ ᴄʀᴇᴅᴇɴᴛɪᴀʟs: ɢᴇᴛ ғ“ʀᴏᴏ ᴏʙ.ᴛᴇʟᴇɢʀᴀᴏ.ᴏʀɢ
+€¢ ᴀᴜᴛᴏ ʀᴇᴘʟʙ: ᴇɴᴀʙʟᴇ ɪɴ sᴇᴛᴛɪɴɢs ᴛᴏ ᴀᴜᴛᴏ-ʀᴇsᴘᴏɴᴅ
+€¢ ᴀᴅᴏ ᴇʀᴛɪsɪɴɢ: sᴇᴛ ᴀᴅ ᴛᴇxᴛ, ᴛʜᴇɴ sᴛᴀʀᴛ ᴄᴀᴏᴘᴀɪɢɴ
 
-“ž <b>ᴢ´„ᴢ´ɴ´ᴢ´›ᴢ´€ᴢ´„ᴢ´› ᴢ´ᴢ´˜ᴢ´›ɴªᴢ´ɴ´s:</b>
-€¢ ᴢ´€ᴢ´…ᴢ´ɴªɴ´ sᴢ´œᴢ´˜ᴢ´˜ᴢ´ʙ€ᴢ´›: ᴢ´…ɴªʙ€ᴢ´‡ᴢ´„ᴢ´› ʜᴢ´‡ʟᴢ´˜ ғ“ʙ€ᴢ´ᴢ´ ᴢ´…ᴢ´‡ᴢ´ ᴢ´‡ʟᴢ´ᴢ´˜ᴢ´‡ʙ€
-€¢ ᴢ´›ᴢ´œᴢ´›ᴢ´ʙ€ɴªᴢ´€ʟ: sᴢ´›ᴢ´‡ᴢ´˜-ʙ™ʙ-sᴢ´›ᴢ´‡ᴢ´˜ ɴ¢ᴢ´œɴªᴢ´…ᴢ´‡ ᴢ´›ᴢ´ ᴢ´œsᴢ´‡ ʙ™ᴢ´ᴢ´›
+“ž <b>ᴄᴏɴᴛᴀᴄᴛ ᴏᴘᴛɪᴏɴs:</b>
+€¢ ᴀᴅᴏɪɴ sᴜᴘᴘᴏʀᴛ: ᴅɪʀᴇᴄᴛ ʜᴇʟᴘ ғ“ʀᴏᴏ ᴅᴇᴏ ᴇʟᴏᴘᴇʀ
+€¢ ᴛᴜᴛᴏʀɪᴀʟ: sᴛᴇᴘ-ʙʙ-sᴛᴇᴘ ɢᴜɪᴅᴇ ᴛᴏ ᴜsᴇ ʙᴏᴛ
 
-š ï¸ <b>ᴢ´„ᴢ´ᴢ´ᴢ´ᴢ´ɴ´ ɴªssᴢ´œᴢ´‡s:</b>
-€¢ sᴢ´‡ssɴªᴢ´ɴ´ ᴢ´‡xᴢ´˜ɴªʙ€ᴢ´‡ᴢ´…? ʙ€ᴢ´‡-ʟᴢ´ɴ¢ɴªɴ´ ʙᴢ´ᴢ´œʙ€ ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´›
-€¢ ᴢ´ᴢ´›ᴢ´˜ ɴ´ᴢ´ᴢ´› ʙ€ᴢ´‡ᴢ´„ᴢ´‡ɴªᴢ´ ᴢ´‡ᴢ´…? ᴢ´„ʜᴢ´‡ᴢ´„ᴢ´‹ ᴢ´›ᴢ´‡ʟᴢ´‡ɴ¢ʙ€ᴢ´€ᴢ´ ᴢ´€ᴢ´˜ᴢ´˜
-€¢ 2ғ“ᴢ´€ ʙ€ᴢ´‡ǫ«ᴢ´œɴªʙ€ᴢ´‡ᴢ´…? ᴢ´‡ɴ´ᴢ´›ᴢ´‡ʙ€ ʙᴢ´ᴢ´œʙ€ ᴢ´„ʟᴢ´ᴢ´œᴢ´… ᴢ´˜ᴢ´€ssᴢ´¡ᴢ´ʙ€ᴢ´…</blockquote>
+š ï📤 <b>ᴄᴏᴏᴏᴏɴ ɪssᴜᴇs:</b>
+€¢ sᴇssɪᴏɴ ᴇxᴘɪʀᴇᴅ? ʀᴇ-ʟᴏɢɪɴ ʙᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ
+€¢ ᴏᴛᴘ ɴᴏᴛ ʀᴇᴄᴇɪᴏ ᴇᴅ? ᴄʜᴇᴄᴋ ᴛᴇʟᴇɢʀᴀᴏ ᴀᴘᴘ
+€¢ 2ғ“ᴀ ʀᴇǫ«ᴜɪʀᴇᴅ? ᴇɴᴛᴇʀ ʙᴏᴜʀ ᴄʟᴏᴜᴅ ᴘᴀssᴡᴏʀᴅ</blockquote>
 """
     await send_new_message(query, support_text, support_keyboard())
 
@@ -865,12 +865,12 @@ async def show_settings(query, user_id):
         auto_reply = s.get("auto_reply_enabled", False) if s else False
 
     mode_text = "“±“± Multiple" if use_multiple else "“± Single"
-    forward_text = "œ‰ï¸ Forward" if use_forward else "“¤ Send"
+    forward_text = "œ≡ï📤 Forward" if use_forward else "“▤ Send"
     auto_reply_text = "Ÿ¢ ON" if auto_reply else "”´ OFF"
     auto_join_text = "Ÿ¢ ON" if auto_group_join else "”´ OFF"
 
     settings_text = f"""
-<b>š™ï¸ sᴢ´‡ᴢ´›ᴢ´›ɴªɴ´ɴ¢s</b>
+<b>š™ï📤 sᴇᴛᴛɪɴɢs</b>
 
 <b>“Š Current Configuration:</b>
 
@@ -893,7 +893,7 @@ async def toggle_forward_mode(query, user_id):
     """Toggle forward mode for first active account."""
     accounts = db.get_accounts(user_id, logged_in_only=True)
     if not accounts:
-        await query.answer("š ï¸ No accounts connected. Add an account first.", show_alert=True)
+        await query.answer("š ï📤 No accounts connected. Add an account first.", show_alert=True)
         return
     acc = accounts[0]
     s = db.get_account_settings(acc["id"]) or {}
@@ -902,16 +902,16 @@ async def toggle_forward_mode(query, user_id):
     db.update_account_settings(acc["id"], use_forward_mode=new_mode)
 
     if new_mode:
-        mode_text = "<b>œ‰ï¸ ғ“ᴢ´ʙ€ᴢ´¡ᴢ´€ʙ€ᴢ´… ᴢ´ᴢ´ᴢ´…ᴢ´‡</b>"
+        mode_text = "<b>œ≡ï📤 ғ“ᴏʀᴡᴀʀᴅ ᴏᴏᴅᴇ</b>"
         description = "<i>Messages will be forwarded from Saved Messages</i>"
         icon = "Ÿ¢"
     else:
-        mode_text = "<b>“¤ sᴢ´‡ɴ´ᴢ´… ᴢ´ᴢ´ᴢ´…ᴢ´‡</b>"
+        mode_text = "<b>“▤ sᴇɴᴅ ᴏᴏᴅᴇ</b>"
         description = "<i>Messages will be sent directly</i>"
         icon = "”´"
 
     result_text = f"""
-{icon} <b>ᴢ´ᴢ´ᴢ´…ᴢ´‡ ᴢ´„ʜᴢ´€ɴ´ɴ¢ᴢ´‡ᴢ´…</b>
+{icon} <b>ᴏᴏᴅᴇ ᴄʜᴀɴɢᴇᴅ</b>
 
 œ… Changed to: {mode_text}
 {description}
@@ -932,7 +932,7 @@ async def show_auto_reply_menu(query, user_id):
     text_type = "Custom" if is_custom else "Default"
 
     menu_text = f"""
-<b>’¬ ᴢ´€ᴢ´œᴢ´›ᴢ´ ʙ€ᴢ´‡ᴢ´˜ʟʙ sᴢ´‡ᴢ´›ᴢ´›ɴªɴ´ɴ¢s</b>
+<b>’¬ ᴀᴜᴛᴏ ʀᴇᴘʟʙ sᴇᴛᴛɪɴɢs</b>
 
 <b>“Š Current Configuration:</b>
 
@@ -947,7 +947,7 @@ async def show_auto_reply_menu(query, user_id):
 async def toggle_auto_reply(query, user_id):
     accounts = db.get_accounts(user_id, logged_in_only=True)
     if not accounts:
-        await query.answer("š ï¸ No accounts connected.", show_alert=True)
+        await query.answer("š ï📤 No accounts connected.", show_alert=True)
         return
     acc = accounts[0]
     s = db.get_account_settings(acc["id"]) or {}
@@ -964,7 +964,7 @@ async def toggle_auto_reply(query, user_id):
 
     status = "Ÿ¢ ON" if new_mode else "”´ OFF"
     result_text = f"""
-<b>’¬ ᴢ´€ᴢ´œᴢ´›ᴢ´ ʙ€ᴢ´‡ᴢ´˜ʟʙ</b>
+<b>’¬ ᴀᴜᴛᴏ ʀᴇᴘʟʙ</b>
 
 œ… Auto Reply is now: <b>{status}</b>
 “Š {status_detail}
@@ -983,7 +983,7 @@ async def set_default_reply_text(query, user_id):
         auto_reply = False
 
     result_text = f"""
-<b>“ ᴢ´…ᴢ´‡ғ“ᴢ´€ᴢ´œʟᴢ´› ᴢ´›ᴢ´‡xᴢ´› sᴢ´‡ᴢ´›</b>
+<b>“ ᴅᴇғ“ᴀᴜʟᴛ ᴛᴇxᴛ sᴇᴛ</b>
 
 œ… Now using default reply text:
 
@@ -996,7 +996,7 @@ async def prompt_add_reply_text(query, user_id):
     user_states[user_id] = {"state": "awaiting_reply_text"}
 
     prompt_text = """
-<b>• ᴢ´€ᴢ´…ᴢ´… ʙ€ᴢ´‡ᴢ´˜ʟʙ ᴢ´›ᴢ´‡xᴢ´›</b>
+<b>• ᴀᴅᴅ ʀᴇᴘʟʙ ᴛᴇxᴛ</b>
 
 “ <b>Send your custom auto-reply text:</b>
 
@@ -1013,7 +1013,7 @@ async def delete_reply_text(query, user_id):
 
     if not current_text:
         result_text = """
-<b>Œ ɴ´ᴢ´ ᴢ´„ᴢ´œsᴢ´›ᴢ´ᴢ´ ᴢ´›ᴢ´‡xᴢ´›</b>
+<b>Œ ɴᴏ ᴄᴜsᴛᴏᴏ ᴛᴇxᴛ</b>
 
 <i>You don't have any custom reply text set. Using default text.</i>
 """
@@ -1024,7 +1024,7 @@ async def delete_reply_text(query, user_id):
             await telethon_handler.start_all_auto_reply_listeners(user_id, config.AUTO_REPLY_TEXT)
 
         result_text = """
-<b>—‘ï¸ ᴢ´›ᴢ´‡xᴢ´› ᴢ´…ᴢ´‡ʟᴢ´‡ᴢ´›ᴢ´‡ᴢ´…</b>
+<b>—‘ï📤 ᴛᴇxᴛ ᴅᴇʟᴇᴛᴇᴅ</b>
 
 œ… Custom reply text has been deleted.
 
@@ -1052,7 +1052,7 @@ async def view_reply_text(query, user_id):
         display_text = config.AUTO_REPLY_TEXT
 
     result_text = f"""
-<b>‘ï¸ ᴢ´„ᴢ´œʙ€ʙ€ᴢ´‡ɴ´ᴢ´› ʙ€ᴢ´‡ᴢ´˜ʟʙ ᴢ´›ᴢ´‡xᴢ´›</b>
+<b>‘ï📤 ᴄᴜʀʀᴇɴᴛ ʀᴇᴘʟʙ ᴛᴇxᴛ</b>
 
 <b>“Š Type:</b> {text_type}
 
@@ -1065,7 +1065,7 @@ async def view_reply_text(query, user_id):
 async def toggle_auto_group_join(query, user_id):
     accounts = db.get_accounts(user_id, logged_in_only=True)
     if not accounts:
-        await query.answer("š ï¸ No accounts connected.", show_alert=True)
+        await query.answer("š ï📤 No accounts connected.", show_alert=True)
         return
     acc = accounts[0]
     s = db.get_account_settings(acc["id"]) or {}
@@ -1082,7 +1082,7 @@ async def toggle_auto_group_join(query, user_id):
 
     status = "Ÿ¢ ON" if new_mode else "”´ OFF"
     result_text = f"""
-<b>”— ᴢ´€ᴢ´œᴢ´›ᴢ´ ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜ ᴢ´Šᴢ´ɴªɴ´</b>
+<b>”— ᴀᴜᴛᴏ ɢʀᴏᴜᴘ ᴊᴏɪɴ</b>
 
 œ… Auto Join is now: <b>{status}</b>
 
@@ -1115,9 +1115,9 @@ async def set_target_all_groups(query, user_id):
         db.update_account_settings(accounts[0]["id"], target_mode="all")
 
     result_text = """
-<b>œ… ᴢ´›ᴢ´€ʙ€ɴ¢ᴢ´‡ᴢ´› sᴢ´‡ᴢ´›</b>
+<b>œ… ᴛᴀʀɢᴇᴛ sᴇᴛ</b>
 
-“¢ Target Mode: <b>ALL GROUPS</b>
+📢 Target Mode: <b>ALL GROUPS</b>
 
 <i>Messages will be sent to all groups</i>
 """
@@ -1132,13 +1132,13 @@ async def show_selected_groups_menu(query, user_id):
     target_groups = db.get_target_groups(user_id)
 
     menu_text = f"""
-<b>Ž¯ sᴢ´‡ʟᴢ´‡ᴢ´„ᴢ´›ᴢ´‡ᴢ´… ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s</b>
+<b>Ž¯ sᴇʟᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs</b>
 
 <b>“Š Selected Groups:</b> <code>{len(target_groups)}</code>
 
 • Add groups by ID
 – Remove groups
-“‹ View all selected
+“❌ View all selected
 """
     await send_new_message(query, menu_text, selected_groups_keyboard())
 
@@ -1147,7 +1147,7 @@ async def prompt_add_target_group(query, user_id):
     user_states[user_id] = {"state": "awaiting_target_group_id", "data": {}}
 
     prompt_text = """
-<b>• ᴢ´€ᴢ´…ᴢ´… ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜</b>
+<b>• ᴀᴅᴅ ɢʀᴏᴜᴘ</b>
 
 <i>Send the Group ID to add:</i>
 
@@ -1163,13 +1163,13 @@ async def remove_target_group(query, user_id, group_id):
 
     if removed:
         result_text = f"""
-<b>œ… ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜ ʙ€ᴢ´‡ᴢ´ᴢ´ᴢ´ ᴢ´‡ᴢ´…</b>
+<b>œ… ɢʀᴏᴜᴘ ʀᴇᴏᴏᴏ ᴇᴅ</b>
 
-—‘ï¸ Group <code>{group_id}</code> removed successfully.
+—‘ï📤 Group <code>{group_id}</code> removed successfully.
 """
     else:
         result_text = f"""
-<b>Œ ᴢ´‡ʙ€ʙ€ᴢ´ʙ€</b>
+<b>Œ ᴇʀʀᴏʀ</b>
 
 Group <code>{group_id}</code> not found.
 """
@@ -1189,7 +1189,7 @@ async def show_remove_target_groups(query, user_id, page=0):
 
     await send_new_message(
         query,
-        "<b>—‘ï¸ Select a group to remove:</b>",
+        "<b>—‘ï📤 Select a group to remove:</b>",
         remove_groups_keyboard(target_groups, page)
     )
 
@@ -1198,7 +1198,7 @@ async def clear_all_target_groups(query, user_id):
     count = db.clear_target_groups(user_id)
 
     result_text = f"""
-<b>—‘ï¸ ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s ᴢ´„ʟᴢ´‡ᴢ´€ʙ€ᴢ´‡ᴢ´…</b>
+<b>—‘ï📤 ɢʀᴏᴜᴘs ᴄʟᴇᴀʀᴇᴅ</b>
 
 œ… Removed <code>{count or 0}</code> groups from target list.
 """
@@ -1211,14 +1211,14 @@ async def view_target_groups(query, user_id, page=0):
     if not target_groups:
         await send_new_message(
             query,
-            "<b>“‹ No targeted groups</b>\n\n<i>Add groups to target them.</i>",
+            "<b>“❌ No targeted groups</b>\n\n<i>Add groups to target them.</i>",
             selected_groups_keyboard()
         )
         return
 
     await send_new_message(
         query,
-        f"<b>“‹ Targeted Groups ({len(target_groups)})</b>",
+        f"<b>“❌ Targeted Groups ({len(target_groups)})</b>",
         target_groups_list_keyboard(target_groups, page)
     )
 
@@ -1227,7 +1227,7 @@ async def start_add_account(query, user_id):
     user_states[user_id] = {"state": "awaiting_api_id", "data": {}}
 
     prompt_text = """
-<b>• ᴢ´€ᴢ´…ᴢ´… ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´›</b>
+<b>• ᴀᴅᴅ ᴀᴄᴄᴏᴜɴᴛ</b>
 
 <b>Step 1/4:</b> Send your <b>API ID</b>
 
@@ -1250,7 +1250,7 @@ async def show_delete_accounts(query, user_id, page=0):
 
     await send_new_message(
         query,
-        "<b>—‘ï¸ Select an account to delete:</b>",
+        "<b>—‘ï📤 Select an account to delete:</b>",
         delete_accounts_keyboard(accounts, page)
     )
 
@@ -1269,7 +1269,7 @@ async def confirm_delete_account(query, account_id):
     display_name = account.get('account_first_name') or account.get('phone', 'Unknown')
 
     confirm_text = f"""
-<b>š ï¸ ᴢ´„ᴢ´ɴ´ғ“ɴªʙ€ᴢ´ ᴢ´…ᴢ´‡ʟᴢ´‡ᴢ´›ᴢ´‡</b>
+<b>š ï📤 ᴄᴏɴғ“ɪʀᴏ ᴅᴇʟᴇᴛᴇ</b>
 
 Are you sure you want to delete:
 <b>{display_name}</b>?
@@ -1284,13 +1284,13 @@ async def delete_account(query, user_id, account_id):
 
     if deleted:
         result_text = """
-<b>œ… ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´› ᴢ´…ᴢ´‡ʟᴢ´‡ᴢ´›ᴢ´‡ᴢ´…</b>
+<b>œ… ᴀᴄᴄᴏᴜɴᴛ ᴅᴇʟᴇᴛᴇᴅ</b>
 
 Account removed successfully.
 """
     else:
         result_text = """
-<b>Œ ᴢ´‡ʙ€ʙ€ᴢ´ʙ€</b>
+<b>Œ ᴇʀʀᴏʀ</b>
 
 Failed to delete account.
 """
@@ -1300,12 +1300,12 @@ Failed to delete account.
 async def show_load_groups_options(query):
     """Show options for loading groups"""
     options_text = """
-<b>“‚ ʟᴢ´ᴢ´€ᴢ´… ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s/ᴢ´ᴢ´€ʙ€ᴢ´‹ᴢ´‡ᴢ´›ᴢ´˜ʟᴢ´€ᴢ´„ᴢ´‡s</b>
+<b>“‚ ʟᴏᴀᴅ ɢʀᴏᴜᴘs/ᴏᴀʀᴋᴇᴛᴘʟᴀᴄᴇs</b>
 
-<b>ˆ ʟᴢ´ᴢ´€ᴢ´… ᴢ´ʙ ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s</b>
+<b>◈ ʟᴏᴀᴅ ᴏʙ ɢʀᴏᴜᴘs</b>
 Load groups from your logged-in account
 
-<b>‰ ʟᴢ´ᴢ´€ᴢ´… ᴢ´…ᴢ´‡ғ“ᴢ´€ᴢ´œʟᴢ´› ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s</b>
+<b>≡ ʟᴏᴀᴅ ᴅᴇғ“ᴀᴜʟᴛ ɢʀᴏᴜᴘs</b>
 Load groups from group_mps.txt file
 
 <i>Select an option:</i>
@@ -1347,7 +1347,7 @@ async def load_groups(query, user_id):
         all_chats = result["groups"] + result["marketplaces"]
 
         groups_text = f"""
-<b>“‚ ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s & ᴢ´ᴢ´€ʙ€ᴢ´‹ᴢ´‡ᴢ´›ᴢ´˜ʟᴢ´€ᴢ´„ᴢ´‡s</b>
+<b>“‚ ɢʀᴏᴜᴘs & ᴏᴀʀᴋᴇᴛᴘʟᴀᴄᴇs</b>
 
 ‘¥ <b>Groups:</b> <code>{len(result['groups'])}</code>
 ª <b>Marketplaces:</b> <code>{len(result['marketplaces'])}</code>
@@ -1370,13 +1370,13 @@ async def load_default_groups(query, user_id, context):
         if not logs_channel or not logs_channel.get('verified'):
             await send_new_message(
                 query,
-                "<b>š ï¸ ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ ʙ€ᴢ´‡ǫ«ᴢ´œɴªʙ€ᴢ´‡ᴢ´…</b>\n\n"
-                "<blockquote>ʙᴢ´ᴢ´œ ᴢ´ᴢ´œsᴢ´› sᴢ´‡ᴢ´› ᴢ´œᴢ´˜ ᴢ´€ɴ´ᴢ´… ᴢ´ ᴢ´‡ʙ€ɴªғ“ʙ ᴢ´€ ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ ʙ™ᴢ´‡ғ“ᴢ´ʙ€ᴢ´‡ ᴢ´€ᴢ´œᴢ´›ᴢ´-ᴢ´Šᴢ´ɴªɴ´ɴªɴ´ɴ¢ ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s.</blockquote>\n\n"
-                "<b>ʜᴢ´ᴢ´¡ ᴢ´›ᴢ´ sᴢ´‡ᴢ´› ᴢ´œᴢ´˜:</b>\n"
-                "1. ᴢ´„ʙ€ᴢ´‡ᴢ´€ᴢ´›ᴢ´‡ ᴢ´€ ɴ´ᴢ´‡ᴢ´¡ ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ\n"
-                "2. ᴢ´€ᴢ´…ᴢ´… ᴢ´›ʜɴªs ʙ™ᴢ´ᴢ´› ᴢ´€s ᴢ´€ᴢ´…ᴢ´ɴªɴ´\n"
-                "3. ɴ¢ᴢ´ ᴢ´›ᴢ´ sᴢ´‡ᴢ´›ᴢ´›ɴªɴ´ɴ¢s †’ ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ\n"
-                "4. sᴢ´‡ɴ´ᴢ´… ᴢ´›ʜᴢ´‡ ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ ɴªᴢ´… ᴢ´€ɴ´ᴢ´… ᴢ´ ᴢ´‡ʙ€ɴªғ“ʙ.",
+                "<b>š ï📤 ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫ«ᴜɪʀᴇᴅ</b>\n\n"
+                "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀɴᴅ ᴏ ᴇʀɪғ“ʙ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғ“ᴏʀᴇ ᴀᴜᴛᴏ-ᴊᴏɪɴɪɴɢ ɢʀᴏᴜᴘs.</blockquote>\n\n"
+                "<b>ʜᴏᴡ ᴛᴏ sᴇᴛ ᴜᴘ:</b>\n"
+                "1. ᴄʀᴇᴀᴛᴇ ᴀ ɴᴇᴡ ᴄʜᴀɴɴᴇʟ\n"
+                "2. ᴀᴅᴅ ᴛʜɪs ʙᴏᴛ ᴀs ᴀᴅᴏɪɴ\n"
+                "3. ɢᴏ ᴛᴏ sᴇᴛᴛɪɴɢs †’ ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
+                "4. sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴀɴᴅ ᴏ ᴇʀɪғ“ʙ.",
                 back_to_menu_keyboard()
             )
             return
@@ -1444,11 +1444,11 @@ async def load_default_groups(query, user_id, context):
         )
 
         result_text = f"""
-<b>œ… ᴢ´€ᴢ´œᴢ´›ᴢ´-ᴢ´Šᴢ´ɴªɴ´ ᴢ´„ᴢ´ᴢ´ᴢ´˜ʟᴢ´‡ᴢ´›ᴢ´‡</b>
+<b>œ… ᴀᴜᴛᴏ-ᴊᴏɪɴ ᴄᴏᴏᴘʟᴇᴛᴇ</b>
 
 “Š <b>Results:</b>
 œ… Joined: <code>{result['joined']}</code>
-š ï¸ Already member: <code>{result['already_member']}</code>
+š ï📤 Already member: <code>{result['already_member']}</code>
 Œ Failed: <code>{result['failed']}</code>
 “Š Total: <code>{result['total']}</code>
 
@@ -1487,7 +1487,7 @@ async def load_account_groups(query, user_id, account_id, context):
     context.user_data[f"groups_{account_id}"] = all_chats
 
     groups_text = f"""
-<b>“‚ ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜s & ᴢ´ᴢ´€ʙ€ᴢ´‹ᴢ´‡ᴢ´›ᴢ´˜ʟᴢ´€ᴢ´„ᴢ´‡s</b>
+<b>“‚ ɢʀᴏᴜᴘs & ᴏᴀʀᴋᴇᴛᴘʟᴀᴄᴇs</b>
 
 ‘¥ <b>Groups:</b> <code>{len(result['groups'])}</code>
 ª <b>Marketplaces:</b> <code>{len(result['marketplaces'])}</code>
@@ -1518,14 +1518,14 @@ async def show_statistics(query, user_id):
 
     if not accounts:
         stats_text = """
-<b>“Š sᴢ´›ᴢ´€ᴢ´›ɴª sᴢ´›ɴªᴢ´„s</b>
+<b>“Š sᴛᴀᴛɪ sᴛɪᴄs</b>
 
 <i>No accounts found. Add an account first.</i>
 """
         await send_new_message(query, stats_text, back_to_settings_keyboard())
         return
 
-    stats_text = "<b>“Š ʙᴢ´ᴢ´œʙ€ ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´› sᴢ´›ᴢ´€ᴢ´›ɴªsᴢ´›ɴªᴢ´„s</b>\n\n"
+    stats_text = "<b>“Š ʙᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ sᴛᴀᴛɪsᴛɪᴄs</b>\n\n"
 
     for account in accounts:
         display_name = account.get('account_first_name') or account.get('phone', 'Unknown')
@@ -1563,7 +1563,7 @@ async def show_ad_text_menu(query, user_id):
     ad_status = "œ… Set" if ad_text else "Œ Not Set"
 
     menu_text = f"""
-<b>“ ᴢ´€ᴢ´… ᴢ´›ᴢ´‡xᴢ´› ᴢ´ᴢ´‡ɴ´ᴢ´œ</b>
+<b>“ ᴀᴅ ᴛᴇxᴛ ᴏᴇɴᴜ</b>
 
 “ <b>Ad Text:</b> {ad_status}
 
@@ -1581,13 +1581,13 @@ async def show_saved_ad_text(query, user_id):
 
     if ad_text:
         display_text = f"""
-<b>“„ sᴢ´€ᴢ´ ᴢ´‡ᴢ´… ᴢ´€ᴢ´… ᴢ´›ᴢ´‡xᴢ´›</b>
+<b>“„ sᴀᴏ ᴇᴅ ᴀᴅ ᴛᴇxᴛ</b>
 
 {ad_text[:500]}{'...' if len(ad_text) > 500 else ''}
 """
     else:
         display_text = """
-<b>“„ sᴢ´€ᴢ´ ᴢ´‡ᴢ´… ᴢ´€ᴢ´… ᴢ´›ᴢ´‡xᴢ´›</b>
+<b>“„ sᴀᴏ ᴇᴅ ᴀᴅ ᴛᴇxᴛ</b>
 
 <i>No ad text saved.</i>
 """
@@ -1598,7 +1598,7 @@ async def prompt_ad_text(query, user_id):
     user_states[user_id] = {"state": "awaiting_ad_text", "data": {}}
 
     prompt_text = """
-<b>• ᴢ´€ᴢ´…ᴢ´… ᴢ´€ᴢ´… ᴢ´›ᴢ´‡xᴢ´›</b>
+<b>• ᴀᴅᴅ ᴀᴅ ᴛᴇxᴛ</b>
 
 <i>Send your ad text now:</i>
 
@@ -1617,7 +1617,7 @@ async def delete_ad_text(query, user_id):
         db.update_account_settings(accounts[0]["id"], ad_text=None)
 
     result_text = """
-<b>—‘ï¸ ᴢ´€ᴢ´… ᴢ´›ᴢ´‡xᴢ´› ᴢ´…ᴢ´‡ʟᴢ´‡ᴢ´›ᴢ´‡ᴢ´…</b>
+<b>—‘ï📤 ᴀᴅ ᴛᴇxᴛ ᴅᴇʟᴇᴛᴇᴅ</b>
 
 œ… Your ad text has been deleted.
 """
@@ -1626,7 +1626,7 @@ async def delete_ad_text(query, user_id):
 
 async def show_time_options(query):
     time_text = """
-<b>±ï¸ sᴢ´‡ᴢ´› ᴢ´›ɴªᴢ´ᴢ´‡ ɴªɴ´ᴢ´›ᴢ´‡ʙ€ᴢ´ ᴢ´€ʟ</b>
+<b>±ï📤 sᴇᴛ ᴛɪᴏᴇ ɪɴᴛᴇʀᴏ ᴀʟ</b>
 
 <i>Select the delay between messages:</i>
 """
@@ -1639,7 +1639,7 @@ async def set_time_interval(query, user_id, time_val):
         user_states[user_id] = {"state": "awaiting_custom_time", "data": {}}
         await send_new_message(
             query,
-            "<b>š™ï¸ Custom Time</b>\n\n<i>Send the delay in seconds:</i>",
+            "<b>š™ï📤 Custom Time</b>\n\n<i>Send the delay in seconds:</i>",
             back_to_menu_keyboard()
         )
         return
@@ -1658,9 +1658,9 @@ async def set_time_interval(query, user_id, time_val):
             time_display = f"{seconds // 3600} hour(s)"
 
         result_text = f"""
-<b>œ… ᴢ´›ɴªᴢ´ᴢ´‡ sᴢ´‡ᴢ´›</b>
+<b>œ… ᴛɪᴏᴇ sᴇᴛ</b>
 
-±ï¸ Interval set to: <b>{time_display}</b>
+±ï📤 Interval set to: <b>{time_display}</b>
 """
 
         await send_new_message(query, result_text, advertising_menu_keyboard())
@@ -1689,7 +1689,7 @@ async def set_single_mode(query, user_id):
 
     if len(accounts) == 1:
         result_text = """
-<b>œ… sɴªɴ´ɴ¢ʟᴢ´‡ ᴢ´ᴢ´ᴢ´…ᴢ´‡ ᴢ´€ᴢ´„ᴢ´›ɴªᴢ´ ᴢ´€ᴢ´›ᴢ´‡ᴢ´…</b>
+<b>œ… sɪɴɢʟᴇ ᴏᴏᴅᴇ ᴀᴄᴛɪᴏ ᴀᴛᴇᴅ</b>
 
 “± Using your only account for advertising.
 """
@@ -1780,7 +1780,7 @@ async def confirm_account_selection(query, user_id, context):
     auto_group_join = user.get('auto_group_join_enabled', False) if user else False
 
     result_text = f"""
-<b>œ… ᴢ´ᴢ´œʟᴢ´›ɴªᴢ´˜ʟᴢ´‡ ᴢ´ᴢ´ᴢ´…ᴢ´‡ ᴢ´€ᴢ´„ᴢ´›ɴªᴢ´ ᴢ´€ᴢ´›ᴢ´‡ᴢ´…</b>
+<b>œ… ᴏᴜʟᴛɪᴘʟᴇ ᴏᴏᴅᴇ ᴀᴄᴛɪᴏ ᴀᴛᴇᴅ</b>
 
 “±“± Using <b>{len(selected)}</b> accounts for advertising.
 """
@@ -1797,14 +1797,14 @@ async def show_my_accounts(query, user_id, page=0):
     if not accounts:
         await send_new_message(
             query,
-            "<b>“‹ No accounts</b>\n\n<i>Add an account to get started.</i>",
+            "<b>“❌ No accounts</b>\n\n<i>Add an account to get started.</i>",
             accounts_menu_keyboard()
         )
         return
 
     await send_new_message(
         query,
-        f"<b>“‹ Your Accounts ({len(accounts)})</b>",
+        f"<b>“❌ Your Accounts ({len(accounts)})</b>",
         accounts_keyboard(accounts, page)
     )
 
@@ -1821,7 +1821,7 @@ async def select_single_account(query, user_id, account_id):
     auto_group_join = user.get('auto_group_join_enabled', False) if user else False
 
     result_text = f"""
-<b>œ… ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´› sᴢ´‡ʟᴢ´‡ᴢ´„ᴢ´›ᴢ´‡ᴢ´…</b>
+<b>œ… ᴀᴄᴄᴏᴜɴᴛ sᴇʟᴇᴄᴛᴇᴅ</b>
 
 “± Using: <b>{display_name}</b>
 """
@@ -1858,13 +1858,13 @@ async def start_advertising(query, user_id, context):
     if not logs_channel or not logs_channel.get('verified'):
         await send_new_message(
             query,
-            "<b>š ï¸ ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ ʙ€ᴢ´‡ǫ«ᴢ´œɴªʙ€ᴢ´‡ᴢ´…</b>\n\n"
-            "<blockquote>ʙᴢ´ᴢ´œ ᴢ´ᴢ´œsᴢ´› sᴢ´‡ᴢ´› ᴢ´œᴢ´˜ ᴢ´€ ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ ʙ™ᴢ´‡ғ“ᴢ´ʙ€ᴢ´‡ sᴢ´›ᴢ´€ʙ€ᴢ´›ɴªɴ´ɴ¢ ᴢ´€ᴢ´…ᴢ´ ᴢ´‡ʙ€ᴢ´›ɴªsɴªɴ´ɴ¢.</blockquote>\n\n"
-            "<b>ʜᴢ´ᴢ´¡ ᴢ´›ᴢ´ sᴢ´‡ᴢ´› ᴢ´œᴢ´˜:</b>\n"
-            "1. ᴢ´„ʙ€ᴢ´‡ᴢ´€ᴢ´›ᴢ´‡ ᴢ´€ ɴ´ᴢ´‡ᴢ´¡ ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ\n"
-            "2. ᴢ´€ᴢ´…ᴢ´… ᴢ´›ʜɴªs ʙ™ᴢ´ᴢ´› ᴢ´€s ᴢ´€ᴢ´…ᴢ´ɴªɴ´\n"
-            "3. ɴ¢ᴢ´ ᴢ´›ᴢ´ sᴢ´‡ᴢ´›ᴢ´›ɴªɴ´ɴ¢s †’ ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ\n"
-            "4. sᴢ´‡ɴ´ᴢ´… ᴢ´›ʜᴢ´‡ ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ ɴªᴢ´… ᴢ´ʙ€ ʟɴªɴ´ᴢ´‹",
+            "<b>š ï📤 ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫ«ᴜɪʀᴇᴅ</b>\n\n"
+            "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғ“ᴏʀᴇ sᴛᴀʀᴛɪɴɢ ᴀᴅᴏ ᴇʀᴛɪsɪɴɢ.</blockquote>\n\n"
+            "<b>ʜᴏᴡ ᴛᴏ sᴇᴛ ᴜᴘ:</b>\n"
+            "1. ᴄʀᴇᴀᴛᴇ ᴀ ɴᴇᴡ ᴄʜᴀɴɴᴇʟ\n"
+            "2. ᴀᴅᴅ ᴛʜɪs ʙᴏᴛ ᴀs ᴀᴅᴏɪɴ\n"
+            "3. ɢᴏ ᴛᴏ sᴇᴛᴛɪɴɢs †’ ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
+            "4. sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴏʀ ʟɪɴᴋ",
             back_to_menu_keyboard()
         )
         return
@@ -1929,12 +1929,12 @@ async def start_advertising(query, user_id, context):
     target_text = f"Selected ({len(target_groups) if target_mode == 'selected' else 0} groups)" if target_mode == "selected" else "All Groups"
 
     start_text = f"""
-<b>š€ ᴢ´€ᴢ´…ᴢ´ ᴢ´‡ʙ€ᴢ´›ɴªsɴªɴ´ɴ¢ sᴢ´›ᴢ´€ʙ€ᴢ´›ᴢ´‡ᴢ´…</b>
+<b>š€ ᴀᴅᴏ ᴇʀᴛɪsɪɴɢ sᴛᴀʀᴛᴇᴅ</b>
 
 “± <b>Accounts:</b> <code>{len(active_accounts)}</code>
-œ‰ï¸ <b>Mode:</b> <code>{mode_text}</code>
+œ≡ï📤 <b>Mode:</b> <code>{mode_text}</code>
 Ž¯ <b>Target:</b> <code>{target_text}</code>
-±ï¸ <b>Interval:</b> <code>{time_interval}s</code>
+±ï📤 <b>Interval:</b> <code>{time_interval}s</code>
 
 <i>Campaign is running...</i>
 """
@@ -2049,7 +2049,7 @@ async def handle_otp_input(query, user_id, data, context):
 
             await send_new_message(
                 query,
-                "<b>œ… ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´› ᴢ´€ᴢ´…ᴢ´…ᴢ´‡ᴢ´…</b>\n\n<i>Account logged in successfully!</i>",
+                "<b>œ… ᴀᴄᴄᴏᴜɴᴛ ᴀᴅᴅᴇᴅ</b>\n\n<i>Account logged in successfully!</i>",
                 main_menu_keyboard()
             )
         elif result.get("requires_2fa"):
@@ -2197,7 +2197,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 del user_states[user_id]
 
             await update.message.reply_text(
-                "<b>œ… ᴢ´€ᴢ´„ᴢ´„ᴢ´ᴢ´œɴ´ᴢ´› ᴢ´€ᴢ´…ᴢ´…ᴢ´‡ᴢ´…</b>\n\n<i>Account logged in successfully!</i>",
+                "<b>œ… ᴀᴄᴄᴏᴜɴᴛ ᴀᴅᴅᴇᴅ</b>\n\n<i>Account logged in successfully!</i>",
                 parse_mode="HTML",
                 reply_markup=main_menu_keyboard()
             )
@@ -2215,7 +2215,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             del user_states[user_id]
 
         await update.message.reply_text(
-            "<b>œ… ᴢ´€ᴢ´… ᴢ´›ᴢ´‡xᴢ´› sᴢ´€ᴢ´ ᴢ´‡ᴢ´…</b>\n\n<i>Your ad text has been saved.</i>",
+            "<b>œ… ᴀᴅ ᴛᴇxᴛ sᴀᴏ ᴇᴅ</b>\n\n<i>Your ad text has been saved.</i>",
             parse_mode="HTML",
             reply_markup=ad_text_menu_keyboard()
         )
@@ -2233,7 +2233,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             del user_states[user_id]
 
         await update.message.reply_text(
-            "<b>œ… ʙ€ᴢ´‡ᴢ´˜ʟʙ ᴢ´›ᴢ´‡xᴢ´› sᴢ´€ᴢ´ ᴢ´‡ᴢ´…</b>\n\n<i>Your custom auto-reply text has been saved.</i>",
+            "<b>œ… ʀᴇᴘʟʙ ᴛᴇxᴛ sᴀᴏ ᴇᴅ</b>\n\n<i>Your custom auto-reply text has been saved.</i>",
             parse_mode="HTML",
             reply_markup=auto_reply_settings_keyboard(auto_reply)
         )
@@ -2320,7 +2320,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
             else:
                 await update.message.reply_text(
-                    "<b>š ï¸ Group already in list</b>",
+                    "<b>š ï📤 Group already in list</b>",
                     parse_mode="HTML",
                     reply_markup=selected_groups_keyboard()
                 )
@@ -2498,12 +2498,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             del user_states[user_id]
 
         await update.message.reply_text(
-            "<b>œ… ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ sᴢ´‡ᴢ´› sᴢ´œᴢ´„ᴢ´„ᴢ´‡ssғ“ᴢ´œʟʟʙ</b>\n\n"
-            f"“‹ <b>Channel ID:</b> <code>{channel_id}</code>\n\n"
+            "<b>œ… ᴄʜᴀɴɴᴇʟ sᴇᴛ sᴜᴄᴄᴇssғ“ᴜʟʟʙ</b>\n\n"
+            f"“❌ <b>Channel ID:</b> <code>{channel_id}</code>\n\n"
             "<i>Please verify that you have:</i>\n"
             "1. Added this bot as admin to the channel\n"
             "2. Given the bot permission to send messages\n\n"
-            "Click <b>'†» ᴢ´ ᴢ´‡ʙ€ɴªғ“ʙ'</b> to check permissions.",
+            "Click <b>'†» ᴏ ᴇʀɪғ“ʙ'</b> to check permissions.",
             parse_mode="HTML",
             reply_markup=logs_channel_keyboard(has_channel=True, verified=False)
         )
@@ -2517,7 +2517,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Admin Panel Functions
 async def show_admin_stats(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("š ï¸ Only admin can access this!", show_alert=True)
+        await query.answer("š ï📤 Only admin can access this!", show_alert=True)
         return
 
     total_users = db.get_users_count()
@@ -2534,7 +2534,7 @@ async def show_admin_stats(query, user_id):
         logged_in_accounts = 0
 
     stats_text = f"""
-<b>ˆ ʙ™ᴢ´ᴢ´› sᴢ´›ᴢ´€ᴢ´›ɴªsᴢ´›ɴªᴢ´„s ˆ</b>
+<b>◈ ʙᴏᴛ sᴛᴀᴛɪsᴛɪᴄs ◈</b>
 
 ‘¥ <b>Total Users:</b> <code>{total_users}</code>
 “± <b>Total Accounts:</b> <code>{total_accounts}</code>
@@ -2548,13 +2548,13 @@ async def show_admin_stats(query, user_id):
 
 async def prompt_admin_broadcast(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("š ï¸ Only admin can access this!", show_alert=True)
+        await query.answer("š ï📤 Only admin can access this!", show_alert=True)
         return
 
     user_states[user_id] = {"state": "awaiting_broadcast", "data": {}}
 
     prompt_text = """
-<b>ˆ ʙ™ʙ€ᴢ´ᴢ´€ᴢ´…ᴢ´„ᴢ´€sᴢ´›</b>
+<b>◈ ʙʀᴏᴀᴅᴄᴀsᴛ</b>
 
 <i>Send the message you want to broadcast to all users:</i>
 
@@ -2572,13 +2572,13 @@ Or send /cancel to cancel.
 
 async def show_admin_users(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("š ï¸ Only admin can access this!", show_alert=True)
+        await query.answer("š ï📤 Only admin can access this!", show_alert=True)
         return
 
     all_users = db.get_all_users()
 
     users_text = f"""
-<b>ˆ ᴢ´œsᴢ´‡ʙ€s ʟɴªsᴢ´› ˆ</b>
+<b>◈ ᴜsᴇʀs ʟɪsᴛ ◈</b>
 
 <b>Total Users:</b> <code>{len(all_users)}</code>
 
@@ -2599,11 +2599,11 @@ async def show_admin_users(query, user_id):
 
 async def show_ban_menu(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("š ï¸ Only admin can access this!", show_alert=True)
+        await query.answer("š ï📤 Only admin can access this!", show_alert=True)
         return
 
     ban_text = """
-<b>ˆ ʙ™ᴢ´€ɴ´/ᴢ´œɴ´ʙ™ᴢ´€ɴ´ ᴢ´œsᴢ´‡ʙ€s ˆ</b>
+<b>◈ ʙᴀɴ/ᴜɴʙᴀɴ ᴜsᴇʀs ◈</b>
 
 <i>To ban or unban a user, use the commands:</i>
 
@@ -2619,14 +2619,14 @@ async def show_ban_menu(query, user_id):
 # Force Sub Functions (Admin only)
 async def show_force_sub_menu(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("š ï¸ Only admin can access this!", show_alert=True)
+        await query.answer("š ï📤 Only admin can access this!", show_alert=True)
         return
 
     settings = db.get_force_sub_settings()
     enabled = settings.get('enabled', False) if settings else False
 
     menu_text = """
-<b>Š— ғ“ᴢ´ʙ€ᴢ´„ᴢ´‡ sᴢ´œʙ™ sᴢ´‡ᴢ´›ᴢ´›ɴªɴ´ɴ¢s</b>
+<b>⊗ ғ“ᴏʀᴄᴇ sᴜʙ sᴇᴛᴛɪɴɢs</b>
 
 <i>Manage force subscription settings here.</i>
 
@@ -2640,7 +2640,7 @@ async def show_force_sub_menu(query, user_id):
 
 async def toggle_force_sub(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("š ï¸ Only admin can access this!", show_alert=True)
+        await query.answer("š ï📤 Only admin can access this!", show_alert=True)
         return
 
     settings = db.get_force_sub_settings()
@@ -2651,7 +2651,7 @@ async def toggle_force_sub(query, user_id):
 
     status = "Ÿ¢ ON" if new_state else "”´ OFF"
     result_text = f"""
-<b>Š— ғ“ᴢ´ʙ€ᴢ´„ᴢ´‡ sᴢ´œʙ™</b>
+<b>⊗ ғ“ᴏʀᴄᴇ sᴜʙ</b>
 
 Status: <b>{status}</b>
 """
@@ -2660,13 +2660,13 @@ Status: <b>{status}</b>
 
 async def prompt_set_force_channel(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("š ï¸ Only admin can access this!", show_alert=True)
+        await query.answer("š ï📤 Only admin can access this!", show_alert=True)
         return
 
     user_states[user_id] = {"state": "awaiting_force_channel"}
 
     prompt_text = """
-<b>ˆ sᴢ´‡ᴢ´› ғ“ᴢ´ʙ€ᴢ´„ᴢ´‡ ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ</b>
+<b>◈ sᴇᴛ ғ“ᴏʀᴄᴇ ᴄʜᴀɴɴᴇʟ</b>
 
 <i>Send the channel ID:</i>
 
@@ -2683,13 +2683,13 @@ async def prompt_set_force_channel(query, user_id):
 
 async def prompt_set_force_group(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("š ï¸ Only admin can access this!", show_alert=True)
+        await query.answer("š ï📤 Only admin can access this!", show_alert=True)
         return
 
     user_states[user_id] = {"state": "awaiting_force_group"}
 
     prompt_text = """
-<b>‰ sᴢ´‡ᴢ´› ғ“ᴢ´ʙ€ᴢ´„ᴢ´‡ ɴ¢ʙ€ᴢ´ᴢ´œᴢ´˜</b>
+<b>≡ sᴇᴛ ғ“ᴏʀᴄᴇ ɢʀᴏᴜᴘ</b>
 
 <i>Send the group ID:</i>
 
@@ -2706,7 +2706,7 @@ async def prompt_set_force_group(query, user_id):
 
 async def view_force_sub_settings(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("š ï¸ Only admin can access this!", show_alert=True)
+        await query.answer("š ï📤 Only admin can access this!", show_alert=True)
         return
 
     settings = db.get_force_sub_settings()
@@ -2726,7 +2726,7 @@ async def view_force_sub_settings(query, user_id):
     status = "Ÿ¢ ON" if enabled else "”´ OFF"
 
     view_text = f"""
-<b> ғ“ᴢ´ʙ€ᴢ´„ᴢ´‡ sᴢ´œʙ™ sᴢ´‡ᴢ´›ᴢ´›ɴªɴ´ɴ¢s</b>
+<b> ғ“ᴏʀᴄᴇ sᴜʙ sᴇᴛᴛɪɴɢs</b>
 
 <b>Status:</b> {status}
 <b>Channel ID:</b> <code>{channel_id}</code>
@@ -2743,7 +2743,7 @@ async def check_force_sub_callback(query, user_id, context):
         await query.answer("œ… You have joined all required channels!", show_alert=True)
         await show_main_menu(query, context)
     else:
-        await query.answer("š ï¸ Please join all required channels/groups!", show_alert=True)
+        await query.answer("š ï📤 Please join all required channels/groups!", show_alert=True)
         await send_force_sub_message(query, context)
 
 
@@ -2759,7 +2759,7 @@ async def show_logs_channel_menu(query, user_id):
         verified = False
 
     menu_text = """
-<b>‰ ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ sᴢ´‡ᴢ´›ᴢ´›ɴªɴ´ɴ¢s</b>
+<b>≡ ʟᴏɢs ᴄʜᴀɴɴᴇʟ sᴇᴛᴛɪɴɢs</b>
 
 <i>Setup a channel to receive logs of all sent messages.</i>
 
@@ -2778,7 +2778,7 @@ async def prompt_set_logs_channel(query, user_id):
     user_states[user_id] = {"state": "awaiting_logs_channel"}
 
     prompt_text = """
-<b>ï¼‹ sᴢ´‡ᴢ´› ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ</b>
+<b>ï¼❌ sᴇᴛ ʟᴏɢs ᴄʜᴀɴɴᴇʟ</b>
 
 <i>Send your channel ID or link:</i>
 
@@ -2826,7 +2826,7 @@ async def verify_logs_channel_callback(query, user_id):
         await query.answer("œ… Channel verified successfully!", show_alert=True)
         await send_new_message(
             query,
-            "<b>œ… ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ ᴢ´ ᴢ´‡ʙ€ɴªғ“ɴªᴢ´‡ᴢ´…</b>\n\n<i>Your logs channel is now active. All advertising logs will be sent here.</i>",
+            "<b>œ… ʟᴏɢs ᴄʜᴀɴɴᴇʟ ᴏ ᴇʀɪғ“ɪᴇᴅ</b>\n\n<i>Your logs channel is now active. All advertising logs will be sent here.</i>",
             logs_channel_keyboard(has_channel=True, verified=True)
         )
     except Exception as e:
@@ -2834,7 +2834,7 @@ async def verify_logs_channel_callback(query, user_id):
         await query.answer("Œ Failed to verify channel. Make sure bot is admin with post permissions.", show_alert=True)
         await send_new_message(
             query,
-            "<b>Œ ᴢ´ ᴢ´‡ʙ€ɴªғ“ɴªᴢ´„ᴢ´€ᴢ´›ɴªᴢ´ɴ´ ғ“ᴢ´€ɴªʟᴢ´‡ᴢ´…</b>\n\n<i>Please make sure:</i>\n1. Bot is added as admin to the channel\n2. Bot has permission to send messages\n3. The channel ID is correct",
+            "<b>Œ ᴏ ᴇʀɪғ“ɪᴄᴀᴛɪᴏɴ ғ“ᴀɪʟᴇᴅ</b>\n\n<i>Please make sure:</i>\n1. Bot is added as admin to the channel\n2. Bot has permission to send messages\n3. The channel ID is correct",
             logs_channel_keyboard(has_channel=True, verified=False)
         )
 
@@ -2845,7 +2845,7 @@ async def remove_logs_channel_callback(query, user_id):
     await query.answer("œ… Logs channel removed!", show_alert=True)
     await send_new_message(
         query,
-        "<b>œ… ʟᴢ´ɴ¢s ᴢ´„ʜᴢ´€ɴ´ɴ´ᴢ´‡ʟ ʙ€ᴢ´‡ᴢ´ᴢ´ᴢ´ ᴢ´‡ᴢ´…</b>\n\n<i>You can set a new logs channel anytime.</i>",
+        "<b>œ… ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇᴏᴏᴏ ᴇᴅ</b>\n\n<i>You can set a new logs channel anytime.</i>",
         logs_channel_keyboard(has_channel=False, verified=False)
     )
 
@@ -2856,7 +2856,7 @@ async def show_force_join_menu(query, user_id):
     enabled = status.get('enabled', False)
 
     menu_text = """
-<b>Š— ғ“ᴢ´ʙ€ᴢ´„ᴢ´‡ ᴢ´Šᴢ´ɴªɴ´ sᴢ´‡ᴢ´›ᴢ´›ɴªɴ´ɴ¢s</b>
+<b>⊗ ғ“ᴏʀᴄᴇ ᴊᴏɪɴ sᴇᴛᴛɪɴɢs</b>
 
 <i>When enabled, your accounts will automatically join all groups from group_mps.txt</i>
 """
@@ -2872,7 +2872,7 @@ async def toggle_force_join_callback(query, user_id):
     await query.answer(f"Force Join: {status_text}", show_alert=True)
     await send_new_message(
         query,
-        f"<b>Š— ғ“ᴢ´ʙ€ᴢ´„ᴢ´‡ ᴢ´Šᴢ´ɴªɴ´</b>\n\nStatus: <b>{status_text}</b>",
+        f"<b>⊗ ғ“ᴏʀᴄᴇ ᴊᴏɪɴ</b>\n\nStatus: <b>{status_text}</b>",
         force_join_keyboard(new_status)
     )
 
