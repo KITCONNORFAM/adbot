@@ -4,8 +4,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from telegram.error import BadRequest
 from telegram.constants import ParseMode
-from PyToday import database as _old_db  # legacy compat shim
-from PyToday import database as db        # new Supabase DB
+from PyToday import database as db
 from PyToday.encryption import encrypt_data, decrypt_data
 from PyToday.keyboards import (
     main_menu_keyboard, otp_keyboard, accounts_keyboard,
@@ -17,16 +16,16 @@ from PyToday.keyboards import (
     selected_groups_keyboard, target_groups_list_keyboard, remove_groups_keyboard,
     single_account_selection_keyboard, auto_reply_settings_keyboard,
     back_to_auto_reply_keyboard, force_sub_keyboard, force_sub_join_keyboard,
-    admin_panel_keyboard, logs_channel_keyboard, back_to_logs_keyboard,
-    stats_keyboard, owner_panel_keyboard
+    admin_panel_keyboard, logs_channel_keyboard, owner_panel_keyboard
 )
 from PyToday import telethon_handler
 from PyToday import config
 from PyToday.new_handlers import (
-    cb_activate_trial, cb_show_referral_info, cb_premium_benefits,
-    cb_acc_settings, cb_set_keyword_reply, cb_set_seq_reply,
+    cb_activate_trial, cb_referral_info as cb_show_referral_info,
     cb_acc_auto_reply, cb_toggle_auto_reply as cb_toggle_auto_reply_new,
-    cb_view_all_replies, cb_clear_replies
+    cb_view_all_replies, cb_clear_replies, cb_account_settings,
+    cb_owner_panel, cb_owner_stats, cb_owner_addprem, cb_owner_ban,
+    cb_buy_premium
 )
 
 logger = logging.getLogger(__name__)
