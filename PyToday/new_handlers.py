@@ -1,5 +1,5 @@
 """
-new_handlers.py - Replacement & new handler logic.
+new_handlers.py – Replacement & new handler logic.
 Provides: start_command, trial/referral callbacks, per-account auto-reply handlers.
 Import and register these in main.py alongside handlers.py.
 """
@@ -24,34 +24,34 @@ logger = logging.getLogger(__name__)
 # ────────────────────────────────────────────────────────────────────────────
 
 NON_PREMIUM_TEXT = (
-    "<b>⊘ PREMIUM ACCESS</b>\n\n"
-    "@{bot_username} is ONLY FOR PREMIUM MEMBERS\n\n"
-    "TO GET PREMIUM, CONTACT THE OWNERS:\n{owner_tags}"
+    "<b>⊘ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇss</b>\n\n"
+    "@{bot_username} ɪs ᴏɴʟʏ ғᴏʀ ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀs\n\n"
+    "ᴛᴏ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ, ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴏᴡɴᴇʀs:\n{owner_tags}"
 )
 
-PREMIUM_SECTION_TEXT = """⭐️ PREMIUM ━━━━━━━━━━━━━━━━━━━━━
+PREMIUM_SECTION_TEXT = """⭐️ ᴘʀᴇᴍɪᴜᴍ ━━━━━━━━━━━━━━━━━━━━━
 
-BENEFITS:
-• NO TAG VERIFICATION
-• PROFILE STAYS UNTOUCHED
-• UNLIMITED SAVE MSG
-• UNLIMITED ACCOUNT
-• ALL ACCOUNTS COVERED
-• INSTANT ACTIVATION
-• PRIORITY SUPPORT"""
+ʙᴇɴᴇꜰɪᴛꜱ:
+• ɴᴏ ᴛᴀɢ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ
+• ᴘʀᴏꜰɪʟᴇ ꜱᴛᴀʏꜱ ᴜɴᴛᴏᴜᴄʜᴇᴅ
+• ᴜɴʟɪᴍɪᴛᴇᴅ ꜱᴀᴠᴇ ᴍꜱɢ
+• ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛ
+• ᴀʟʟ ᴀᴄᴄᴏᴜɴᴛꜱ ᴄᴏᴠᴇʀᴇᴅ
+• ɪɴꜱᴛᴀɴᴛ ᴀᴄᴛɪᴠᴀᴛɪᴏɴ
+• ᴘʀɪᴏʀɪᴛʏ ꜱᴜᴘᴘᴏʀᴛ"""
 
-WELCOME_TEXT = """<b>◈ TELEGRAM AD BOT ◈</b>
+WELCOME_TEXT = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 
-HEY <code>{first_name}</code> WELCOME TO YOUR PERSONAL ADVERTISING BOT
+ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ʙᴏᴛ
 
-<blockquote>📢 AUTOMATED ADVERTISING IN GROUPS
-💬 AUTO REPLY TO DIRECT MESSAGES
-🔗 AUTO JOIN GROUPS VIA LINKS
-📊 DETAILED STATISTICS TRACKING
-👤 MULTIPLE ACCOUNT SUPPORT
-⏰ SCHEDULED MESSAGE SENDING</blockquote>
+<blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ɪɴ ɢʀᴏᴜᴘs
+💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴛᴏ ᴅɪʀᴇᴄᴛ ᴍᴇssᴀɢᴇs
+🔗 ᴀᴜᴛᴏ ᴊᴏɪɴ ɢʀᴏᴜᴘs ᴠɪᴀ ʟɪɴᴋs
+📊 ᴅᴇᴛᴀɪʟᴇᴅ sᴛᴀᴛɪsᴛɪᴄs ᴛʀᴀᴄᴋɪɴɢ
+👤 ᴍᴜʟᴛɪᴘʟᴇ ᴀᴄᴄᴏᴜɴᴛ sᴜᴘᴘᴏʀᴛ
+⏰ sᴄʜᴇᴅᴜʟᴇᴅ ᴍᴇssᴀɢᴇ sᴇɴᴅɪɴɢ</blockquote>
 {expiry_line}
-<i>CHOOSE AN OPTION BELOW:</i>"""
+<i>ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ:</i>"""
 
 
 async def _build_owner_tags(bot=None) -> str:
@@ -89,7 +89,7 @@ async def _build_owner_tags(bot=None) -> str:
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# /start  - entry point with referral tracking
+# /start  – entry point with referral tracking
 # ────────────────────────────────────────────────────────────────────────────
 
 @not_banned
@@ -102,7 +102,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Always create/update the user record
     db.create_or_update_user(user.id, user.first_name, user.username)
 
-    # ── Referral tracking - ONLY works for first-time users
+    # ── Referral tracking — ONLY works for first-time users
     referral_notice = None
     if context.args and is_new_user:
         try:
@@ -208,7 +208,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if role == "owner" or db.is_owner(user.id):
         from telegram import InlineKeyboardButton, InlineKeyboardMarkup
         existing_kb = list(main_menu_keyboard().inline_keyboard)
-        owner_row = [[InlineKeyboardButton("👑 OWNER PANEL", callback_data="owner_panel")]]
+        owner_row = [[InlineKeyboardButton("👑 ᴏᴡɴᴇʀ ᴘᴀɴᴇʟ", callback_data="owner_panel")]]
         kb = InlineKeyboardMarkup(list(owner_row) + existing_kb)
 
 
@@ -264,10 +264,10 @@ async def cb_activate_trial(query, user_id: int, context):
 async def cb_buy_premium(query, user_id: int, context):
     owners = db.get_all_owners()
     text = (
-        f"<b>⭐️ PREMIUM</b>\n\n"
+        f"<b>⭐️ ᴘʀᴇᴍɪᴜᴍ</b>\n\n"
         f"{PREMIUM_SECTION_TEXT}\n\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"TO PURCHASE, CONTACT AN OWNER:\n"
+        f"ᴛᴏ ᴘᴜʀᴄʜᴀsᴇ, ᴄᴏɴᴛᴀᴄᴛ ᴀɴ ᴏᴡɴᴇʀ:\n"
     )
     for o in owners:
         uname = o.get("username")
@@ -296,7 +296,7 @@ async def cb_referral_info(query, user_id: int, context):
     invite_link = f"https://t.me/{bot_info.username}?start={user_id}"
 
     text = (
-        f"<b>🔥 REFERRAL PROGRAM</b>\n\n"
+        f"<b>🔥 ʀᴇғᴇʀʀᴀʟ ᴘʀᴏɢʀᴀᴍ</b>\n\n"
         f"Invite <b>{config.REFERRALS_REQUIRED} friends</b> to earn <b>+14 days Premium</b>\n\n"
         f"<b>Your Progress:</b>\n"
         f"{progress_bar}\n"
@@ -326,7 +326,7 @@ async def cb_owner_panel(query, user_id: int):
 
     stats = db.get_global_stats()
     text = (
-        f"<b>👑 OWNER PANEL</b>\n\n"
+        f"<b>👑 ᴏᴡɴᴇʀ ᴘᴀɴᴇʟ</b>\n\n"
         f"👥 Users: <b>{stats['total_users']}</b>\n"
         f"💎 Premium: <b>{stats['premium']}</b>\n"
         f"🎁 Trial: <b>{stats['trial']}</b>\n"
@@ -354,7 +354,7 @@ async def cb_account_settings(query, account_id: str, user_id: int):
     settings = db.get_account_settings(account_id)
     name = account.get("account_first_name") or account.get("phone", "Account")
     text = (
-        f"<b>⚙️ ACCOUNT SETTINGS</b>\n"
+        f"<b>⚙️ ᴀᴄᴄᴏᴜɴᴛ sᴇᴛᴛɪɴɢs</b>\n"
         f"<code>{name}</code>\n\n"
         f"Configure settings for this account individually.\n"
         f"Changes apply to THIS account only."
@@ -397,7 +397,7 @@ async def cb_acc_auto_reply(query, account_id: str, user_id: int):
     kw_replies = db.get_keyword_replies(account_id)
 
     text = (
-        f"<b>⟐ AUTO REPLY</b>\n\n"
+        f"<b>⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ</b>\n\n"
         f"Status: {'🟢 ON' if enabled else '🔴 OFF'}\n"
         f"Sequential Replies: <b>{len(seq_replies)}</b>\n"
         f"Keyword Replies: <b>{len(kw_replies)}</b>\n\n"
@@ -423,7 +423,7 @@ async def cb_view_all_replies(query, account_id: str):
     seq = db.get_sequential_replies(account_id)
     kw = db.get_keyword_replies(account_id)
 
-    lines = ["<b>📋 AUTO REPLIES</b>\n"]
+    lines = ["<b>📋 ᴀᴜᴛᴏ ʀᴇᴘʟɪᴇs</b>\n"]
 
     if seq:
         lines.append("<b>Sequential:</b>")
@@ -473,7 +473,7 @@ async def cb_owner_stats(query, user_id: int):
         for o in owners
     ]) or "  None"
     text = (
-        f"<b>▤ BOT STATISTICS</b>\n\n"
+        f"<b>▤ ʙᴏᴛ sᴛᴀᴛɪsᴛɪᴄs</b>\n\n"
         f"👥 Total: <b>{stats['total_users']}</b>\n"
         f"👑 Owners: <b>{stats['owners']}</b>\n"
         f"💎 Premium: <b>{stats['premium']}</b>\n"
