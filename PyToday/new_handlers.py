@@ -190,16 +190,16 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Compute live expiry line for display
     expiry_line = ""
     if role == "owner":
-        expiry_line = "\n👑 <b>Owner</b> — lifetime access\n"
+        expiry_line = "\n👑 <b>Owner</b> - lifetime access\n"
     elif role in ("premium", "trial"):
         expiry = db.get_premium_expiry(user.id)
         if expiry:
             expiry_str = expiry.strftime("%d %b %Y, %H:%M UTC")
             icon = "🎁" if role == "trial" else "💎"
             label = "Trial" if role == "trial" else "Premium"
-            expiry_line = f"\n{icon} <b>{label} active</b> — expires <b>{expiry_str}</b>\n"
+            expiry_line = f"\n{icon} <b>{label} active</b> - expires <b>{expiry_str}</b>\n"
         else:
-            expiry_line = "\n⚠️ <i>Expiry date missing — contact support</i>\n"
+            expiry_line = "\n⚠️ <i>Expiry date missing - contact support</i>\n"
 
     welcome = WELCOME_TEXT.format(first_name=user.first_name, expiry_line=expiry_line)
     kb = main_menu_keyboard()
@@ -237,11 +237,11 @@ async def cb_activate_trial(query, user_id: int, context):
 
     db.activate_trial(user_id)
     expiry = db.get_premium_expiry(user_id)
-    expiry_str = expiry.strftime("%d %b %Y") if expiry else "30 days from now"
+    expiry_str = expiry.strftime("%d %b %Y") if expiry else f"{config.TRIAL_DAYS} days from now"
 
     text = (
         "<b>🎁 Trial Activated!</b>\n\n"
-        f"✅ You now have <b>30 days</b> of free access.\n"
+        f"✅ You now have <b>{config.TRIAL_DAYS} days</b> of free access.\n"
         f"⏳ Expires: <b>{expiry_str}</b>\n\n"
         "<b>Trial Limits:</b>\n"
         "• Max 1 Telegram account\n"
