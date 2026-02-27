@@ -30,14 +30,15 @@ def accounts_menu_keyboard():
     return InlineKeyboardMarkup(keyboard)
 
 def support_keyboard():
+    from PyToday import config as _cfg
     keyboard = [
-        [InlineKeyboardButton("◈ ᴀᴅᴍɪɴ", url="https://t.me/charliespringfam")],
-        [InlineKeyboardButton("◉ ʜᴏᴡ ᴛᴏ ᴜsᴇ", url="https://t.me/charliespringfam")],
+        [InlineKeyboardButton("◈ ᴀᴅᴍɪɴ", url=f"https://t.me/{_cfg.BOT_USERNAME}")],
+        [InlineKeyboardButton("◉ ʜᴏᴡ ᴛᴏ ᴜsᴇ", url=f"https://t.me/{_cfg.BOT_USERNAME}")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, auto_group_join=False, force_sub=False, is_admin_user=False):
+def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, auto_group_join=False, force_sub=False, is_owner=False):
     forward_status = "●" if use_forward else "○"
     forward_mode = "ғᴏʀᴡᴀʀᴅ" if use_forward else "sᴇɴᴅ"
     auto_reply_status = "●" if auto_reply else "○"
@@ -54,7 +55,7 @@ def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, a
         [InlineKeyboardButton("◉ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="logs_channel_menu")]
     ]
     
-    if is_admin_user:
+    if is_owner:
         keyboard.append([InlineKeyboardButton(f"⊗ ғᴏʀᴄᴇ sᴜʙ ⟨{force_sub_status}⟩", callback_data="force_sub_menu")])
     
     keyboard.append([InlineKeyboardButton("◎ ᴛᴀʀɢᴇᴛɪɴɢ", callback_data="target_adv")])
@@ -64,6 +65,7 @@ def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, a
 def force_sub_keyboard(force_sub_enabled=False):
     status = "● ᴏɴ" if force_sub_enabled else "○ ᴏғғ"
     toggle_text = "○ ᴛᴜʀɴ ᴏғғ" if force_sub_enabled else "● ᴛᴜʀɴ ᴏɴ"
+
     
     keyboard = [
         [InlineKeyboardButton(f"{toggle_text}", callback_data="toggle_force_sub")],
@@ -85,6 +87,7 @@ def force_sub_join_keyboard(channel_id=None, group_id=None):
 
 def auto_reply_settings_keyboard(auto_reply_enabled=False):
     toggle_text = "○ ᴛᴜʀɴ ᴏғғ" if auto_reply_enabled else "● ᴛᴜʀɴ ᴏɴ"
+
     
     keyboard = [
         [InlineKeyboardButton(f"{toggle_text}", callback_data="toggle_auto_reply")],
@@ -381,18 +384,6 @@ def single_account_selection_keyboard(accounts, page=0, per_page=5):
     keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")])
     return InlineKeyboardMarkup(keyboard)
 
-# Admin Panel Keyboard
-def admin_panel_keyboard():
-    keyboard = [
-        [InlineKeyboardButton("▤ sᴛᴀᴛs", callback_data="admin_stats"),
-         InlineKeyboardButton("◈ ʙʀᴏᴀᴅᴄᴀsᴛ", callback_data="admin_broadcast")],
-        [InlineKeyboardButton("⊗ ғᴏʀᴄᴇ sᴜʙ", callback_data="force_sub_menu"),
-         InlineKeyboardButton("◉ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="logs_channel_menu")],
-        [InlineKeyboardButton("≡ ᴜsᴇʀs", callback_data="admin_users"),
-         InlineKeyboardButton("✕ ʙᴀɴ/ᴜɴʙᴀɴ", callback_data="admin_ban")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
-    ]
-    return InlineKeyboardMarkup(keyboard)
 
 # Logs Channel Keyboard
 def logs_channel_keyboard(has_channel=False, verified=False):
