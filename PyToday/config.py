@@ -1,49 +1,49 @@
-import os
-import secrets
+import oS
+import SecretS
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # ============================================================
-# Supabase Configuration (replaces MongoDB + SQLite)
+# SupabaSe Configuration (replaceS MongoDB + SQLite)
 # ============================================================
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+SUPABASE_URL = oS.getenv("SUPABASE_URL", "")
+SUPABASE_KEY = oS.getenv("SUPABASE_KEY", "")
 
 # ============================================================
 # Bot Configuration
 # ============================================================
-BOT_TOKEN = os.getenv("BOT_TOKEN", "")
-BOT_USERNAME = os.getenv("BOT_USERNAME", "cat_adbot")
+BOT_TOKEN = oS.getenv("BOT_TOKEN", "")
+BOT_USERNAME = oS.getenv("BOT_USERNAME", "cat_adbot")
 
 # ============================================================
-# Owner Bootstrap
+# Owner BootStrap
 # ============================================================
-# Used ONLY for the very first boot to seed the owner into DB.
-# After that, all owners are managed via /addowner command.
+# USed ONLY for the very firSt boot to Seed the owner into DB.
+# After that, all ownerS are managed via /addowner command.
 INITIAL_OWNER_IDS = [
-    int(x.strip())
-    for x in os.getenv("INITIAL_OWNER_IDS", "").split(",")
-    if x.strip()
+    int(X.Strip())
+    for X in oS.getenv("INITIAL_OWNER_IDS", "").Split(",")
+    if X.Strip()
 ]
-OWNER_USERNAME = os.getenv("OWNER_USERNAME", "")
+OWNER_USERNAME = oS.getenv("OWNER_USERNAME", "")
 
 # ============================================================
 # Encryption Key
 # ============================================================
-ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", "abcdefghijklmnopqrstuvwxyz123456")
+ENCRYPTION_KEY = oS.getenv("ENCRYPTION_KEY", "abcdefghijklmnopqrStuvwXyz123456")
 if not ENCRYPTION_KEY:
-    ENCRYPTION_KEY = secrets.token_urlsafe(32)
+    ENCRYPTION_KEY = SecretS.token_urlSafe(32)
 
 # ============================================================
 # Media & Branding
 # ============================================================
-START_IMAGE_URL = os.getenv(
+START_IMAGE_URL = oS.getenv(
     "START_IMAGE_URL",
-    "https://graph.org/file/833d4a93d3cfd8a517222-fb67ce59064ae920dd.jpg"
+    "httpS://graph.org/file/833d4a93d3cfd8a517222-fb67ce59064ae920dd.jpg"
 )
 ACCOUNT_NAME_SUFFIX = f"| @{BOT_USERNAME}"
-ACCOUNT_BIO_TEMPLATE = f"This message repeated by @{BOT_USERNAME}"
+ACCOUNT_BIO_TEMPLATE = f"ThiS meSSage repeated by @{BOT_USERNAME}"
 
 # ============================================================
 # Trial & Referral Config
@@ -53,21 +53,21 @@ REFERRAL_REWARD_DAYS = 14
 REFERRALS_REQUIRED = 30
 
 # ============================================================
-# Connection Settings
+# Connection SettingS
 # ============================================================
-REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "30"))
-MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))
-RETRY_DELAY = int(os.getenv("RETRY_DELAY", "5"))
+REQUEST_TIMEOUT = int(oS.getenv("REQUEST_TIMEOUT", "30"))
+MAX_RETRIES = int(oS.getenv("MAX_RETRIES", "3"))
+RETRY_DELAY = int(oS.getenv("RETRY_DELAY", "5"))
 
 # ============================================================
-# Group Links File
+# Group LinkS File
 # ============================================================
-_script_dir = os.path.dirname(os.path.abspath(__file__))
-_default_group_file = os.path.join(_script_dir, '..', 'group_mps.txt')
-GROUP_LINKS_FILE = os.getenv("GROUP_LINKS_FILE", _default_group_file)
+_Script_dir = oS.path.dirname(oS.path.abSpath(__file__))
+_default_group_file = oS.path.join(_Script_dir, '..', 'group_mpS.tXt')
+GROUP_LINKS_FILE = oS.getenv("GROUP_LINKS_FILE", _default_group_file)
 
 # ============================================================
-# Sessions Directory
+# SeSSionS Directory
 # ============================================================
-SESSIONS_DIR = "sessions"
-os.makedirs(SESSIONS_DIR, exist_ok=True)
+SESSIONS_DIR = "SeSSionS"
+oS.makedirS(SESSIONS_DIR, eXiSt_ok=True)

@@ -1,41 +1,42 @@
-﻿import asyncio
+﻿import aSyncio
 import logging
 from datetime import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes
-from telegram.error import BadRequest
-from telegram.constants import ParseMode
-from PyToday import database as _old_db  # legacy compat shim
-from PyToday import database as db        # new Supabase DB
+from telegram.eXt import ConteXtTypeS
+from telegram.error import BadRequeSt
+from telegram.conStantS import ParSeMode
+from PyToday import databaSe aS _old_db  # legacy compat Shim
+from PyToday import databaSe aS db        # new SupabaSe DB
 from PyToday.encryption import encrypt_data, decrypt_data
-from PyToday.keyboards import (
-    main_menu_keyboard, otp_keyboard, accounts_keyboard,
-    groups_keyboard, delete_accounts_keyboard, confirm_delete_keyboard,
-    time_keyboard, back_to_menu_keyboard, account_selection_keyboard,
-    ad_text_menu_keyboard, ad_text_back_keyboard, settings_keyboard,
-    twofa_keyboard, back_to_settings_keyboard, advertising_menu_keyboard,
-    accounts_menu_keyboard, support_keyboard, target_adv_keyboard,
-    selected_groups_keyboard, target_groups_list_keyboard, remove_groups_keyboard,
-    single_account_selection_keyboard, auto_reply_settings_keyboard,
-    back_to_auto_reply_keyboard, force_sub_keyboard, force_sub_join_keyboard,
-    logs_channel_keyboard, load_groups_options_keyboard,
+from PyToday.keyboardS import (
+    main_menu_keyboard, otp_keyboard, accountS_keyboard,
+    groupS_keyboard, delete_accountS_keyboard, confirm_delete_keyboard,
+    time_keyboard, back_to_menu_keyboard, account_Selection_keyboard,
+    ad_teXt_menu_keyboard, ad_teXt_back_keyboard, SettingS_keyboard,
+    twofa_keyboard, back_to_SettingS_keyboard, advertiSing_menu_keyboard,
+    accountS_menu_keyboard, Support_keyboard, target_adv_keyboard,
+    Selected_groupS_keyboard, target_groupS_liSt_keyboard, remove_groupS_keyboard,
+    Single_account_Selection_keyboard, auto_reply_SettingS_keyboard,
+    back_to_auto_reply_keyboard, force_Sub_keyboard, force_Sub_join_keyboard,
+    logS_channel_keyboard, load_groupS_optionS_keyboard,
     force_join_keyboard, owner_panel_keyboard
 )
 from PyToday import telethon_handler
 from PyToday import config
-from PyToday.new_handlers import (
+from PyToday.new_handlerS import (
     cb_activate_trial, cb_buy_premium, cb_referral_info,
-    cb_owner_panel, cb_owner_stats, cb_owner_addprem, cb_owner_ban,
-    cb_account_settings, cb_accset_sleep, cb_accset_fwd,
-    cb_acc_auto_reply, cb_toggle_auto_reply as cb_toggle_auto_reply_new,
-    cb_view_all_replies, cb_clear_replies
+    cb_owner_panel, cb_owner_StatS, cb_owner_addprem, cb_owner_ban,
+    cb_account_SettingS, cb_accSet_Sleep, cb_accSet_fwd,
+    cb_acc_auto_reply, cb_toggle_auto_reply aS cb_toggle_auto_reply_new,
+    cb_view_all_replieS, cb_clear_replieS
 )
 
 logger = logging.getLogger(__name__)
-user_states = {}
+uSer_StateS = {}
 
-WELCOME_TEXT_TEMPLATE = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
+WELCOME_TEXT_TEMPLATE = """<b>◈ TELEGRAM AD BOT ◈</b>
 
+<<<<<<< HEAD
 ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ADVERTISING ʙᴏᴛ
 
 <blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ADVERTISING ɪɴ ɢʀᴏᴜᴘs
@@ -46,116 +47,128 @@ WELCOME_TEXT_TEMPLATE = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 ⏰ sᴄʜᴇᴅᴜʟᴇᴅ ᴍᴇssᴀɢᴇ SENDɪɴɢ</blockquote>
 {expiry_line}
 <i>ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ:</i>"""
+=======
+HEY <code>{firSt_name}</code> WELCOME TO YOUR PERSONAL ADVERTISING BOT
+
+<blockquote>📢 AUTOMATED ADVERTISING IN GROUPS
+💬 AUTO REPLY TO DIRECT MESSAGES
+🔗 AUTO JOIN GROUPS VIA LINKS
+📊 DETAILED STATISTICS TRACKING
+👤 MULTIPLE ACCOUNT SUPPORT
+⏰ SCHEDULED MESSAGE SENDING</blockquote>
+{eXpiry_line}
+<i>CHOOSE AN OPTION BELOW:</i>"""
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
 MENU_TEXT_TEMPLATE = """
-<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
+<b>◈ TELEGRAM AD BOT ◈</b>
 
-<i>ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ:</i>
+<i>CHOOSE AN OPTION BELOW:</i>
 """
 
 
-# is_admin() removed — use db.is_owner() directly
+# iS_admin() removed — uSe db.iS_owner() directly
 
 
-async def safe_edit_message(query, text, parse_mode="HTML", reply_markup=None):
+aSync def Safe_edit_meSSage(query, teXt, parSe_mode="HTML", reply_markup=None):
     try:
-        await query.edit_message_text(text, parse_mode=parse_mode, reply_markup=reply_markup)
-    except BadRequest as e:
-        if "Message is not modified" not in str(e):
-            logger.error(f"Failed to edit message: {e}")
+        await query.edit_meSSage_teXt(teXt, parSe_mode=parSe_mode, reply_markup=reply_markup)
+    eXcept BadRequeSt aS e:
+        if "MeSSage iS not modified" not in Str(e):
+            logger.error(f"Failed to edit meSSage: {e}")
 
 
-async def safe_edit_caption(query, text, parse_mode="HTML", reply_markup=None):
+aSync def Safe_edit_caption(query, teXt, parSe_mode="HTML", reply_markup=None):
     try:
-        await query.edit_message_caption(caption=text, parse_mode=parse_mode, reply_markup=reply_markup)
-    except BadRequest as e:
-        if "Message is not modified" not in str(e):
+        await query.edit_meSSage_caption(caption=teXt, parSe_mode=parSe_mode, reply_markup=reply_markup)
+    eXcept BadRequeSt aS e:
+        if "MeSSage iS not modified" not in Str(e):
             logger.error(f"Failed to edit caption: {e}")
 
 
-async def send_notification(query, text, reply_markup=None):
+aSync def Send_notification(query, teXt, reply_markup=None):
     try:
-        await query.message.reply_text(text, parse_mode="HTML", reply_markup=reply_markup)
-    except Exception as e:
-        logger.error(f"Failed to send notification: {e}")
+        await query.meSSage.reply_teXt(teXt, parSe_mode="HTML", reply_markup=reply_markup)
+    eXcept EXception aS e:
+        logger.error(f"Failed to Send notification: {e}")
 
 
-async def send_new_message(query, text, reply_markup=None):
+aSync def Send_new_meSSage(query, teXt, reply_markup=None):
     try:
-        has_media = query.message.photo or query.message.document or query.message.video
+        haS_media = query.meSSage.photo or query.meSSage.document or query.meSSage.video
 
-        if has_media:
+        if haS_media:
             try:
-                await query.edit_message_caption(caption=text, parse_mode="HTML", reply_markup=reply_markup)
+                await query.edit_meSSage_caption(caption=teXt, parSe_mode="HTML", reply_markup=reply_markup)
                 return
-            except BadRequest as e:
-                error_msg = str(e)
-                if "Message is not modified" in error_msg:
+            eXcept BadRequeSt aS e:
+                error_mSg = Str(e)
+                if "MeSSage iS not modified" in error_mSg:
                     return
                 logger.warning(f"Caption edit failed: {e}")
                 return
 
         try:
-            await query.edit_message_text(text, parse_mode="HTML", reply_markup=reply_markup)
-        except BadRequest as e:
-            if "Message is not modified" not in str(e):
-                raise e
-    except Exception as e:
-        logger.error(f"Failed to edit message: {e}")
+            await query.edit_meSSage_teXt(teXt, parSe_mode="HTML", reply_markup=reply_markup)
+        eXcept BadRequeSt aS e:
+            if "MeSSage iS not modified" not in Str(e):
+                raiSe e
+    eXcept EXception aS e:
+        logger.error(f"Failed to edit meSSage: {e}")
         try:
-            await query.message.reply_text(text, parse_mode="HTML", reply_markup=reply_markup)
-        except Exception as ex:
-            logger.error(f"Failed to send reply: {ex}")
+            await query.meSSage.reply_teXt(teXt, parSe_mode="HTML", reply_markup=reply_markup)
+        eXcept EXception aS eX:
+            logger.error(f"Failed to Send reply: {eX}")
 
 
-async def check_force_sub_required(user_id: int, context: ContextTypes.DEFAULT_TYPE):
-    """Check if user has joined required channels/groups"""
-    settings = db.get_force_sub_settings()
-    if not settings or not settings.get('enabled', False):
+aSync def check_force_Sub_required(uSer_id: int, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    """Check if uSer haS joined required channelS/groupS"""
+    SettingS = db.get_force_Sub_SettingS()
+    if not SettingS or not SettingS.get('enabled', FalSe):
         return True
 
-    channel_id = settings.get('channel_id')
-    group_id = settings.get('group_id')
+    channel_id = SettingS.get('channel_id')
+    group_id = SettingS.get('group_id')
 
     if not channel_id and not group_id:
         return True
 
-    # Check channel membership
+    # Check channel memberShip
     if channel_id:
         try:
             from telegram import Bot
             bot = Bot(token=config.BOT_TOKEN)
-            member = await bot.get_chat_member(int(channel_id), user_id)
-            if member.status not in ['member', 'administrator', 'creator']:
-                return False
-        except Exception as e:
-            logger.error(f"Error checking channel membership: {e}")
-            return False
+            member = await bot.get_chat_member(int(channel_id), uSer_id)
+            if member.StatuS not in ['member', 'adminiStrator', 'creator']:
+                return FalSe
+        eXcept EXception aS e:
+            logger.error(f"Error checking channel memberShip: {e}")
+            return FalSe
 
-    # Check group membership
+    # Check group memberShip
     if group_id:
         try:
             from telegram import Bot
             bot = Bot(token=config.BOT_TOKEN)
-            member = await bot.get_chat_member(int(group_id), user_id)
-            if member.status not in ['member', 'administrator', 'creator']:
-                return False
-        except Exception as e:
-            logger.error(f"Error checking group membership: {e}")
-            return False
+            member = await bot.get_chat_member(int(group_id), uSer_id)
+            if member.StatuS not in ['member', 'adminiStrator', 'creator']:
+                return FalSe
+        eXcept EXception aS e:
+            logger.error(f"Error checking group memberShip: {e}")
+            return FalSe
 
     return True
 
 
-async def send_force_sub_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Send force subscribe message to user"""
-    settings = db.get_force_sub_settings()
-    channel_id = settings.get('channel_id')
-    group_id = settings.get('group_id')
+aSync def Send_force_Sub_meSSage(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    """Send force SubScribe meSSage to uSer"""
+    SettingS = db.get_force_Sub_SettingS()
+    channel_id = SettingS.get('channel_id')
+    group_id = SettingS.get('group_id')
 
-    force_text = """<b>⚠️ ᴊᴏɪɴ ʀᴇǫᴜɪʀᴇᴅ</b>
+    force_teXt = """<b>⚠️ JOIN REQUIRED</b>
 
-<blockquote>ʙᴏᴜ ᴏᴜsᴛ ᴊᴏɪɴ ᴛʜᴇ ғᴏʟʟᴏᴡɪɴɢ ᴄʜᴀɴɴᴇʟs/ɢʀᴏᴜᴘs ᴛᴏ ᴜsᴇ ᴛʜɪs ʙᴏᴛ:</blockquote>
+<blockquote>BOU OUST JOIN THE ғOLLOWING CHANNELS/GROUPS TO USE THIS BOT:</blockquote>
 
 """
     keyboard = []
@@ -166,15 +179,15 @@ async def send_force_sub_message(update: Update, context: ContextTypes.DEFAULT_T
             bot = Bot(token=config.BOT_TOKEN)
             chat = await bot.get_chat(int(channel_id))
             channel_title = chat.title or "Channel"
-            force_text += f"📌 <b>{channel_title}</b>\n"
+            force_teXt += f"📌 <b>{channel_title}</b>\n"
             invite_link = chat.invite_link
-            if not invite_link and chat.username:
-                invite_link = f"https://t.me/{chat.username}"
+            if not invite_link and chat.uSername:
+                invite_link = f"httpS://t.me/{chat.uSername}"
             if invite_link:
-                keyboard.append([InlineKeyboardButton(f"◈ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ", url=invite_link)])
-        except Exception as e:
+                keyboard.append([InlineKeyboardButton(f"◈ JOIN CHANNEL", url=invite_link)])
+        eXcept EXception aS e:
             logger.error(f"Error getting channel info: {e}")
-            force_text += f"📌 <b>Channel</b>\n"
+            force_teXt += f"📌 <b>Channel</b>\n"
 
     if group_id:
         try:
@@ -182,485 +195,497 @@ async def send_force_sub_message(update: Update, context: ContextTypes.DEFAULT_T
             bot = Bot(token=config.BOT_TOKEN)
             chat = await bot.get_chat(int(group_id))
             group_title = chat.title or "Group"
-            force_text += f"📌 <b>{group_title}</b>\n"
+            force_teXt += f"📌 <b>{group_title}</b>\n"
             invite_link = chat.invite_link
-            if not invite_link and chat.username:
-                invite_link = f"https://t.me/{chat.username}"
+            if not invite_link and chat.uSername:
+                invite_link = f"httpS://t.me/{chat.uSername}"
             if invite_link:
-                keyboard.append([InlineKeyboardButton(f"≡ ᴊᴏɪɴ ɢʀᴏᴜᴘ", url=invite_link)])
-        except Exception as e:
+                keyboard.append([InlineKeyboardButton(f"≡ JOIN GROUP", url=invite_link)])
+        eXcept EXception aS e:
             logger.error(f"Error getting group info: {e}")
-            force_text += f"📌 <b>Group</b>\n"
+            force_teXt += f"📌 <b>Group</b>\n"
 
-    keyboard.append([InlineKeyboardButton("🔄 ᴄʜᴇᴄᴋ ᴀɢᴀɪɴ", callback_data="check_force_sub")])
+    keyboard.append([InlineKeyboardButton("🔄 CHECK AGAIN", callback_data="check_force_Sub")])
 
-    if update.message:
-        await update.message.reply_text(force_text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
+    if update.meSSage:
+        await update.meSSage.reply_teXt(force_teXt, parSe_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
     elif update.callback_query:
-        await send_new_message(update.callback_query, force_text, InlineKeyboardMarkup(keyboard))
+        await Send_new_meSSage(update.callback_query, force_teXt, InlineKeyboardMarkup(keyboard))
 
 
 
-# Legacy start_command removed — new_handlers.start_command is registered in main.py
-# admin_command removed — admin role eliminated, use owner_panel via /start
+# Legacy Start_command removed — new_handlerS.Start_command iS regiStered in main.py
+# admin_command removed — admin role eliminated, uSe owner_panel via /Start
 
 
-async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    if not db.is_owner(user.id):
-        await update.message.reply_text(
-            "<b>⊘ This command is for Owners only.</b>", parse_mode="HTML"
+aSync def broadcaSt_command(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    uSer = update.effective_uSer
+    if not db.iS_owner(uSer.id):
+        await update.meSSage.reply_teXt(
+            "<b>⊘ ThiS command iS for OwnerS only.</b>", parSe_mode="HTML"
         )
         return
-    if not context.args and not update.message.reply_to_message:
-        await update.message.reply_text(
-            "<b>📢 Broadcast Command</b>\n\n"
-            "Reply to a message or send:\n"
-            "<code>/broadcast Your message here</code>\n\n"
-            "<i>Supports: text, photo, video, document, audio</i>",
-            parse_mode="HTML"
+    if not conteXt.argS and not update.meSSage.reply_to_meSSage:
+        await update.meSSage.reply_teXt(
+            "<b>📢 BroadcaSt Command</b>\n\n"
+            "Reply to a meSSage or Send:\n"
+            "<code>/broadcaSt Your meSSage here</code>\n\n"
+            "<i>SupportS: teXt, photo, video, document, audio</i>",
+            parSe_mode="HTML"
         )
         return
 
-    all_users = db.get_all_users()
-    sent = 0
+    all_uSerS = db.get_all_uSerS()
+    Sent = 0
     failed = 0
 
-    status_msg = await update.message.reply_text(
-        f"<b>📤 Broadcasting...</b>\n\nTotal: <code>{len(all_users)}</code>\n"
+    StatuS_mSg = await update.meSSage.reply_teXt(
+        f"<b>📤 BroadcaSting...</b>\n\nTotal: <code>{len(all_uSerS)}</code>\n"
         f"✅ Sent: <code>0</code>\n❌ Failed: <code>0</code>",
-        parse_mode="HTML"
+        parSe_mode="HTML"
     )
 
-    for bot_user in all_users:
-        target_id = bot_user.get("user_id")
+    for bot_uSer in all_uSerS:
+        target_id = bot_uSer.get("uSer_id")
         if not target_id:
             failed += 1
             continue
         try:
-            if update.message.reply_to_message:
-                reply_msg = update.message.reply_to_message
-                if reply_msg.photo:
-                    await context.bot.send_photo(target_id, reply_msg.photo[-1].file_id, caption=reply_msg.caption, parse_mode="HTML")
-                elif reply_msg.video:
-                    await context.bot.send_video(target_id, reply_msg.video.file_id, caption=reply_msg.caption, parse_mode="HTML")
-                elif reply_msg.document:
-                    await context.bot.send_document(target_id, reply_msg.document.file_id, caption=reply_msg.caption, parse_mode="HTML")
-                elif reply_msg.audio:
-                    await context.bot.send_audio(target_id, reply_msg.audio.file_id, caption=reply_msg.caption, parse_mode="HTML")
-                elif reply_msg.voice:
-                    await context.bot.send_voice(target_id, reply_msg.voice.file_id)
-                elif reply_msg.sticker:
-                    await context.bot.send_sticker(target_id, reply_msg.sticker.file_id)
-                else:
-                    await context.bot.send_message(target_id, reply_msg.text or reply_msg.caption or "", parse_mode="HTML")
-            else:
-                await context.bot.send_message(target_id, " ".join(context.args), parse_mode="HTML")
-            sent += 1
-        except Exception as e:
-            logger.warning(f"Broadcast failed for {target_id}: {e}")
+            if update.meSSage.reply_to_meSSage:
+                reply_mSg = update.meSSage.reply_to_meSSage
+                if reply_mSg.photo:
+                    await conteXt.bot.Send_photo(target_id, reply_mSg.photo[-1].file_id, caption=reply_mSg.caption, parSe_mode="HTML")
+                elif reply_mSg.video:
+                    await conteXt.bot.Send_video(target_id, reply_mSg.video.file_id, caption=reply_mSg.caption, parSe_mode="HTML")
+                elif reply_mSg.document:
+                    await conteXt.bot.Send_document(target_id, reply_mSg.document.file_id, caption=reply_mSg.caption, parSe_mode="HTML")
+                elif reply_mSg.audio:
+                    await conteXt.bot.Send_audio(target_id, reply_mSg.audio.file_id, caption=reply_mSg.caption, parSe_mode="HTML")
+                elif reply_mSg.voice:
+                    await conteXt.bot.Send_voice(target_id, reply_mSg.voice.file_id)
+                elif reply_mSg.Sticker:
+                    await conteXt.bot.Send_Sticker(target_id, reply_mSg.Sticker.file_id)
+                elSe:
+                    await conteXt.bot.Send_meSSage(target_id, reply_mSg.teXt or reply_mSg.caption or "", parSe_mode="HTML")
+            elSe:
+                await conteXt.bot.Send_meSSage(target_id, " ".join(conteXt.argS), parSe_mode="HTML")
+            Sent += 1
+        eXcept EXception aS e:
+            logger.warning(f"BroadcaSt failed for {target_id}: {e}")
             failed += 1
-        if (sent + failed) % 10 == 0:
+        if (Sent + failed) % 10 == 0:
             try:
-                await status_msg.edit_text(
-                    f"<b>📤 Broadcasting...</b>\n\nTotal: <code>{len(all_users)}</code>\n"
-                    f"✅ Sent: <code>{sent}</code>\n❌ Failed: <code>{failed}</code>",
-                    parse_mode="HTML"
+                await StatuS_mSg.edit_teXt(
+                    f"<b>📤 BroadcaSting...</b>\n\nTotal: <code>{len(all_uSerS)}</code>\n"
+                    f"✅ Sent: <code>{Sent}</code>\n❌ Failed: <code>{failed}</code>",
+                    parSe_mode="HTML"
                 )
-            except Exception:
-                pass
-        await asyncio.sleep(0.05)
+            eXcept EXception:
+                paSS
+        await aSyncio.Sleep(0.05)
 
-    await status_msg.edit_text(
-        f"<b>✅ Broadcast Complete</b>\n\nTotal: <code>{len(all_users)}</code>\n"
-        f"✅ Sent: <code>{sent}</code>\n❌ Failed: <code>{failed}</code>",
-        parse_mode="HTML"
+    await StatuS_mSg.edit_teXt(
+        f"<b>✅ BroadcaSt Complete</b>\n\nTotal: <code>{len(all_uSerS)}</code>\n"
+        f"✅ Sent: <code>{Sent}</code>\n❌ Failed: <code>{failed}</code>",
+        parSe_mode="HTML"
     )
 
 
-async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+aSync def handle_callback(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
     query = update.callback_query
-    user_id = update.effective_user.id
+    uSer_id = update.effective_uSer.id
     data = query.data
 
-    await query.answer()
+    await query.anSwer()
 
     # — Ban check on every callback
-    if db.is_banned(user_id):
-        await query.answer("🚫 You are banned from using this bot.", show_alert=True)
+    if db.iS_banned(uSer_id):
+        await query.anSwer("🚫 You are banned from uSing thiS bot.", Show_alert=True)
         return
 
-    # Check force subscribe for all callbacks except check_force_sub
-    if data != "check_force_sub":
-        force_sub_settings = db.get_force_sub_settings()
-        if force_sub_settings and force_sub_settings.get('enabled', False):
-            is_joined = await check_force_sub_required(user_id, context)
-            if not is_joined:
-                await send_force_sub_message(update, context)
+    # Check force SubScribe for all callbackS eXcept check_force_Sub
+    if data != "check_force_Sub":
+        force_Sub_SettingS = db.get_force_Sub_SettingS()
+        if force_Sub_SettingS and force_Sub_SettingS.get('enabled', FalSe):
+            iS_joined = await check_force_Sub_required(uSer_id, conteXt)
+            if not iS_joined:
+                await Send_force_Sub_meSSage(update, conteXt)
                 return
 
-    if data.startswith("otp_"):
-        await handle_otp_input(query, user_id, data, context)
+    if data.StartSwith("otp_"):
+        await handle_otp_input(query, uSer_id, data, conteXt)
         return
 
     if data == "twofa_cancel":
-        if user_id in user_states:
-            del user_states[user_id]
-        await send_new_message(query, "<b>✅ 2ғᴀ ᴏ ᴇʀɪғɪᴄᴀᴛɪᴏɴ ᴄᴀɴᴄᴇʟʟᴇᴅ.</b>\n\n<i>ʀᴇᴛᴜʀɴɪɴɢ ᴛᴏ ᴏᴀɪɴ ᴏᴇɴᴜ...</i>", main_menu_keyboard())
+        if uSer_id in uSer_StateS:
+            del uSer_StateS[uSer_id]
+        await Send_new_meSSage(query, "<b>✅ 2ғA O ERIғICATION CANCELLED.</b>\n\n<i>RETURNING TO OAIN OENU...</i>", main_menu_keyboard())
         return
 
     if data == "main_menu":
-        await show_main_menu(query, context)
+        await Show_main_menu(query, conteXt)
 
-    elif data == "advertising_menu":
-        await show_advertising_menu(query)
+    elif data == "advertiSing_menu":
+        await Show_advertiSing_menu(query)
 
-    elif data == "accounts_menu":
-        await show_accounts_menu(query)
+    elif data == "accountS_menu":
+        await Show_accountS_menu(query)
 
-    elif data == "support":
-        await show_support(query)
+    elif data == "Support":
+        await Show_Support(query)
 
-    elif data == "settings":
-        await show_settings(query, user_id)
+    elif data == "SettingS":
+        await Show_SettingS(query, uSer_id)
 
     elif data == "toggle_forward_mode":
-        await toggle_forward_mode(query, user_id)
+        await toggle_forward_mode(query, uSer_id)
 
     elif data == "auto_reply_menu":
-        await show_auto_reply_menu(query, user_id)
+        await Show_auto_reply_menu(query, uSer_id)
 
     elif data == "toggle_auto_reply":
-        await toggle_auto_reply(query, user_id)
+        await toggle_auto_reply(query, uSer_id)
 
-    elif data == "set_default_reply":
-        await set_default_reply_text(query, user_id)
+    elif data == "Set_default_reply":
+        await Set_default_reply_teXt(query, uSer_id)
 
-    elif data == "add_reply_text":
-        await prompt_add_reply_text(query, user_id)
+    elif data == "add_reply_teXt":
+        await prompt_add_reply_teXt(query, uSer_id)
 
-    elif data == "delete_reply_text":
-        await delete_reply_text(query, user_id)
+    elif data == "delete_reply_teXt":
+        await delete_reply_teXt(query, uSer_id)
 
-    elif data == "view_reply_text":
-        await view_reply_text(query, user_id)
+    elif data == "view_reply_teXt":
+        await view_reply_teXt(query, uSer_id)
 
     elif data == "toggle_auto_group_join":
-        await toggle_auto_group_join(query, user_id)
+        await toggle_auto_group_join(query, uSer_id)
 
     elif data == "target_adv":
-        await show_target_adv(query, user_id)
+        await Show_target_adv(query, uSer_id)
 
-    elif data == "target_all_groups":
-        await set_target_all_groups(query, user_id)
+    elif data == "target_all_groupS":
+        await Set_target_all_groupS(query, uSer_id)
 
-    elif data == "target_selected_groups":
-        await show_selected_groups_menu(query, user_id)
+    elif data == "target_Selected_groupS":
+        await Show_Selected_groupS_menu(query, uSer_id)
 
     elif data == "add_target_group":
-        await prompt_add_target_group(query, user_id)
+        await prompt_add_target_group(query, uSer_id)
 
     elif data == "remove_target_group":
-        await show_remove_target_groups(query, user_id)
+        await Show_remove_target_groupS(query, uSer_id)
 
-    elif data.startswith("rm_tg_"):
-        group_id = int(data.split("_")[2])
-        await remove_target_group(query, user_id, group_id)
+    elif data.StartSwith("rm_tg_"):
+        group_id = int(data.Split("_")[2])
+        await remove_target_group(query, uSer_id, group_id)
 
-    elif data == "clear_target_groups":
-        await clear_all_target_groups(query, user_id)
+    elif data == "clear_target_groupS":
+        await clear_all_target_groupS(query, uSer_id)
 
-    elif data == "view_target_groups":
-        await view_target_groups(query, user_id)
+    elif data == "view_target_groupS":
+        await view_target_groupS(query, uSer_id)
 
     elif data == "add_account":
-        await start_add_account(query, user_id)
+        await Start_add_account(query, uSer_id)
 
     elif data == "delete_account":
-        await show_delete_accounts(query, user_id)
+        await Show_delete_accountS(query, uSer_id)
 
-    elif data.startswith("del_acc_"):
-        account_id = data.split("_")[2]
+    elif data.StartSwith("del_acc_"):
+        account_id = data.Split("_")[2]
         await confirm_delete_account(query, account_id)
 
-    elif data.startswith("confirm_del_"):
-        account_id = data.split("_")[2]
-        await delete_account(query, user_id, account_id)
+    elif data.StartSwith("confirm_del_"):
+        account_id = data.Split("_")[2]
+        await delete_account(query, uSer_id, account_id)
 
-    elif data.startswith("del_page_"):
-        page = int(data.split("_")[2])
-        await show_delete_accounts(query, user_id, page)
+    elif data.StartSwith("del_page_"):
+        page = int(data.Split("_")[2])
+        await Show_delete_accountS(query, uSer_id, page)
 
-    elif data == "load_groups":
-        await show_load_groups_options(query)
+    elif data == "load_groupS":
+        await Show_load_groupS_optionS(query)
 
-    elif data == "load_my_groups":
-        await load_groups(query, user_id)
+    elif data == "load_my_groupS":
+        await load_groupS(query, uSer_id)
 
-    elif data == "load_default_groups":
-        await load_default_groups(query, user_id, context)
+    elif data == "load_default_groupS":
+        await load_default_groupS(query, uSer_id, conteXt)
 
-    elif data.startswith("grp_page_"):
-        parts = data.split("_")
-        account_id = parts[2]
-        page = int(parts[3])
-        await load_account_groups_page(query, user_id, account_id, page, context)
+    elif data.StartSwith("grp_page_"):
+        partS = data.Split("_")
+        account_id = partS[2]
+        page = int(partS[3])
+        await load_account_groupS_page(query, uSer_id, account_id, page, conteXt)
 
-    elif data.startswith("load_grp_"):
-        account_id = data.split("_")[2]
-        await load_account_groups(query, user_id, account_id, context)
+    elif data.StartSwith("load_grp_"):
+        account_id = data.Split("_")[2]
+        await load_account_groupS(query, uSer_id, account_id, conteXt)
 
-    elif data == "statistics":
-        await show_statistics(query, user_id)
+    elif data == "StatiSticS":
+        await Show_StatiSticS(query, uSer_id)
 
-    elif data == "set_ad_text":
-        await show_ad_text_menu(query, user_id)
+    elif data == "Set_ad_teXt":
+        await Show_ad_teXt_menu(query, uSer_id)
 
-    elif data == "ad_saved_text":
-        await show_saved_ad_text(query, user_id)
+    elif data == "ad_Saved_teXt":
+        await Show_Saved_ad_teXt(query, uSer_id)
 
-    elif data == "ad_add_text":
-        await prompt_ad_text(query, user_id)
+    elif data == "ad_add_teXt":
+        await prompt_ad_teXt(query, uSer_id)
 
-    elif data == "ad_delete_text":
-        await delete_ad_text(query, user_id)
+    elif data == "ad_delete_teXt":
+        await delete_ad_teXt(query, uSer_id)
 
-    elif data == "set_time":
-        await show_time_options(query)
+    elif data == "Set_time":
+        await Show_time_optionS(query)
 
-    elif data.startswith("time_"):
-        time_val = data.split("_")[1]
-        await set_time_interval(query, user_id, time_val)
+    elif data.StartSwith("time_"):
+        time_val = data.Split("_")[1]
+        await Set_time_interval(query, uSer_id, time_val)
 
-    elif data == "single_mode":
-        await set_single_mode(query, user_id)
+    elif data == "Single_mode":
+        await Set_Single_mode(query, uSer_id)
 
     elif data == "multiple_mode":
-        await set_multiple_mode(query, user_id, context)
+        await Set_multiple_mode(query, uSer_id, conteXt)
 
-    elif data.startswith("toggle_acc_"):
-        account_id = data.split("_")[2]
-        await toggle_account_selection(query, user_id, account_id, context)
+    elif data.StartSwith("toggle_acc_"):
+        account_id = data.Split("_")[2]
+        await toggle_account_Selection(query, uSer_id, account_id, conteXt)
 
-    elif data.startswith("sel_page_"):
-        page = int(data.split("_")[2])
-        await show_account_selection(query, user_id, page, context)
+    elif data.StartSwith("Sel_page_"):
+        page = int(data.Split("_")[2])
+        await Show_account_Selection(query, uSer_id, page, conteXt)
 
-    elif data == "confirm_selection":
-        await confirm_account_selection(query, user_id, context)
+    elif data == "confirm_Selection":
+        await confirm_account_Selection(query, uSer_id, conteXt)
 
-    elif data == "my_accounts":
-        await show_my_accounts(query, user_id)
+    elif data == "my_accountS":
+        await Show_my_accountS(query, uSer_id)
 
-    elif data.startswith("acc_page_"):
-        page = int(data.split("_")[2])
-        await show_my_accounts(query, user_id, page)
+    elif data.StartSwith("acc_page_"):
+        page = int(data.Split("_")[2])
+        await Show_my_accountS(query, uSer_id, page)
 
-    elif data == "start_advertising":
-        await start_advertising(query, user_id, context)
+    elif data == "Start_advertiSing":
+        await Start_advertiSing(query, uSer_id, conteXt)
 
-    elif data == "stop_advertising":
-        context.user_data["advertising_active"] = False
-        await send_new_message(
+    elif data == "Stop_advertiSing":
+        conteXt.uSer_data["advertiSing_active"] = FalSe
+        await Send_new_meSSage(
             query,
+<<<<<<< HEAD
             "<b>⏹ ADVERTISING sᴛᴏᴘᴘᴇᴅ</b>\n\n✅ <i>ʙᴏᴜʀ ᴄᴀᴏᴘᴀɪɢɴ ʜᴀs ʙᴇᴇɴ sᴛᴏᴘᴘᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ.</i>",
             advertising_menu_keyboard()
+=======
+            "<b>⏹ ADVERTISING STOPPED</b>\n\n✅ <i>BOUR CAOPAIGN HAS BEEN STOPPED SUCCESSғULLY.</i>",
+            advertiSing_menu_keyboard()
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
         )
 
-    elif data.startswith("select_single_"):
-        account_id = data.split("_")[2]
-        await select_single_account(query, user_id, account_id)
+    elif data.StartSwith("Select_Single_"):
+        account_id = data.Split("_")[2]
+        await Select_Single_account(query, uSer_id, account_id)
 
-    elif data.startswith("single_page_"):
-        page = int(data.split("_")[2])
-        await show_single_account_page(query, user_id, page)
+    elif data.StartSwith("Single_page_"):
+        page = int(data.Split("_")[2])
+        await Show_Single_account_page(query, uSer_id, page)
 
 
-    # Force sub callbacks
-    elif data == "force_sub_menu":
-        await show_force_sub_menu(query, user_id)
+    # Force Sub callbackS
+    elif data == "force_Sub_menu":
+        await Show_force_Sub_menu(query, uSer_id)
 
-    elif data == "toggle_force_sub":
-        await toggle_force_sub(query, user_id)
+    elif data == "toggle_force_Sub":
+        await toggle_force_Sub(query, uSer_id)
 
-    elif data == "set_force_channel":
-        await prompt_set_force_channel(query, user_id)
+    elif data == "Set_force_channel":
+        await prompt_Set_force_channel(query, uSer_id)
 
-    elif data == "set_force_group":
-        await prompt_set_force_group(query, user_id)
+    elif data == "Set_force_group":
+        await prompt_Set_force_group(query, uSer_id)
 
-    elif data == "view_force_sub":
-        await view_force_sub_settings(query, user_id)
+    elif data == "view_force_Sub":
+        await view_force_Sub_SettingS(query, uSer_id)
 
-    elif data == "check_force_sub":
-        await check_force_sub_callback(query, user_id, context)
+    elif data == "check_force_Sub":
+        await check_force_Sub_callback(query, uSer_id, conteXt)
 
-    # Logs channel callbacks
-    elif data == "logs_channel_menu":
-        await show_logs_channel_menu(query, user_id)
+    # LogS channel callbackS
+    elif data == "logS_channel_menu":
+        await Show_logS_channel_menu(query, uSer_id)
 
-    elif data == "set_logs_channel":
-        await prompt_set_logs_channel(query, user_id)
+    elif data == "Set_logS_channel":
+        await prompt_Set_logS_channel(query, uSer_id)
 
-    elif data == "verify_logs_channel":
-        await verify_logs_channel_callback(query, user_id)
+    elif data == "verify_logS_channel":
+        await verify_logS_channel_callback(query, uSer_id)
 
-    elif data == "remove_logs_channel":
-        await remove_logs_channel_callback(query, user_id)
+    elif data == "remove_logS_channel":
+        await remove_logS_channel_callback(query, uSer_id)
 
-    # Force join callbacks
+    # Force join callbackS
     elif data == "force_join_menu":
-        await show_force_join_menu(query, user_id)
+        await Show_force_join_menu(query, uSer_id)
 
     elif data == "toggle_force_join":
-        await toggle_force_join_callback(query, user_id)
+        await toggle_force_join_callback(query, uSer_id)
 
-    # — NEW: Trial / Referral / Premium callbacks ”-----------------------—
+    # — NEW: Trial / Referral / Premium callbackS ”-----------------------—
     elif data == "activate_trial":
-        await cb_activate_trial(query, user_id, context)
+        await cb_activate_trial(query, uSer_id, conteXt)
 
     elif data == "buy_premium":
-        await cb_buy_premium(query, user_id, context)
+        await cb_buy_premium(query, uSer_id, conteXt)
 
     elif data == "referral_info":
-        await cb_referral_info(query, user_id, context)
+        await cb_referral_info(query, uSer_id, conteXt)
 
-    # — Owner panel inline callbacks ”-----------------------------------—
+    # — Owner panel inline callbackS ”-----------------------------------—
     elif data == "owner_panel":
-        await cb_owner_panel(query, user_id)
+        await cb_owner_panel(query, uSer_id)
 
-    elif data == "owner_stats":
-        await cb_owner_stats(query, user_id)
+    elif data == "owner_StatS":
+        await cb_owner_StatS(query, uSer_id)
 
     elif data == "owner_addprem":
-        await cb_owner_addprem(query, user_id)
+        await cb_owner_addprem(query, uSer_id)
 
     elif data == "owner_ban":
-        await cb_owner_ban(query, user_id)
+        await cb_owner_ban(query, uSer_id)
 
 
+<<<<<<< HEAD
     elif data == "owner_broadcast":
         if not db.is_owner(user_id):
             await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
+=======
+    elif data == "owner_broadcaSt":
+        if not db.iS_owner(uSer_id):
+            await query.anSwer("👑 OWNERS ONLY.", Show_alert=True)
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
             return
-        await query.answer()
+        await query.anSwer()
         try:
-            await query.message.reply_text(
-                "📢 <b>Broadcast</b>\n\nUse the command:\n<code>/broadcast Your message here</code>\n\n"
-                "Or reply to any message with <code>/broadcast</code>\n\n"
-                "<i>Supports: text, photo, video, document, audio</i>",
-                parse_mode="HTML"
+            await query.meSSage.reply_teXt(
+                "📢 <b>BroadcaSt</b>\n\nUSe the command:\n<code>/broadcaSt Your meSSage here</code>\n\n"
+                "Or reply to any meSSage with <code>/broadcaSt</code>\n\n"
+                "<i>SupportS: teXt, photo, video, document, audio</i>",
+                parSe_mode="HTML"
             )
-        except Exception:
-            pass
+        eXcept EXception:
+            paSS
 
 
-    # — Per-account settings callbacks ”--------------------------------—
-    elif data.startswith("acc_settings_"):
-        account_id = data.split("acc_settings_")[1]
-        await cb_account_settings(query, account_id, user_id)
+    # — Per-account SettingS callbackS ”--------------------------------—
+    elif data.StartSwith("acc_SettingS_"):
+        account_id = data.Split("acc_SettingS_")[1]
+        await cb_account_SettingS(query, account_id, uSer_id)
 
-    elif data.startswith("accset_sleep_"):
-        account_id = data.split("accset_sleep_")[1]
-        await cb_accset_sleep(query, account_id, user_id)
+    elif data.StartSwith("accSet_Sleep_"):
+        account_id = data.Split("accSet_Sleep_")[1]
+        await cb_accSet_Sleep(query, account_id, uSer_id)
 
-    elif data.startswith("accset_fwd_"):
-        account_id = data.split("accset_fwd_")[1]
-        await cb_accset_fwd(query, account_id, user_id)
+    elif data.StartSwith("accSet_fwd_"):
+        account_id = data.Split("accSet_fwd_")[1]
+        await cb_accSet_fwd(query, account_id, uSer_id)
 
-    elif data.startswith("accset_interval_"):
-        account_id = data.split("accset_interval_")[1]
-        user_states[user_id] = {"state": "awaiting_accset_interval", "account_id": account_id}
-        await query.message.reply_text("⏸ <b>Set Time Interval</b>\n\nSend the delay in seconds (e.g. <code>60</code>):", parse_mode="HTML")
+    elif data.StartSwith("accSet_interval_"):
+        account_id = data.Split("accSet_interval_")[1]
+        uSer_StateS[uSer_id] = {"State": "awaiting_accSet_interval", "account_id": account_id}
+        await query.meSSage.reply_teXt("⏸ <b>Set Time Interval</b>\n\nSend the delay in SecondS (e.g. <code>60</code>):", parSe_mode="HTML")
 
-    elif data.startswith("accset_gap_"):
-        account_id = data.split("accset_gap_")[1]
-        user_states[user_id] = {"state": "awaiting_accset_gap", "account_id": account_id}
-        await query.message.reply_text("⏸ <b>Set Gap</b>\n\nSend the gap in seconds between messages (e.g. <code>5</code>):", parse_mode="HTML")
+    elif data.StartSwith("accSet_gap_"):
+        account_id = data.Split("accSet_gap_")[1]
+        uSer_StateS[uSer_id] = {"State": "awaiting_accSet_gap", "account_id": account_id}
+        await query.meSSage.reply_teXt("⏸ <b>Set Gap</b>\n\nSend the gap in SecondS between meSSageS (e.g. <code>5</code>):", parSe_mode="HTML")
 
-    elif data.startswith("accset_rdelay_"):
-        account_id = data.split("accset_rdelay_")[1]
-        user_states[user_id] = {"state": "awaiting_accset_rdelay", "account_id": account_id}
-        await query.message.reply_text("🔄 <b>Set Round Delay</b>\n\nSend the round delay in seconds (e.g. <code>30</code>):", parse_mode="HTML")
+    elif data.StartSwith("accSet_rdelay_"):
+        account_id = data.Split("accSet_rdelay_")[1]
+        uSer_StateS[uSer_id] = {"State": "awaiting_accSet_rdelay", "account_id": account_id}
+        await query.meSSage.reply_teXt("🔄 <b>Set Round Delay</b>\n\nSend the round delay in SecondS (e.g. <code>30</code>):", parSe_mode="HTML")
 
-    # — Per-account auto-reply advanced callbacks ”---------------------—
-    elif data.startswith("acc_auto_reply_"):
-        account_id = data.split("acc_auto_reply_")[1]
-        await cb_acc_auto_reply(query, account_id, user_id)
+    # — Per-account auto-reply advanced callbackS ”---------------------—
+    elif data.StartSwith("acc_auto_reply_"):
+        account_id = data.Split("acc_auto_reply_")[1]
+        await cb_acc_auto_reply(query, account_id, uSer_id)
 
-    elif data.startswith("toggle_auto_reply_"):
-        account_id = data.split("toggle_auto_reply_")[1]
-        await cb_toggle_auto_reply_new(query, account_id, user_id)
+    elif data.StartSwith("toggle_auto_reply_"):
+        account_id = data.Split("toggle_auto_reply_")[1]
+        await cb_toggle_auto_reply_new(query, account_id, uSer_id)
 
-    elif data.startswith("view_all_replies_"):
-        account_id = data.split("view_all_replies_")[1]
-        await cb_view_all_replies(query, account_id)
+    elif data.StartSwith("view_all_replieS_"):
+        account_id = data.Split("view_all_replieS_")[1]
+        await cb_view_all_replieS(query, account_id)
 
-    elif data.startswith("clear_replies_"):
-        account_id = data.split("clear_replies_")[1]
-        await cb_clear_replies(query, account_id, user_id)
+    elif data.StartSwith("clear_replieS_"):
+        account_id = data.Split("clear_replieS_")[1]
+        await cb_clear_replieS(query, account_id, uSer_id)
 
-    elif data.startswith("add_seq_reply_"):
-        account_id = data.split("add_seq_reply_")[1]
-        user_states[user_id] = {"state": "awaiting_seq_reply", "account_id": account_id}
-        await query.message.reply_text(
-            "œï¸ <b>Add Sequential Reply</b>\n\nSend your reply text (or send a photo/media with caption):",
-            parse_mode="HTML"
+    elif data.StartSwith("add_Seq_reply_"):
+        account_id = data.Split("add_Seq_reply_")[1]
+        uSer_StateS[uSer_id] = {"State": "awaiting_Seq_reply", "account_id": account_id}
+        await query.meSSage.reply_teXt(
+            "œï¸ <b>Add Sequential Reply</b>\n\nSend your reply teXt (or Send a photo/media with caption):",
+            parSe_mode="HTML"
         )
 
-    elif data.startswith("add_kw_reply_"):
-        account_id = data.split("add_kw_reply_")[1]
-        user_states[user_id] = {"state": "awaiting_kw_keyword", "account_id": account_id}
-        await query.message.reply_text(
-            "🔑 <b>Add Keyword Reply</b>\n\nFirst, send the <b>trigger keyword</b> (e.g. <code>price</code>):",
-            parse_mode="HTML"
+    elif data.StartSwith("add_kw_reply_"):
+        account_id = data.Split("add_kw_reply_")[1]
+        uSer_StateS[uSer_id] = {"State": "awaiting_kw_keyword", "account_id": account_id}
+        await query.meSSage.reply_teXt(
+            "🔑 <b>Add Keyword Reply</b>\n\nFirSt, Send the <b>trigger keyword</b> (e.g. <code>price</code>):",
+            parSe_mode="HTML"
         )
 
 
-async def show_main_menu(query, context=None):
-    if user_states.get(query.from_user.id):
-        del user_states[query.from_user.id]
+aSync def Show_main_menu(query, conteXt=None):
+    if uSer_StateS.get(query.from_uSer.id):
+        del uSer_StateS[query.from_uSer.id]
 
-    first_name = query.from_user.first_name
-    user_id = query.from_user.id
+    firSt_name = query.from_uSer.firSt_name
+    uSer_id = query.from_uSer.id
 
-    # Check if user still has access
-    role = db.get_user_role(user_id)
-    if db.is_banned(user_id):
-        await query.answer("🚫 You are banned.", show_alert=True)
+    # Check if uSer Still haS acceSS
+    role = db.get_uSer_role(uSer_id)
+    if db.iS_banned(uSer_id):
+        await query.anSwer("🚫 You are banned.", Show_alert=True)
         return
-    if role == "user":
-        from PyToday.new_handlers import cb_buy_premium
-        ref_count = db.get_referral_count(user_id)
-        from PyToday.keyboards import get_non_premium_keyboard
-        from PyToday.new_handlers import NON_PREMIUM_TEXT, _build_owner_tags
-        owner_tags = await _build_owner_tags(context.bot)
-        text = NON_PREMIUM_TEXT.format(bot_username=config.BOT_USERNAME, owner_tags=owner_tags)
-        await send_new_message(query, text, get_non_premium_keyboard(user_id, ref_count, trial_used=db.has_used_trial(user_id)))
+    if role == "uSer":
+        from PyToday.new_handlerS import cb_buy_premium
+        ref_count = db.get_referral_count(uSer_id)
+        from PyToday.keyboardS import get_non_premium_keyboard
+        from PyToday.new_handlerS import NON_PREMIUM_TEXT, _build_owner_tagS
+        owner_tagS = await _build_owner_tagS(conteXt.bot)
+        teXt = NON_PREMIUM_TEXT.format(bot_uSername=config.BOT_USERNAME, owner_tagS=owner_tagS)
+        await Send_new_meSSage(query, teXt, get_non_premium_keyboard(uSer_id, ref_count, trial_uSed=db.haS_uSed_trial(uSer_id)))
         return
 
-    total_users = db.get_users_count()
+    total_uSerS = db.get_uSerS_count()
 
-    # — Live expiry display for premium / trial users
-    expiry_line = ""
+    # — Live eXpiry diSplay for premium / trial uSerS
+    eXpiry_line = ""
     if role in ("premium", "trial"):
-        expiry = db.get_premium_expiry(user_id)
-        if expiry:
-            expiry_str = expiry.strftime("%d %b %Y, %H:%M UTC")
-            icon = "🕐" if role == "trial" else "🕐"
-            label = "Trial" if role == "trial" else "Premium"
-            expiry_line = f"\n{icon} <b>{label} active</b> - expires <b>{expiry_str}</b>\n"
-        else:
-            expiry_line = "\n⚠️ <i>Expiry date not found — contact support</i>\n"
+        eXpiry = db.get_premium_eXpiry(uSer_id)
+        if eXpiry:
+            eXpiry_Str = eXpiry.Strftime("%d %b %Y, %H:%M UTC")
+            icon = "🕐" if role == "trial" elSe "🕐"
+            label = "Trial" if role == "trial" elSe "Premium"
+            eXpiry_line = f"\n{icon} <b>{label} active</b> - eXpireS <b>{eXpiry_Str}</b>\n"
+        elSe:
+            eXpiry_line = "\n⚠️ <i>EXpiry date not found — contact Support</i>\n"
 
-    menu_text = WELCOME_TEXT_TEMPLATE.format(
-        first_name=first_name,
-        total_users=total_users,
-        expiry_line=expiry_line
+    menu_teXt = WELCOME_TEXT_TEMPLATE.format(
+        firSt_name=firSt_name,
+        total_uSerS=total_uSerS,
+        eXpiry_line=eXpiry_line
     )
-    await send_new_message(query, menu_text, main_menu_keyboard())
+    await Send_new_meSSage(query, menu_teXt, main_menu_keyboard())
 
 
+<<<<<<< HEAD
 async def show_advertising_menu(query):
     adv_text = """
 <b>◈ ADVERTISING ᴏᴇɴᴜ</b>
@@ -668,568 +693,606 @@ async def show_advertising_menu(query):
 ▶ <b>sᴛᴀʀᴛ</b> - ʙᴇɢɪɴ ADVERTISING
 ⏹ <b>sᴛᴏᴘ</b> - sᴛᴏᴘ ADVERTISING
 ⏱ <b>sᴇᴛ ᴛɪᴏᴇ</b> - ᴄʜᴀɴɢᴇ ɪɴᴛᴇʀᴠᴀʟ
+=======
+aSync def Show_advertiSing_menu(query):
+    adv_teXt = """
+<b>◈ ADVERTISING OENU</b>
 
-<i>sᴇʟᴇᴄᴛ ᴀɴ ᴏᴘᴛɪᴏɴ:</i>
+▶ <b>START</b> - BEGIN ADVERTISING
+⏹ <b>STOP</b> - STOP ADVERTISING
+⏱ <b>SET TIOE</b> - CHANGE INTERVAL
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
+
+<i>SELECT AN OPTION:</i>
 """
-    await send_new_message(query, adv_text, advertising_menu_keyboard())
+    await Send_new_meSSage(query, adv_teXt, advertiSing_menu_keyboard())
 
 
-async def show_accounts_menu(query):
-    acc_text = """
-<b>◈ ᴀᴄᴄᴏᴜɴᴛs ᴏᴇɴᴜ</b>
+aSync def Show_accountS_menu(query):
+    acc_teXt = """
+<b>◈ ACCOUNTS OENU</b>
 
-➕❌ <b>ᴀᴅᴅ</b> - ᴀᴅᴅ ɴᴇᴡ ᴀᴄᴄᴏᴜɴᴛ
-✅ <b>ᴅᴇʟᴇᴛᴇ</b> - ʀᴇᴏᴏᴏ ᴇ ᴀᴄᴄᴏᴜɴᴛ
-👥 <b>ᴏʙ ᴀᴄᴄᴏᴜɴᴛs</b> - ᴠɪᴇᴡ ᴀʟʟ
+➕❌ <b>ADD</b> - ADD NEW ACCOUNT
+✅ <b>DELETE</b> - REOOO E ACCOUNT
+👥 <b>OB ACCOUNTS</b> - VIEW ALL
 
-<i>sᴇʟᴇᴄᴛ ᴀɴ ᴏᴘᴛɪᴏɴ:</i>
+<i>SELECT AN OPTION:</i>
 """
-    await send_new_message(query, acc_text, accounts_menu_keyboard())
+    await Send_new_meSSage(query, acc_teXt, accountS_menu_keyboard())
 
 
-async def show_support(query):
-    support_text = """
-<b>💬 sᴜᴘᴘᴏʀᴛ & ʜᴇʟᴘ ᴄᴇɴᴛᴇʀ</b>
+aSync def Show_Support(query):
+    Support_teXt = """
+<b>💬 SUPPORT & HELP CENTER</b>
 
-<blockquote expandable>💡 <b>ɴᴇᴇᴅ ᴀssɪsᴛᴀɴᴄᴇ?</b>
-ᴡᴇ'ʀᴇ ʜᴇʀᴇ ᴛᴏ ʜᴇʟᴘ ʙᴏᴜ 24/7!
+<blockquote eXpandable>💡 <b>NEED ASSISTANCE?</b>
+WE'RE HERE TO HELP BOU 24/7!
 
+<<<<<<< HEAD
 📌 <b>ǫᴜɪᴄᴋ ʜᴇʟᴘ:</b>
 • ɢᴇᴛᴛɪɴɢ sᴛᴀʀᴛᴇᴅ: ᴀᴅᴅ ʙᴏᴜʀ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴄᴄᴏᴜɴᴛ ғɪʀsᴛ
 • ᴀᴘɪ ᴄʀᴇᴅᴇɴᴛɪᴀʟs: ɢᴇᴛ ғʀᴏᴏ ᴏʙ.ᴛᴇʟᴇɢʀᴀᴍ.ᴏʀɢ
 • ᴀᴜᴛᴏ ʀᴇᴘʟʏ: ᴇɴᴀʙʟᴇ ɪɴ SETTINGS ᴛᴏ ᴀᴜᴛᴏ-ʀᴇsᴘᴏɴᴅ
 • ADVERTISING: SET AD TEXT, ᴛʜᴇɴ sᴛᴀʀᴛ ᴄᴀᴏᴘᴀɪɢɴ
+=======
+📌 <b>QUICK HELP:</b>
+• GETTING STARTED: ADD BOUR TELEGRAM ACCOUNT ғIRST
+• API CREDENTIALS: GET ғROO OB.TELEGRAM.ORG
+• AUTO REPLY: ENABLE IN SETTINGS TO AUTO-RESPOND
+• ADVERTISING: SET AD TEXT, THEN START CAOPAIGN
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
-📞 <b>ᴄᴏɴᴛᴀᴄᴛ ᴏᴘᴛɪᴏɴs:</b>
-• ᴀᴅᴏɪɴ sᴜᴘᴘᴏʀᴛ: ᴅɪʀᴇᴄᴛ ʜᴇʟᴘ ғʀᴏᴏ ᴅᴇᴏ ᴇʟᴏᴘᴇʀ
-• ᴛᴜᴛᴏʀɪᴀʟ: sᴛᴇᴘ-ʙʙ-sᴛᴇᴘ ɢᴜɪᴅᴇ ᴛᴏ ᴜsᴇ ʙᴏᴛ
+📞 <b>CONTACT OPTIONS:</b>
+• ADOIN SUPPORT: DIRECT HELP ғROO DEO ELOPER
+• TUTORIAL: STEP-BB-STEP GUIDE TO USE BOT
 
-⚠️ <b>ᴄᴏᴏᴏᴏɴ ɪssᴜᴇs:</b>
-• sᴇssɪᴏɴ ᴇxᴘɪʀᴇᴅ? ʀᴇ-ʟᴏɢɪɴ ʙᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ
-• ᴏᴛᴘ ɴᴏᴛ ʀᴇᴄᴇɪᴠᴇᴅ? ᴄʜᴇᴄᴋ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴘᴘ
-• 2ғᴀ ʀᴇǫᴜɪʀᴇᴅ? ᴇɴᴛᴇʀ ʙᴏᴜʀ ᴄʟᴏᴜᴅ ᴘᴀssᴡᴏʀᴅ</blockquote>
+⚠️ <b>COOOON ISSUES:</b>
+• SESSION EXPIRED? RE-LOGIN BOUR ACCOUNT
+• OTP NOT RECEIVED? CHECK TELEGRAM APP
+• 2ғA REQUIRED? ENTER BOUR CLOUD PASSWORD</blockquote>
 """
-    await send_new_message(query, support_text, support_keyboard())
+    await Send_new_meSSage(query, Support_teXt, Support_keyboard())
 
 
-async def show_settings(query, user_id):
-    # Fetch account-level settings for the user's primary account
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    use_multiple = len(accounts) > 1
-    use_forward = False
-    auto_reply = False
-    auto_group_join = False
-    if accounts:
-        s = db.get_account_settings(accounts[0]["id"])
-        use_forward = s.get("use_forward_mode", False) if s else False
-        auto_reply = s.get("auto_reply_enabled", False) if s else False
+aSync def Show_SettingS(query, uSer_id):
+    # Fetch account-level SettingS for the uSer'S primary account
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    uSe_multiple = len(accountS) > 1
+    uSe_forward = FalSe
+    auto_reply = FalSe
+    auto_group_join = FalSe
+    if accountS:
+        S = db.get_account_SettingS(accountS[0]["id"])
+        uSe_forward = S.get("uSe_forward_mode", FalSe) if S elSe FalSe
+        auto_reply = S.get("auto_reply_enabled", FalSe) if S elSe FalSe
 
-    mode_text = "💎💎 Multiple" if use_multiple else "💎 Single"
-    forward_text = "📨 Forward" if use_forward else "📤 Send"
-    auto_reply_text = "✅ ON" if auto_reply else "⏸ OFF"
-    auto_join_text = "✅ ON" if auto_group_join else "⏸ OFF"
+    mode_teXt = "💎💎 Multiple" if uSe_multiple elSe "💎 Single"
+    forward_teXt = "📨 Forward" if uSe_forward elSe "📤 Send"
+    auto_reply_teXt = "✅ ON" if auto_reply elSe "⏸ OFF"
+    auto_join_teXt = "✅ ON" if auto_group_join elSe "⏸ OFF"
 
+<<<<<<< HEAD
     settings_text = f"""
+=======
+    SettingS_teXt = f"""
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 <b>⚙️ SETTINGS</b>
 
 <b>📊 Current Configuration:</b>
 
-• <b>Account Mode:</b> {mode_text}
-• <b>Message Mode:</b> {forward_text}
-• <b>Auto Reply:</b> {auto_reply_text}
-• <b>Auto Join:</b> {auto_join_text}
+• <b>Account Mode:</b> {mode_teXt}
+• <b>MeSSage Mode:</b> {forward_teXt}
+• <b>Auto Reply:</b> {auto_reply_teXt}
+• <b>Auto Join:</b> {auto_join_teXt}
 
-<i>Tap to change settings:
-For per-account config, open My Accounts → select account.</i>
+<i>Tap to change SettingS:
+For per-account config, open My AccountS → Select account.</i>
 """
 
-    force_sub_settings = db.get_force_sub_settings()
-    force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
+    force_Sub_SettingS = db.get_force_Sub_SettingS()
+    force_Sub_enabled = force_Sub_SettingS.get('enabled', FalSe) if force_Sub_SettingS elSe FalSe
 
-    await send_new_message(query, settings_text, settings_keyboard(use_multiple, use_forward, auto_reply, auto_group_join, force_sub_enabled, db.is_owner(user_id)))
+    await Send_new_meSSage(query, SettingS_teXt, SettingS_keyboard(uSe_multiple, uSe_forward, auto_reply, auto_group_join, force_Sub_enabled, db.iS_owner(uSer_id)))
 
 
-async def toggle_forward_mode(query, user_id):
-    """Toggle forward mode for first active account."""
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    if not accounts:
-        await query.answer("⚠️ No accounts connected. Add an account first.", show_alert=True)
+aSync def toggle_forward_mode(query, uSer_id):
+    """Toggle forward mode for firSt active account."""
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    if not accountS:
+        await query.anSwer("⚠️ No accountS connected. Add an account firSt.", Show_alert=True)
         return
-    acc = accounts[0]
-    s = db.get_account_settings(acc["id"]) or {}
-    current_mode = s.get("use_forward_mode", False)
+    acc = accountS[0]
+    S = db.get_account_SettingS(acc["id"]) or {}
+    current_mode = S.get("uSe_forward_mode", FalSe)
     new_mode = not current_mode
-    db.update_account_settings(acc["id"], use_forward_mode=new_mode)
+    db.update_account_SettingS(acc["id"], uSe_forward_mode=new_mode)
 
     if new_mode:
-        mode_text = "<b>📨 ғᴏʀᴡᴀʀᴅ ᴏᴏᴅᴇ</b>"
-        description = "<i>Messages will be forwarded from Saved Messages</i>"
+        mode_teXt = "<b>📨 ғORWARD OODE</b>"
+        deScription = "<i>MeSSageS will be forwarded from Saved MeSSageS</i>"
         icon = "✅"
+<<<<<<< HEAD
     else:
         mode_text = "<b>📤 SEND ᴏᴏᴅᴇ</b>"
         description = "<i>Messages will be sent directly</i>"
+=======
+    elSe:
+        mode_teXt = "<b>📤 SEND OODE</b>"
+        deScription = "<i>MeSSageS will be Sent directly</i>"
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
         icon = "⏸"
 
-    result_text = f"""
-{icon} <b>ᴏᴏᴅᴇ ᴄʜᴀɴɢᴇᴅ</b>
+    reSult_teXt = f"""
+{icon} <b>OODE CHANGED</b>
 
-✅ Changed to: {mode_text}
-{description}
+✅ Changed to: {mode_teXt}
+{deScription}
 """
-    await send_new_message(query, result_text, back_to_settings_keyboard())
+    await Send_new_meSSage(query, reSult_teXt, back_to_SettingS_keyboard())
 
 
-async def show_auto_reply_menu(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    auto_reply = False
-    is_custom = False
-    if accounts:
-        s = db.get_account_settings(accounts[0]["id"]) or {}
-        auto_reply = s.get("auto_reply_enabled", False)
-        is_custom = bool(s.get("sequential_replies") or s.get("keyword_replies"))
+aSync def Show_auto_reply_menu(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    auto_reply = FalSe
+    iS_cuStom = FalSe
+    if accountS:
+        S = db.get_account_SettingS(accountS[0]["id"]) or {}
+        auto_reply = S.get("auto_reply_enabled", FalSe)
+        iS_cuStom = bool(S.get("Sequential_replieS") or S.get("keyword_replieS"))
 
-    status = "✅ ON" if auto_reply else "⏸ OFF"
-    text_type = "Custom" if is_custom else "Default"
+    StatuS = "✅ ON" if auto_reply elSe "⏸ OFF"
+    teXt_type = "CuStom" if iS_cuStom elSe "Default"
 
+<<<<<<< HEAD
     menu_text = f"""
 <b>💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ SETTINGS</b>
+=======
+    menu_teXt = f"""
+<b>💬 AUTO REPLY SETTINGS</b>
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
 <b>📊 Current Configuration:</b>
 
-• <b>Status:</b> {status}
-• <b>Text Type:</b> {text_type}
+• <b>StatuS:</b> {StatuS}
+• <b>TeXt Type:</b> {teXt_type}
 
-<i>Manage your auto-reply settings:</i>
+<i>Manage your auto-reply SettingS:</i>
 """
-    await send_new_message(query, menu_text, auto_reply_settings_keyboard(auto_reply))
+    await Send_new_meSSage(query, menu_teXt, auto_reply_SettingS_keyboard(auto_reply))
 
 
-async def toggle_auto_reply(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    if not accounts:
-        await query.answer("⚠️ No accounts connected.", show_alert=True)
+aSync def toggle_auto_reply(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    if not accountS:
+        await query.anSwer("⚠️ No accountS connected.", Show_alert=True)
         return
-    acc = accounts[0]
-    s = db.get_account_settings(acc["id"]) or {}
-    current_mode = s.get("auto_reply_enabled", False)
+    acc = accountS[0]
+    S = db.get_account_SettingS(acc["id"]) or {}
+    current_mode = S.get("auto_reply_enabled", FalSe)
     new_mode = not current_mode
-    db.update_account_settings(acc["id"], auto_reply_enabled=new_mode)
+    db.update_account_SettingS(acc["id"], auto_reply_enabled=new_mode)
 
     if new_mode:
-        await telethon_handler.start_all_auto_reply_listeners(user_id, config.AUTO_REPLY_TEXT)
-        status_detail = "Auto-reply started"
-    else:
-        await telethon_handler.stop_all_auto_reply_listeners(user_id)
-        status_detail = "Auto-reply stopped"
+        await telethon_handler.Start_all_auto_reply_liStenerS(uSer_id, config.AUTO_REPLY_TEXT)
+        StatuS_detail = "Auto-reply Started"
+    elSe:
+        await telethon_handler.Stop_all_auto_reply_liStenerS(uSer_id)
+        StatuS_detail = "Auto-reply Stopped"
 
-    status = "✅ ON" if new_mode else "⏸ OFF"
-    result_text = f"""
-<b>💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ</b>
+    StatuS = "✅ ON" if new_mode elSe "⏸ OFF"
+    reSult_teXt = f"""
+<b>💬 AUTO REPLY</b>
 
-✅ Auto Reply is now: <b>{status}</b>
-📊 {status_detail}
+✅ Auto Reply iS now: <b>{StatuS}</b>
+📊 {StatuS_detail}
 """
-    await send_new_message(query, result_text, auto_reply_settings_keyboard(new_mode))
+    await Send_new_meSSage(query, reSult_teXt, auto_reply_SettingS_keyboard(new_mode))
 
 
-async def set_default_reply_text(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    if accounts:
-        s = db.get_account_settings(accounts[0]["id"]) or {}
-        auto_reply = s.get("auto_reply_enabled", False)
+aSync def Set_default_reply_teXt(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    if accountS:
+        S = db.get_account_SettingS(accountS[0]["id"]) or {}
+        auto_reply = S.get("auto_reply_enabled", FalSe)
         if auto_reply:
-            await telethon_handler.start_all_auto_reply_listeners(user_id, config.AUTO_REPLY_TEXT)
-    else:
-        auto_reply = False
+            await telethon_handler.Start_all_auto_reply_liStenerS(uSer_id, config.AUTO_REPLY_TEXT)
+    elSe:
+        auto_reply = FalSe
 
-    result_text = f"""
-<b>📝 ᴅᴇғᴀᴜʟᴛ ᴛᴇxᴛ sᴇᴛ</b>
+    reSult_teXt = f"""
+<b>📝 DEғAULT TEXT SET</b>
 
-✅ Now using default reply text:
+✅ Now uSing default reply teXt:
 
 {config.AUTO_REPLY_TEXT}
 """
-    await send_new_message(query, result_text, auto_reply_settings_keyboard(auto_reply))
+    await Send_new_meSSage(query, reSult_teXt, auto_reply_SettingS_keyboard(auto_reply))
 
 
-async def prompt_add_reply_text(query, user_id):
-    user_states[user_id] = {"state": "awaiting_reply_text"}
+aSync def prompt_add_reply_teXt(query, uSer_id):
+    uSer_StateS[uSer_id] = {"State": "awaiting_reply_teXt"}
 
-    prompt_text = """
-<b>• ᴀᴅᴅ ʀᴇᴘʟʏ ᴛᴇxᴛ</b>
+    prompt_teXt = """
+<b>• ADD REPLY TEXT</b>
 
-“ <b>Send your custom auto-reply text:</b>
+“ <b>Send your cuStom auto-reply teXt:</b>
 
-<i>This message will be sent automatically when someone DMs your account.</i>
+<i>ThiS meSSage will be Sent automatically when Someone DMS your account.</i>
 """
 
-    await send_new_message(query, prompt_text, back_to_auto_reply_keyboard())
+    await Send_new_meSSage(query, prompt_teXt, back_to_auto_reply_keyboard())
 
 
-async def delete_reply_text(query, user_id):
-    user = db.get_user(user_id)
-    current_text = user.get('auto_reply_text', '') if user else ''
-    auto_reply = user.get('auto_reply_enabled', False) if user else False
+aSync def delete_reply_teXt(query, uSer_id):
+    uSer = db.get_uSer(uSer_id)
+    current_teXt = uSer.get('auto_reply_teXt', '') if uSer elSe ''
+    auto_reply = uSer.get('auto_reply_enabled', FalSe) if uSer elSe FalSe
 
-    if not current_text:
-        result_text = """
-<b>✅ ɴᴏ ᴄᴜsᴛᴏᴏ ᴛᴇxᴛ</b>
+    if not current_teXt:
+        reSult_teXt = """
+<b>✅ NO CUSTOO TEXT</b>
 
-<i>You don't have any custom reply text set. Using default text.</i>
+<i>You don't have any cuStom reply teXt Set. USing default teXt.</i>
 """
-    else:
-        db.update_user(user_id, auto_reply_text='')
+    elSe:
+        db.update_uSer(uSer_id, auto_reply_teXt='')
 
         if auto_reply:
-            await telethon_handler.start_all_auto_reply_listeners(user_id, config.AUTO_REPLY_TEXT)
+            await telethon_handler.Start_all_auto_reply_liStenerS(uSer_id, config.AUTO_REPLY_TEXT)
 
-        result_text = """
-<b>🗑️ ᴛᴇxᴛ ᴅᴇʟᴇᴛᴇᴅ</b>
+        reSult_teXt = """
+<b>🗑️ TEXT DELETED</b>
 
-✅ Custom reply text has been deleted.
+✅ CuStom reply teXt haS been deleted.
 
-<i>Now using default text.</i>
+<i>Now uSing default teXt.</i>
 """
 
-    await send_new_message(query, result_text, auto_reply_settings_keyboard(auto_reply))
+    await Send_new_meSSage(query, reSult_teXt, auto_reply_SettingS_keyboard(auto_reply))
 
 
-async def view_reply_text(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    auto_reply = False
-    custom_text = ""
-    if accounts:
-        s = db.get_account_settings(accounts[0]["id"]) or {}
-        auto_reply = s.get("auto_reply_enabled", False)
-        replies = s.get("sequential_replies") or []
-        custom_text = replies[0].get("text", "") if replies else ""
+aSync def view_reply_teXt(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    auto_reply = FalSe
+    cuStom_teXt = ""
+    if accountS:
+        S = db.get_account_SettingS(accountS[0]["id"]) or {}
+        auto_reply = S.get("auto_reply_enabled", FalSe)
+        replieS = S.get("Sequential_replieS") or []
+        cuStom_teXt = replieS[0].get("teXt", "") if replieS elSe ""
 
-    if custom_text:
-        text_type = "Custom"
-        display_text = custom_text
-    else:
-        text_type = "Default"
-        display_text = config.AUTO_REPLY_TEXT
+    if cuStom_teXt:
+        teXt_type = "CuStom"
+        diSplay_teXt = cuStom_teXt
+    elSe:
+        teXt_type = "Default"
+        diSplay_teXt = config.AUTO_REPLY_TEXT
 
-    result_text = f"""
-<b>‘ï📤 ᴄᴜʀʀᴇɴᴛ ʀᴇᴘʟʏ ᴛᴇxᴛ</b>
+    reSult_teXt = f"""
+<b>‘ï📤 CURRENT REPLY TEXT</b>
 
-<b>📊 Type:</b> {text_type}
+<b>📊 Type:</b> {teXt_type}
 
-<b>📝 Text:</b>
-{display_text}
+<b>📝 TeXt:</b>
+{diSplay_teXt}
 """
-    await send_new_message(query, result_text, auto_reply_settings_keyboard(auto_reply))
+    await Send_new_meSSage(query, reSult_teXt, auto_reply_SettingS_keyboard(auto_reply))
 
 
-async def toggle_auto_group_join(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    if not accounts:
-        await query.answer("⚠️ No accounts connected.", show_alert=True)
+aSync def toggle_auto_group_join(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    if not accountS:
+        await query.anSwer("⚠️ No accountS connected.", Show_alert=True)
         return
-    acc = accounts[0]
-    s = db.get_account_settings(acc["id"]) or {}
-    current_mode = s.get("auto_group_join", False)
+    acc = accountS[0]
+    S = db.get_account_SettingS(acc["id"]) or {}
+    current_mode = S.get("auto_group_join", FalSe)
     new_mode = not current_mode
-    db.update_account_settings(acc["id"], auto_group_join=new_mode)
+    db.update_account_SettingS(acc["id"], auto_group_join=new_mode)
 
-    accounts_all = db.get_accounts(user_id, logged_in_only=True)
-    use_multiple = len(accounts_all) > 1
-    use_forward = s.get("use_forward_mode", False)
-    auto_reply = s.get("auto_reply_enabled", False)
-    force_sub_settings = db.get_force_sub_settings() or {}
-    force_sub_enabled = force_sub_settings.get('enabled', False)
+    accountS_all = db.get_accountS(uSer_id, logged_in_only=True)
+    uSe_multiple = len(accountS_all) > 1
+    uSe_forward = S.get("uSe_forward_mode", FalSe)
+    auto_reply = S.get("auto_reply_enabled", FalSe)
+    force_Sub_SettingS = db.get_force_Sub_SettingS() or {}
+    force_Sub_enabled = force_Sub_SettingS.get('enabled', FalSe)
 
-    status = "✅ ON" if new_mode else "⏸ OFF"
-    result_text = f"""
-<b>👥 ᴀᴜᴛᴏ ɢʀᴏᴜᴘ ᴊᴏɪɴ</b>
+    StatuS = "✅ ON" if new_mode elSe "⏸ OFF"
+    reSult_teXt = f"""
+<b>👥 AUTO GROUP JOIN</b>
 
-✅ Auto Join is now: <b>{status}</b>
+✅ Auto Join iS now: <b>{StatuS}</b>
 
-<i>When enabled, accounts will auto-join groups from links</i>
+<i>When enabled, accountS will auto-join groupS from linkS</i>
 """
-    await send_new_message(query, result_text, settings_keyboard(use_multiple, use_forward, auto_reply, new_mode, force_sub_enabled, db.is_owner(user_id)))
+    await Send_new_meSSage(query, reSult_teXt, SettingS_keyboard(uSe_multiple, uSe_forward, auto_reply, new_mode, force_Sub_enabled, db.iS_owner(uSer_id)))
 
 
-async def show_target_adv(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
+aSync def Show_target_adv(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
     target_mode = "all"
-    if accounts:
-        s = db.get_account_settings(accounts[0]["id"]) or {}
-        target_mode = s.get("target_mode", "all")
+    if accountS:
+        S = db.get_account_SettingS(accountS[0]["id"]) or {}
+        target_mode = S.get("target_mode", "all")
 
+<<<<<<< HEAD
     target_text = f"""
 <b>🎯 ᴛᴀʀɢᴇᴛ ADVERTISING</b>
+=======
+    target_teXt = f"""
+<b>🎯 TARGET ADVERTISING</b>
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
 <b>📊 Current Mode:</b> <code>{target_mode.upper()}</code>
 
-📢 <b>All Groups</b> - Send to all groups
-🎯 <b>Selected</b> - Send to specific groups
+📢 <b>All GroupS</b> - Send to all groupS
+🎯 <b>Selected</b> - Send to Specific groupS
 """
-    await send_new_message(query, target_text, target_adv_keyboard(target_mode))
+    await Send_new_meSSage(query, target_teXt, target_adv_keyboard(target_mode))
 
 
-async def set_target_all_groups(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    if accounts:
-        db.update_account_settings(accounts[0]["id"], target_mode="all")
+aSync def Set_target_all_groupS(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    if accountS:
+        db.update_account_SettingS(accountS[0]["id"], target_mode="all")
 
-    result_text = """
-<b>✅ ᴛᴀʀɢᴇᴛ sᴇᴛ</b>
+    reSult_teXt = """
+<b>✅ TARGET SET</b>
 
 • Target Mode: <b>ALL GROUPS</b>
 
-<i>Messages will be sent to all groups</i>
+<i>MeSSageS will be Sent to all groupS</i>
 """
-    await send_new_message(query, result_text, target_adv_keyboard("all"))
+    await Send_new_meSSage(query, reSult_teXt, target_adv_keyboard("all"))
 
 
-async def show_selected_groups_menu(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    if accounts:
-        db.update_account_settings(accounts[0]["id"], target_mode="selected")
+aSync def Show_Selected_groupS_menu(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    if accountS:
+        db.update_account_SettingS(accountS[0]["id"], target_mode="Selected")
 
-    target_groups = db.get_target_groups(user_id)
+    target_groupS = db.get_target_groupS(uSer_id)
 
-    menu_text = f"""
-<b>🕐¯ sᴇʟᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs</b>
+    menu_teXt = f"""
+<b>🕐¯ SELECTED GROUPS</b>
 
-<b>📊 Selected Groups:</b> <code>{len(target_groups)}</code>
+<b>📊 Selected GroupS:</b> <code>{len(target_groupS)}</code>
 
-• Add groups by ID
-– Remove groups
-📋 View all selected
+• Add groupS by ID
+– Remove groupS
+📋 View all Selected
 """
-    await send_new_message(query, menu_text, selected_groups_keyboard())
+    await Send_new_meSSage(query, menu_teXt, Selected_groupS_keyboard())
 
 
-async def prompt_add_target_group(query, user_id):
-    user_states[user_id] = {"state": "awaiting_target_group_id", "data": {}}
+aSync def prompt_add_target_group(query, uSer_id):
+    uSer_StateS[uSer_id] = {"State": "awaiting_target_group_id", "data": {}}
 
-    prompt_text = """
-<b>• ᴀᴅᴅ ɢʀᴏᴜᴘ</b>
+    prompt_teXt = """
+<b>• ADD GROUP</b>
 
 <i>Send the Group ID to add:</i>
 
 <b>💡 How to get Group ID:</b>
-Forward a message from the group to @userinfobot
+Forward a meSSage from the group to @uSerinfobot
 """
 
-    await send_new_message(query, prompt_text, back_to_menu_keyboard())
+    await Send_new_meSSage(query, prompt_teXt, back_to_menu_keyboard())
 
 
-async def remove_target_group(query, user_id, group_id):
-    removed = db.remove_target_group(user_id, group_id)
+aSync def remove_target_group(query, uSer_id, group_id):
+    removed = db.remove_target_group(uSer_id, group_id)
 
     if removed:
-        result_text = f"""
-<b>✅ ɢʀᴏᴜᴘ ʀᴇᴏᴏᴏ ᴇᴅ</b>
+        reSult_teXt = f"""
+<b>✅ GROUP REOOO ED</b>
 
-🗑️ Group <code>{group_id}</code> removed successfully.
+🗑️ Group <code>{group_id}</code> removed SucceSSfully.
 """
-    else:
-        result_text = f"""
-<b>✅ ᴇʀʀᴏʀ</b>
+    elSe:
+        reSult_teXt = f"""
+<b>✅ ERROR</b>
 
 Group <code>{group_id}</code> not found.
 """
-    await send_new_message(query, result_text, selected_groups_keyboard())
+    await Send_new_meSSage(query, reSult_teXt, Selected_groupS_keyboard())
 
 
-async def show_remove_target_groups(query, user_id, page=0):
-    target_groups = db.get_target_groups(user_id)
+aSync def Show_remove_target_groupS(query, uSer_id, page=0):
+    target_groupS = db.get_target_groupS(uSer_id)
 
-    if not target_groups:
-        await send_new_message(
+    if not target_groupS:
+        await Send_new_meSSage(
             query,
-            "<b>✅ No groups to remove</b>\n\n<i>Add some groups first.</i>",
-            selected_groups_keyboard()
+            "<b>✅ No groupS to remove</b>\n\n<i>Add Some groupS firSt.</i>",
+            Selected_groupS_keyboard()
         )
         return
 
-    await send_new_message(
+    await Send_new_meSSage(
         query,
         "<b>🗑️ Select a group to remove:</b>",
-        remove_groups_keyboard(target_groups, page)
+        remove_groupS_keyboard(target_groupS, page)
     )
 
 
-async def clear_all_target_groups(query, user_id):
-    count = db.clear_target_groups(user_id)
+aSync def clear_all_target_groupS(query, uSer_id):
+    count = db.clear_target_groupS(uSer_id)
 
-    result_text = f"""
-<b>🗑️ ɢʀᴏᴜᴘs ᴄʟᴇᴀʀᴇᴅ</b>
+    reSult_teXt = f"""
+<b>🗑️ GROUPS CLEARED</b>
 
-✅ Removed <code>{count or 0}</code> groups from target list.
+✅ Removed <code>{count or 0}</code> groupS from target liSt.
 """
-    await send_new_message(query, result_text, selected_groups_keyboard())
+    await Send_new_meSSage(query, reSult_teXt, Selected_groupS_keyboard())
 
 
-async def view_target_groups(query, user_id, page=0):
-    target_groups = db.get_target_groups(user_id)
+aSync def view_target_groupS(query, uSer_id, page=0):
+    target_groupS = db.get_target_groupS(uSer_id)
 
-    if not target_groups:
-        await send_new_message(
+    if not target_groupS:
+        await Send_new_meSSage(
             query,
-            "<b>📋 No targeted groups</b>\n\n<i>Add groups to target them.</i>",
-            selected_groups_keyboard()
+            "<b>📋 No targeted groupS</b>\n\n<i>Add groupS to target them.</i>",
+            Selected_groupS_keyboard()
         )
         return
 
-    await send_new_message(
+    await Send_new_meSSage(
         query,
-        f"<b>📋 Targeted Groups ({len(target_groups)})</b>",
-        target_groups_list_keyboard(target_groups, page)
+        f"<b>📋 Targeted GroupS ({len(target_groupS)})</b>",
+        target_groupS_liSt_keyboard(target_groupS, page)
     )
 
 
-async def start_add_account(query, user_id):
-    user_states[user_id] = {"state": "awaiting_api_id", "data": {}}
+aSync def Start_add_account(query, uSer_id):
+    uSer_StateS[uSer_id] = {"State": "awaiting_api_id", "data": {}}
 
-    prompt_text = """
-<b>• ᴀᴅᴅ ᴀᴄᴄᴏᴜɴᴛ</b>
+    prompt_teXt = """
+<b>• ADD ACCOUNT</b>
 
 <b>Step 1/4:</b> Send your <b>API ID</b>
 
-Get it from: <a href="https://my.telegram.org">my.telegram.org</a>
+Get it from: <a href="httpS://my.telegram.org">my.telegram.org</a>
 """
 
-    await send_new_message(query, prompt_text, back_to_menu_keyboard())
+    await Send_new_meSSage(query, prompt_teXt, back_to_menu_keyboard())
 
 
-async def show_delete_accounts(query, user_id, page=0):
-    accounts = db.get_accounts(user_id)
+aSync def Show_delete_accountS(query, uSer_id, page=0):
+    accountS = db.get_accountS(uSer_id)
 
-    if not accounts:
-        await send_new_message(
+    if not accountS:
+        await Send_new_meSSage(
             query,
-            "<b>✅ No accounts to delete</b>\n\n<i>Add an account first.</i>",
-            accounts_menu_keyboard()
+            "<b>✅ No accountS to delete</b>\n\n<i>Add an account firSt.</i>",
+            accountS_menu_keyboard()
         )
         return
 
-    await send_new_message(
+    await Send_new_meSSage(
         query,
         "<b>🗑️ Select an account to delete:</b>",
-        delete_accounts_keyboard(accounts, page)
+        delete_accountS_keyboard(accountS, page)
     )
 
 
-async def confirm_delete_account(query, account_id):
+aSync def confirm_delete_account(query, account_id):
     account = db.get_account(account_id)
 
     if not account:
-        await send_new_message(
+        await Send_new_meSSage(
             query,
             "<b>✅ Account not found</b>",
-            accounts_menu_keyboard()
+            accountS_menu_keyboard()
         )
         return
 
-    display_name = account.get('account_first_name') or account.get('phone', 'Unknown')
+    diSplay_name = account.get('account_firSt_name') or account.get('phone', 'Unknown')
 
-    confirm_text = f"""
-<b>⚠️ ᴄᴏɴғɪʀᴏ ᴅᴇʟᴇᴛᴇ</b>
+    confirm_teXt = f"""
+<b>⚠️ CONғIRO DELETE</b>
 
-Are you sure you want to delete:
-<b>{display_name}</b>?
+Are you Sure you want to delete:
+<b>{diSplay_name}</b>?
 
-<i>This action cannot be undone.</i>
+<i>ThiS action cannot be undone.</i>
 """
-    await send_new_message(query, confirm_text, confirm_delete_keyboard(account_id))
+    await Send_new_meSSage(query, confirm_teXt, confirm_delete_keyboard(account_id))
 
 
-async def delete_account(query, user_id, account_id):
-    deleted = db.delete_account(account_id, user_id)
+aSync def delete_account(query, uSer_id, account_id):
+    deleted = db.delete_account(account_id, uSer_id)
 
     if deleted:
-        result_text = """
-<b>✅ ᴀᴄᴄᴏᴜɴᴛ ᴅᴇʟᴇᴛᴇᴅ</b>
+        reSult_teXt = """
+<b>✅ ACCOUNT DELETED</b>
 
-Account removed successfully.
+Account removed SucceSSfully.
 """
-    else:
-        result_text = """
-<b>✅ ᴇʀʀᴏʀ</b>
+    elSe:
+        reSult_teXt = """
+<b>✅ ERROR</b>
 
 Failed to delete account.
 """
-    await send_new_message(query, result_text, accounts_menu_keyboard())
+    await Send_new_meSSage(query, reSult_teXt, accountS_menu_keyboard())
 
 
-async def show_load_groups_options(query):
-    """Show options for loading groups"""
-    options_text = """
-<b>📂 ʟᴏᴀᴅ ɢʀᴏᴜᴘs/ᴏᴀʀᴋᴇᴛᴘʟᴀᴄᴇs</b>
+aSync def Show_load_groupS_optionS(query):
+    """Show optionS for loading groupS"""
+    optionS_teXt = """
+<b>📂 LOAD GROUPS/OARKETPLACES</b>
 
-<b>◈ ʟᴏᴀᴅ ᴏʙ ɢʀᴏᴜᴘs</b>
-Load groups from your logged-in account
+<b>◈ LOAD OB GROUPS</b>
+Load groupS from your logged-in account
 
-<b>≡ ʟᴏᴀᴅ ᴅᴇғᴀᴜʟᴛ ɢʀᴏᴜᴘs</b>
-Load groups from group_mps.txt file
+<b>≡ LOAD DEғAULT GROUPS</b>
+Load groupS from group_mpS.tXt file
 
 <i>Select an option:</i>
 """
-    await send_new_message(query, options_text, load_groups_options_keyboard())
+    await Send_new_meSSage(query, optionS_teXt, load_groupS_optionS_keyboard())
 
 
-async def load_groups(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
+aSync def load_groupS(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
 
-    if not accounts:
-        await send_new_message(
+    if not accountS:
+        await Send_new_meSSage(
             query,
-            "<b>✅ No logged in accounts</b>\n\n<i>Please add and login to an account first.</i>",
+            "<b>✅ No logged in accountS</b>\n\n<i>PleaSe add and login to an account firSt.</i>",
             main_menu_keyboard()
         )
         return
 
-    if len(accounts) == 1:
-        account = accounts[0]
-        account_id = str(account.get("id", account.get("_id", "")))
+    if len(accountS) == 1:
+        account = accountS[0]
+        account_id = Str(account.get("id", account.get("_id", "")))
 
-        await send_new_message(
+        await Send_new_meSSage(
             query,
-            "<b>⏳ Loading groups...</b>\n\n<i>Please wait while we fetch your groups and marketplaces.</i>",
+            "<b>⏳ Loading groupS...</b>\n\n<i>PleaSe wait while we fetch your groupS and marketplaceS.</i>",
             None
         )
 
-        result = await telethon_handler.get_groups_and_marketplaces(account_id)
+        reSult = await telethon_handler.get_groupS_and_marketplaceS(account_id)
 
-        if not result["success"]:
-            await send_new_message(
+        if not reSult["SucceSS"]:
+            await Send_new_meSSage(
                 query,
-                f"<b>✅ Error loading groups</b>\n\n{result.get('error', 'Unknown error')}",
+                f"<b>✅ Error loading groupS</b>\n\n{reSult.get('error', 'Unknown error')}",
                 main_menu_keyboard()
             )
             return
 
-        all_chats = result["groups"] + result["marketplaces"]
+        all_chatS = reSult["groupS"] + reSult["marketplaceS"]
 
-        groups_text = f"""
-<b>📂 ɢʀᴏᴜᴘs & ᴏᴀʀᴋᴇᴛᴘʟᴀᴄᴇs</b>
+        groupS_teXt = f"""
+<b>📂 GROUPS & OARKETPLACES</b>
 
-👥 <b>Groups:</b> <code>{len(result['groups'])}</code>
-🏪 <b>Marketplaces:</b> <code>{len(result['marketplaces'])}</code>
-📊 <b>Total:</b> <code>{result['total']}</code>
+👥 <b>GroupS:</b> <code>{len(reSult['groupS'])}</code>
+🏪 <b>MarketplaceS:</b> <code>{len(reSult['marketplaceS'])}</code>
+📊 <b>Total:</b> <code>{reSult['total']}</code>
 """
-        await send_new_message(query, groups_text, groups_keyboard(all_chats, account_id))
-    else:
-        await send_new_message(
+        await Send_new_meSSage(query, groupS_teXt, groupS_keyboard(all_chatS, account_id))
+    elSe:
+        await Send_new_meSSage(
             query,
-            "<b>📂 Select an account to load groups:</b>",
-            single_account_selection_keyboard([acc for acc in accounts if acc.get('is_logged_in')])
+            "<b>📂 Select an account to load groupS:</b>",
+            Single_account_Selection_keyboard([acc for acc in accountS if acc.get('iS_logged_in')])
         )
 
 
-async def load_default_groups(query, user_id, context):
-    """Load groups from group_mps.txt file and auto-join with user's logs channel"""
+aSync def load_default_groupS(query, uSer_id, conteXt):
+    """Load groupS from group_mpS.tXt file and auto-join with uSer'S logS channel"""
     try:
-        # Check if user has logs channel set and verified
-        logs_channel = db.get_logs_channel(user_id)
-        if not logs_channel or not logs_channel.get('verified'):
-            await send_new_message(
+        # Check if uSer haS logS channel Set and verified
+        logS_channel = db.get_logS_channel(uSer_id)
+        if not logS_channel or not logS_channel.get('verified'):
+            await Send_new_meSSage(
                 query,
+<<<<<<< HEAD
                 "<b>⚠️ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
                 "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀɴᴅ ᴠᴇʀɪғʏ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏʀᴇ ᴀᴜᴛᴏ-ᴊᴏɪɴɪɴɢ ɢʀᴏᴜᴘs.</blockquote>\n\n"
                 "<b>ʜᴏᴡ ᴛᴏ sᴇᴛ ᴜᴘ:</b>\n"
@@ -1237,487 +1300,506 @@ async def load_default_groups(query, user_id, context):
                 "2. ᴀᴅᴅ ᴛʜɪs ʙᴏᴛ ᴀs ᴀᴅᴏɪɴ\n"
                 "3. ɢᴏ ᴛᴏ SETTINGS → ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
                 "4. SEND ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴀɴᴅ ᴠᴇʀɪғʏ.",
+=======
+                "<b>⚠️ LOGS CHANNEL REQUIRED</b>\n\n"
+                "<blockquote>BOU OUST SET UP AND VERIғY A LOGS CHANNEL BEғORE AUTO-JOINING GROUPS.</blockquote>\n\n"
+                "<b>HOW TO SET UP:</b>\n"
+                "1. CREATE A NEW CHANNEL\n"
+                "2. ADD THIS BOT AS ADOIN\n"
+                "3. GO TO SETTINGS → LOGS CHANNEL\n"
+                "4. SEND THE CHANNEL ID AND VERIғY.",
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
                 back_to_menu_keyboard()
             )
             return
 
-        logs_channel_id = logs_channel.get('channel_id')
+        logS_channel_id = logS_channel.get('channel_id')
 
-        # Read group links from file (use bundled file)
-        import os
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        group_file_path = os.path.join(script_dir, '..', 'group_mps.txt')
+        # Read group linkS from file (uSe bundled file)
+        import oS
+        Script_dir = oS.path.dirname(oS.path.abSpath(__file__))
+        group_file_path = oS.path.join(Script_dir, '..', 'group_mpS.tXt')
         
-        # Also check in current directory
-        if not os.path.exists(group_file_path):
-            group_file_path = 'group_mps.txt'
+        # AlSo check in current directory
+        if not oS.path.eXiStS(group_file_path):
+            group_file_path = 'group_mpS.tXt'
         
-        group_links = []
+        group_linkS = []
         try:
-            with open(group_file_path, 'r') as f:
+            with open(group_file_path, 'r') aS f:
                 for line in f:
-                    line = line.strip()
-                    if line and not line.startswith('#'):
-                        group_links.append(line)
-        except FileNotFoundError:
-            await send_new_message(
+                    line = line.Strip()
+                    if line and not line.StartSwith('#'):
+                        group_linkS.append(line)
+        eXcept FileNotFoundError:
+            await Send_new_meSSage(
                 query,
-                "<b>✅ Error</b>\n\n<i>Group links file not found. Please contact admin.</i>",
+                "<b>✅ Error</b>\n\n<i>Group linkS file not found. PleaSe contact admin.</i>",
                 main_menu_keyboard()
             )
             return
 
-        if not group_links:
-            await send_new_message(
+        if not group_linkS:
+            await Send_new_meSSage(
                 query,
-                "<b>✅ No groups found</b>\n\n<i>No valid group links found in the file.</i>",
+                "<b>✅ No groupS found</b>\n\n<i>No valid group linkS found in the file.</i>",
                 main_menu_keyboard()
             )
             return
 
-        # Get user's accounts
-        accounts = db.get_accounts(user_id, logged_in_only=True)
-        if not accounts:
-            await send_new_message(
+        # Get uSer'S accountS
+        accountS = db.get_accountS(uSer_id, logged_in_only=True)
+        if not accountS:
+            await Send_new_meSSage(
                 query,
-                "<b>✅ No logged in accounts</b>\n\n<i>Please add and login to an account first.</i>",
+                "<b>✅ No logged in accountS</b>\n\n<i>PleaSe add and login to an account firSt.</i>",
                 main_menu_keyboard()
             )
             return
 
-        await send_new_message(
+        await Send_new_meSSage(
             query,
-            f"<b>⏳ Auto-joining groups...</b>\n\n<i>Found {len(group_links)} groups to join. This may take a while.</i>",
+            f"<b>⏳ Auto-joining groupS...</b>\n\n<i>Found {len(group_linkS)} groupS to join. ThiS may take a while.</i>",
             None
         )
 
-        # Join groups using the first account with user's logs channel
-        account = accounts[0]
-        account_id = str(account["_id"])
+        # Join groupS uSing the firSt account with uSer'S logS channel
+        account = accountS[0]
+        account_id = Str(account["_id"])
 
-        # Auto-join groups with user's logs channel (only this user's logs will be sent)
-        result = await telethon_handler.auto_join_groups_from_file(
+        # Auto-join groupS with uSer'S logS channel (only thiS uSer'S logS will be Sent)
+        reSult = await telethon_handler.auto_join_groupS_from_file(
             account_id,
-            group_links,
-            logs_channel_id=logs_channel_id,
-            user_id=user_id
+            group_linkS,
+            logS_channel_id=logS_channel_id,
+            uSer_id=uSer_id
         )
 
-        result_text = f"""
-<b>✅ ᴀᴜᴛᴏ-ᴊᴏɪɴ ᴄᴏᴏᴘʟᴇᴛᴇ</b>
+        reSult_teXt = f"""
+<b>✅ AUTO-JOIN COOPLETE</b>
 
-📊 <b>Results:</b>
-✅ Joined: <code>{result['joined']}</code>
-⚠️ Already member: <code>{result['already_member']}</code>
-❌ Failed: <code>{result['failed']}</code>
-📊 Total: <code>{result['total']}</code>
+📊 <b>ReSultS:</b>
+✅ Joined: <code>{reSult['joined']}</code>
+⚠️ Already member: <code>{reSult['already_member']}</code>
+❌ Failed: <code>{reSult['failed']}</code>
+📊 Total: <code>{reSult['total']}</code>
 
-<i>All logs sent to your logs channel only.</i>
+<i>All logS Sent to your logS channel only.</i>
 """
 
-        await send_new_message(query, result_text, main_menu_keyboard())
+        await Send_new_meSSage(query, reSult_teXt, main_menu_keyboard())
 
-    except Exception as e:
-        logger.error(f"Error loading default groups: {e}")
-        await send_new_message(
+    eXcept EXception aS e:
+        logger.error(f"Error loading default groupS: {e}")
+        await Send_new_meSSage(
             query,
-            f"<b>✅ Error</b>\n\n<i>{str(e)}</i>",
+            f"<b>✅ Error</b>\n\n<i>{Str(e)}</i>",
             main_menu_keyboard()
         )
 
 
-async def load_account_groups(query, user_id, account_id, context):
-    await send_new_message(
+aSync def load_account_groupS(query, uSer_id, account_id, conteXt):
+    await Send_new_meSSage(
         query,
-        "<b>⏳ Loading groups...</b>\n\n<i>Please wait...</i>",
+        "<b>⏳ Loading groupS...</b>\n\n<i>PleaSe wait...</i>",
         None
     )
 
-    result = await telethon_handler.get_groups_and_marketplaces(account_id)
+    reSult = await telethon_handler.get_groupS_and_marketplaceS(account_id)
 
-    if not result["success"]:
-        await send_new_message(
+    if not reSult["SucceSS"]:
+        await Send_new_meSSage(
             query,
-            f"<b>✅ Error loading groups</b>\n\n{result.get('error', 'Unknown error')}",
+            f"<b>✅ Error loading groupS</b>\n\n{reSult.get('error', 'Unknown error')}",
             main_menu_keyboard()
         )
         return
 
-    all_chats = result["groups"] + result["marketplaces"]
-    context.user_data[f"groups_{account_id}"] = all_chats
+    all_chatS = reSult["groupS"] + reSult["marketplaceS"]
+    conteXt.uSer_data[f"groupS_{account_id}"] = all_chatS
 
-    groups_text = f"""
-<b>📂 ɢʀᴏᴜᴘs & ᴏᴀʀᴋᴇᴛᴘʟᴀᴄᴇs</b>
+    groupS_teXt = f"""
+<b>📂 GROUPS & OARKETPLACES</b>
 
-👥 <b>Groups:</b> <code>{len(result['groups'])}</code>
-🏪 <b>Marketplaces:</b> <code>{len(result['marketplaces'])}</code>
-📊 <b>Total:</b> <code>{result['total']}</code>
+👥 <b>GroupS:</b> <code>{len(reSult['groupS'])}</code>
+🏪 <b>MarketplaceS:</b> <code>{len(reSult['marketplaceS'])}</code>
+📊 <b>Total:</b> <code>{reSult['total']}</code>
 """
 
-    await send_new_message(query, groups_text, groups_keyboard(all_chats, account_id))
+    await Send_new_meSSage(query, groupS_teXt, groupS_keyboard(all_chatS, account_id))
 
 
-async def load_account_groups_page(query, user_id, account_id, page, context):
-    all_chats = context.user_data.get(f"groups_{account_id}", [])
+aSync def load_account_groupS_page(query, uSer_id, account_id, page, conteXt):
+    all_chatS = conteXt.uSer_data.get(f"groupS_{account_id}", [])
 
-    if not all_chats:
-        result = await telethon_handler.get_groups_and_marketplaces(account_id)
-        if result["success"]:
-            all_chats = result["groups"] + result["marketplaces"]
-            context.user_data[f"groups_{account_id}"] = all_chats
+    if not all_chatS:
+        reSult = await telethon_handler.get_groupS_and_marketplaceS(account_id)
+        if reSult["SucceSS"]:
+            all_chatS = reSult["groupS"] + reSult["marketplaceS"]
+            conteXt.uSer_data[f"groupS_{account_id}"] = all_chatS
 
-    await send_new_message(
+    await Send_new_meSSage(
         query,
-        f"<b>📂 Groups (Page {page + 1})</b>",
-        groups_keyboard(all_chats, account_id, page)
+        f"<b>📂 GroupS (Page {page + 1})</b>",
+        groupS_keyboard(all_chatS, account_id, page)
     )
 
 
-async def show_statistics(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
+aSync def Show_StatiSticS(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
 
+<<<<<<< HEAD
     if not accounts:
         stats_text = """
+=======
+    if not accountS:
+        StatS_teXt = """
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 <b>📊 STATISTICS</b>
 
-<i>No accounts found. Add an account first.</i>
+<i>No accountS found. Add an account firSt.</i>
 """
-        await send_new_message(query, stats_text, back_to_settings_keyboard())
+        await Send_new_meSSage(query, StatS_teXt, back_to_SettingS_keyboard())
         return
 
+<<<<<<< HEAD
     stats_text = "<b>📊 ʙᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ STATISTICS</b>\n\n"
+=======
+    StatS_teXt = "<b>📊 BOUR ACCOUNT STATISTICS</b>\n\n"
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
-    for account in accounts:
-        display_name = account.get('account_first_name') or account.get('phone', 'Unknown')
-        if account.get('account_username'):
-            display_name = f"{display_name} (@{account.get('account_username')})"
+    for account in accountS:
+        diSplay_name = account.get('account_firSt_name') or account.get('phone', 'Unknown')
+        if account.get('account_uSername'):
+            diSplay_name = f"{diSplay_name} (@{account.get('account_uSername')})"
 
         acc_id = account.get("id", account.get("_id", ""))
-        stats = db.get_account_stats(acc_id) if hasattr(db, 'get_account_stats') else {}
+        StatS = db.get_account_StatS(acc_id) if haSattr(db, 'get_account_StatS') elSe {}
 
-        sent = (stats or {}).get("messages_sent", 0)
-        failed = (stats or {}).get("messages_failed", 0)
-        groups = (stats or {}).get("groups_count", 0) + (stats or {}).get("marketplaces_count", 0)
-        replies = (stats or {}).get("auto_replies_sent", 0)
-        joined = (stats or {}).get("groups_joined", 0)
+        Sent = (StatS or {}).get("meSSageS_Sent", 0)
+        failed = (StatS or {}).get("meSSageS_failed", 0)
+        groupS = (StatS or {}).get("groupS_count", 0) + (StatS or {}).get("marketplaceS_count", 0)
+        replieS = (StatS or {}).get("auto_replieS_Sent", 0)
+        joined = (StatS or {}).get("groupS_joined", 0)
 
-        stats_text += f"""
-<b>💎 {display_name[:30]}</b>
-✅ Sent: <code>{sent}</code> | ❌ Failed: <code>{failed}</code>
-👥 Groups: <code>{groups}</code> | 💬 Replies: <code>{replies}</code>
+        StatS_teXt += f"""
+<b>💎 {diSplay_name[:30]}</b>
+✅ Sent: <code>{Sent}</code> | ❌ Failed: <code>{failed}</code>
+👥 GroupS: <code>{groupS}</code> | 💬 ReplieS: <code>{replieS}</code>
 👥 Joined: <code>{joined}</code>
 """
 
-    stats_text += f"""
-<b>💎 Total Accounts:</b> <code>{len(accounts)}</code>
+    StatS_teXt += f"""
+<b>💎 Total AccountS:</b> <code>{len(accountS)}</code>
 """
-    await send_new_message(query, stats_text, back_to_settings_keyboard())
+    await Send_new_meSSage(query, StatS_teXt, back_to_SettingS_keyboard())
 
 
-async def show_ad_text_menu(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    ad_text = None
-    if accounts:
-        s = db.get_account_settings(accounts[0]["id"]) or {}
-        ad_text = s.get("ad_text")
-    ad_status = "✅ Set" if ad_text else "✅ Not Set"
+aSync def Show_ad_teXt_menu(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    ad_teXt = None
+    if accountS:
+        S = db.get_account_SettingS(accountS[0]["id"]) or {}
+        ad_teXt = S.get("ad_teXt")
+    ad_StatuS = "✅ Set" if ad_teXt elSe "✅ Not Set"
 
-    menu_text = f"""
-<b>📝 ᴀᴅ ᴛᴇxᴛ ᴏᴇɴᴜ</b>
+    menu_teXt = f"""
+<b>📝 AD TEXT OENU</b>
 
-“ <b>Ad Text:</b> {ad_status}
+“ <b>Ad TeXt:</b> {ad_StatuS}
 
 <i>Select an option:</i>
 """
-    await send_new_message(query, menu_text, ad_text_menu_keyboard())
+    await Send_new_meSSage(query, menu_teXt, ad_teXt_menu_keyboard())
 
 
-async def show_saved_ad_text(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    ad_text = None
-    if accounts:
-        s = db.get_account_settings(accounts[0]["id"]) or {}
-        ad_text = s.get("ad_text")
+aSync def Show_Saved_ad_teXt(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    ad_teXt = None
+    if accountS:
+        S = db.get_account_SettingS(accountS[0]["id"]) or {}
+        ad_teXt = S.get("ad_teXt")
 
-    if ad_text:
-        display_text = f"""
-<b>📄 sᴀᴠᴇᴅ ᴀᴅ ᴛᴇxᴛ</b>
+    if ad_teXt:
+        diSplay_teXt = f"""
+<b>📄 SAVED AD TEXT</b>
 
-{ad_text[:500]}{'...' if len(ad_text) > 500 else ''}
+{ad_teXt[:500]}{'...' if len(ad_teXt) > 500 elSe ''}
 """
-    else:
-        display_text = """
-<b>📄 sᴀᴠᴇᴅ ᴀᴅ ᴛᴇxᴛ</b>
+    elSe:
+        diSplay_teXt = """
+<b>📄 SAVED AD TEXT</b>
 
-<i>No ad text saved.</i>
+<i>No ad teXt Saved.</i>
 """
-    await send_new_message(query, display_text, ad_text_back_keyboard())
+    await Send_new_meSSage(query, diSplay_teXt, ad_teXt_back_keyboard())
 
 
-async def prompt_ad_text(query, user_id):
-    user_states[user_id] = {"state": "awaiting_ad_text", "data": {}}
+aSync def prompt_ad_teXt(query, uSer_id):
+    uSer_StateS[uSer_id] = {"State": "awaiting_ad_teXt", "data": {}}
 
-    prompt_text = """
-<b>• ᴀᴅᴅ ᴀᴅ ᴛᴇxᴛ</b>
+    prompt_teXt = """
+<b>• ADD AD TEXT</b>
 
-<i>Send your ad text now:</i>
+<i>Send your ad teXt now:</i>
 
-<b>💡 Tips:</b>
-• Use <code>&lt;b&gt;text&lt;/b&gt;</code> for <b>bold</b>
-• Use <code>&lt;i&gt;text&lt;/i&gt;</code> for <i>italic</i>
-• Use <code>&lt;blockquote&gt;text&lt;/blockquote&gt;</code> for quotes
-"""
-
-    await send_new_message(query, prompt_text, ad_text_back_keyboard())
-
-
-async def delete_ad_text(query, user_id):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    if accounts:
-        db.update_account_settings(accounts[0]["id"], ad_text=None)
-
-    result_text = """
-<b>🗑️ ᴀᴅ ᴛᴇxᴛ ᴅᴇʟᴇᴛᴇᴅ</b>
-
-✅ Your ad text has been deleted.
-"""
-    await send_new_message(query, result_text, ad_text_menu_keyboard())
-
-
-async def show_time_options(query):
-    time_text = """
-<b>⏱ sᴇᴛ ᴛɪᴏᴇ ɪɴᴛᴇʀᴠᴀʟ</b>
-
-<i>Select the delay between messages:</i>
+<b>💡 TipS:</b>
+• USe <code>&lt;b&gt;teXt&lt;/b&gt;</code> for <b>bold</b>
+• USe <code>&lt;i&gt;teXt&lt;/i&gt;</code> for <i>italic</i>
+• USe <code>&lt;blockquote&gt;teXt&lt;/blockquote&gt;</code> for quoteS
 """
 
-    await send_new_message(query, time_text, time_keyboard())
+    await Send_new_meSSage(query, prompt_teXt, ad_teXt_back_keyboard())
 
 
-async def set_time_interval(query, user_id, time_val):
-    if time_val == "custom":
-        user_states[user_id] = {"state": "awaiting_custom_time", "data": {}}
-        await send_new_message(
+aSync def delete_ad_teXt(query, uSer_id):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    if accountS:
+        db.update_account_SettingS(accountS[0]["id"], ad_teXt=None)
+
+    reSult_teXt = """
+<b>🗑️ AD TEXT DELETED</b>
+
+✅ Your ad teXt haS been deleted.
+"""
+    await Send_new_meSSage(query, reSult_teXt, ad_teXt_menu_keyboard())
+
+
+aSync def Show_time_optionS(query):
+    time_teXt = """
+<b>⏱ SET TIOE INTERVAL</b>
+
+<i>Select the delay between meSSageS:</i>
+"""
+
+    await Send_new_meSSage(query, time_teXt, time_keyboard())
+
+
+aSync def Set_time_interval(query, uSer_id, time_val):
+    if time_val == "cuStom":
+        uSer_StateS[uSer_id] = {"State": "awaiting_cuStom_time", "data": {}}
+        await Send_new_meSSage(
             query,
-            "<b>⚙️ Custom Time</b>\n\n<i>Send the delay in seconds:</i>",
+            "<b>⚙️ CuStom Time</b>\n\n<i>Send the delay in SecondS:</i>",
             back_to_menu_keyboard()
         )
         return
 
     try:
-        seconds = int(time_val)
-        accounts = db.get_accounts(user_id, logged_in_only=True)
-        if accounts:
-            db.update_account_settings(accounts[0]["id"], time_interval=seconds)
+        SecondS = int(time_val)
+        accountS = db.get_accountS(uSer_id, logged_in_only=True)
+        if accountS:
+            db.update_account_SettingS(accountS[0]["id"], time_interval=SecondS)
 
-        if seconds < 60:
-            time_display = f"{seconds} seconds"
-        elif seconds < 3600:
-            time_display = f"{seconds // 60} minute(s)"
-        else:
-            time_display = f"{seconds // 3600} hour(s)"
+        if SecondS < 60:
+            time_diSplay = f"{SecondS} SecondS"
+        elif SecondS < 3600:
+            time_diSplay = f"{SecondS // 60} minute(S)"
+        elSe:
+            time_diSplay = f"{SecondS // 3600} hour(S)"
 
-        result_text = f"""
-<b>✅ ᴛɪᴏᴇ sᴇᴛ</b>
+        reSult_teXt = f"""
+<b>✅ TIOE SET</b>
 
-⏱ Interval set to: <b>{time_display}</b>
+⏱ Interval Set to: <b>{time_diSplay}</b>
 """
 
-        await send_new_message(query, result_text, advertising_menu_keyboard())
-    except ValueError:
-        await send_new_message(
+        await Send_new_meSSage(query, reSult_teXt, advertiSing_menu_keyboard())
+    eXcept ValueError:
+        await Send_new_meSSage(
             query,
             "<b>✅ Invalid time value</b>",
             time_keyboard()
         )
 
 
-async def set_single_mode(query, user_id):
-    db.update_user(user_id, use_multiple_accounts=False)
+aSync def Set_Single_mode(query, uSer_id):
+    db.update_uSer(uSer_id, uSe_multiple_accountS=FalSe)
 
-    accounts = db.get_accounts(user_id, logged_in_only=True)
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
 
-    if not accounts:
-        force_sub_settings = db.get_force_sub_settings()
-        force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
-        await send_new_message(
+    if not accountS:
+        force_Sub_SettingS = db.get_force_Sub_SettingS()
+        force_Sub_enabled = force_Sub_SettingS.get('enabled', FalSe) if force_Sub_SettingS elSe FalSe
+        await Send_new_meSSage(
             query,
-            "<b>✅ No logged in accounts</b>\n\n<i>Please add an account first.</i>",
-            settings_keyboard(False, False, False, False, force_sub_enabled, db.is_owner(user_id))
+            "<b>✅ No logged in accountS</b>\n\n<i>PleaSe add an account firSt.</i>",
+            SettingS_keyboard(FalSe, FalSe, FalSe, FalSe, force_Sub_enabled, db.iS_owner(uSer_id))
         )
         return
 
-    if len(accounts) == 1:
-        result_text = """
-<b>✅ sɪɴɢʟᴇ ᴏᴏᴅᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ</b>
+    if len(accountS) == 1:
+        reSult_teXt = """
+<b>✅ SINGLE OODE ACTIVATED</b>
 
-💎 Using your only account for advertising.
+💎 USing your only account for advertiSing.
 """
-        user = db.get_user(user_id)
-        use_forward = user.get('use_forward_mode', False) if user else False
-        auto_reply = user.get('auto_reply_enabled', False) if user else False
-        auto_group_join = user.get('auto_group_join_enabled', False) if user else False
+        uSer = db.get_uSer(uSer_id)
+        uSe_forward = uSer.get('uSe_forward_mode', FalSe) if uSer elSe FalSe
+        auto_reply = uSer.get('auto_reply_enabled', FalSe) if uSer elSe FalSe
+        auto_group_join = uSer.get('auto_group_join_enabled', FalSe) if uSer elSe FalSe
 
-        force_sub_settings = db.get_force_sub_settings()
-        force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
+        force_Sub_SettingS = db.get_force_Sub_SettingS()
+        force_Sub_enabled = force_Sub_SettingS.get('enabled', FalSe) if force_Sub_SettingS elSe FalSe
 
-        await send_new_message(query, result_text, settings_keyboard(False, use_forward, auto_reply, auto_group_join, force_sub_enabled, db.is_owner(user_id)))
-    else:
-        await send_new_message(
+        await Send_new_meSSage(query, reSult_teXt, SettingS_keyboard(FalSe, uSe_forward, auto_reply, auto_group_join, force_Sub_enabled, db.iS_owner(uSer_id)))
+    elSe:
+        await Send_new_meSSage(
             query,
-            "<b>💎 Select an account for single mode:</b>",
-            single_account_selection_keyboard(accounts)
+            "<b>💎 Select an account for Single mode:</b>",
+            Single_account_Selection_keyboard(accountS)
         )
 
 
-async def set_multiple_mode(query, user_id, context):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
+aSync def Set_multiple_mode(query, uSer_id, conteXt):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
 
-    if len(accounts) < 2:
-        force_sub_settings = db.get_force_sub_settings()
-        force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
-        await send_new_message(
+    if len(accountS) < 2:
+        force_Sub_SettingS = db.get_force_Sub_SettingS()
+        force_Sub_enabled = force_Sub_SettingS.get('enabled', FalSe) if force_Sub_SettingS elSe FalSe
+        await Send_new_meSSage(
             query,
-            "<b>✅ Need at least 2 accounts</b>\n\n<i>Add more accounts for multiple mode.</i>",
-            settings_keyboard(False, False, False, False, force_sub_enabled, db.is_owner(user_id))
-        )
-        return
-
-    context.user_data["selected_accounts"] = []
-
-    await send_new_message(
-        query,
-        "<b>💎💎 Select accounts for multiple mode:</b>",
-        account_selection_keyboard(accounts, [])
-    )
-
-
-async def toggle_account_selection(query, user_id, account_id, context):
-    selected = context.user_data.get("selected_accounts", [])
-
-    if account_id in selected:
-        selected.remove(account_id)
-    else:
-        selected.append(account_id)
-
-    context.user_data["selected_accounts"] = selected
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-
-    await send_new_message(
-        query,
-        f"<b>💎💎 Selected: {len(selected)} accounts</b>",
-        account_selection_keyboard(accounts, selected)
-    )
-
-
-async def show_account_selection(query, user_id, page, context):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
-    selected = context.user_data.get("selected_accounts", [])
-
-    await send_new_message(
-        query,
-        f"<b>💎💎 Selected: {len(selected)} accounts</b>",
-        account_selection_keyboard(accounts, selected, page)
-    )
-
-
-async def confirm_account_selection(query, user_id, context):
-    selected = context.user_data.get("selected_accounts", [])
-
-    if len(selected) < 2:
-        await send_new_message(
-            query,
-            "<b>✅ Select at least 2 accounts</b>",
-            account_selection_keyboard(db.get_accounts(user_id, logged_in_only=True), selected)
+            "<b>✅ Need at leaSt 2 accountS</b>\n\n<i>Add more accountS for multiple mode.</i>",
+            SettingS_keyboard(FalSe, FalSe, FalSe, FalSe, force_Sub_enabled, db.iS_owner(uSer_id))
         )
         return
 
-    db.update_user(user_id, use_multiple_accounts=True, selected_accounts=selected)
+    conteXt.uSer_data["Selected_accountS"] = []
 
-    user = db.get_user(user_id)
-    use_forward = user.get('use_forward_mode', False) if user else False
-    auto_reply = user.get('auto_reply_enabled', False) if user else False
-    auto_group_join = user.get('auto_group_join_enabled', False) if user else False
+    await Send_new_meSSage(
+        query,
+        "<b>💎💎 Select accountS for multiple mode:</b>",
+        account_Selection_keyboard(accountS, [])
+    )
 
-    result_text = f"""
-<b>✅ ᴏᴜʟᴛɪᴘʟᴇ ᴏᴏᴅᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ</b>
 
-💎💎 Using <b>{len(selected)}</b> accounts for advertising.
+aSync def toggle_account_Selection(query, uSer_id, account_id, conteXt):
+    Selected = conteXt.uSer_data.get("Selected_accountS", [])
+
+    if account_id in Selected:
+        Selected.remove(account_id)
+    elSe:
+        Selected.append(account_id)
+
+    conteXt.uSer_data["Selected_accountS"] = Selected
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+
+    await Send_new_meSSage(
+        query,
+        f"<b>💎💎 Selected: {len(Selected)} accountS</b>",
+        account_Selection_keyboard(accountS, Selected)
+    )
+
+
+aSync def Show_account_Selection(query, uSer_id, page, conteXt):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
+    Selected = conteXt.uSer_data.get("Selected_accountS", [])
+
+    await Send_new_meSSage(
+        query,
+        f"<b>💎💎 Selected: {len(Selected)} accountS</b>",
+        account_Selection_keyboard(accountS, Selected, page)
+    )
+
+
+aSync def confirm_account_Selection(query, uSer_id, conteXt):
+    Selected = conteXt.uSer_data.get("Selected_accountS", [])
+
+    if len(Selected) < 2:
+        await Send_new_meSSage(
+            query,
+            "<b>✅ Select at leaSt 2 accountS</b>",
+            account_Selection_keyboard(db.get_accountS(uSer_id, logged_in_only=True), Selected)
+        )
+        return
+
+    db.update_uSer(uSer_id, uSe_multiple_accountS=True, Selected_accountS=Selected)
+
+    uSer = db.get_uSer(uSer_id)
+    uSe_forward = uSer.get('uSe_forward_mode', FalSe) if uSer elSe FalSe
+    auto_reply = uSer.get('auto_reply_enabled', FalSe) if uSer elSe FalSe
+    auto_group_join = uSer.get('auto_group_join_enabled', FalSe) if uSer elSe FalSe
+
+    reSult_teXt = f"""
+<b>✅ OULTIPLE OODE ACTIVATED</b>
+
+💎💎 USing <b>{len(Selected)}</b> accountS for advertiSing.
 """
 
-    force_sub_settings = db.get_force_sub_settings()
-    force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
+    force_Sub_SettingS = db.get_force_Sub_SettingS()
+    force_Sub_enabled = force_Sub_SettingS.get('enabled', FalSe) if force_Sub_SettingS elSe FalSe
 
-    await send_new_message(query, result_text, settings_keyboard(True, use_forward, auto_reply, auto_group_join, force_sub_enabled, db.is_owner(user_id)))
+    await Send_new_meSSage(query, reSult_teXt, SettingS_keyboard(True, uSe_forward, auto_reply, auto_group_join, force_Sub_enabled, db.iS_owner(uSer_id)))
 
 
-async def show_my_accounts(query, user_id, page=0):
-    accounts = db.get_accounts(user_id)
+aSync def Show_my_accountS(query, uSer_id, page=0):
+    accountS = db.get_accountS(uSer_id)
 
-    if not accounts:
-        await send_new_message(
+    if not accountS:
+        await Send_new_meSSage(
             query,
-            "<b>📋 No accounts</b>\n\n<i>Add an account to get started.</i>",
-            accounts_menu_keyboard()
+            "<b>📋 No accountS</b>\n\n<i>Add an account to get Started.</i>",
+            accountS_menu_keyboard()
         )
         return
 
-    await send_new_message(
+    await Send_new_meSSage(
         query,
-        f"<b>📋 Your Accounts ({len(accounts)})</b>",
-        accounts_keyboard(accounts, page)
+        f"<b>📋 Your AccountS ({len(accountS)})</b>",
+        accountS_keyboard(accountS, page)
     )
 
 
-async def select_single_account(query, user_id, account_id):
-    db.update_user(user_id, use_multiple_accounts=False, selected_single_account=account_id)
+aSync def Select_Single_account(query, uSer_id, account_id):
+    db.update_uSer(uSer_id, uSe_multiple_accountS=FalSe, Selected_Single_account=account_id)
 
     account = db.get_account(account_id)
-    display_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
+    diSplay_name = account.get('account_firSt_name', 'Unknown') if account elSe 'Unknown'
 
-    user = db.get_user(user_id)
-    use_forward = user.get('use_forward_mode', False) if user else False
-    auto_reply = user.get('auto_reply_enabled', False) if user else False
-    auto_group_join = user.get('auto_group_join_enabled', False) if user else False
+    uSer = db.get_uSer(uSer_id)
+    uSe_forward = uSer.get('uSe_forward_mode', FalSe) if uSer elSe FalSe
+    auto_reply = uSer.get('auto_reply_enabled', FalSe) if uSer elSe FalSe
+    auto_group_join = uSer.get('auto_group_join_enabled', FalSe) if uSer elSe FalSe
 
-    result_text = f"""
-<b>✅ ᴀᴄᴄᴏᴜɴᴛ sᴇʟᴇᴄᴛᴇᴅ</b>
+    reSult_teXt = f"""
+<b>✅ ACCOUNT SELECTED</b>
 
-💎 Using: <b>{display_name}</b>
+💎 USing: <b>{diSplay_name}</b>
 """
 
-    force_sub_settings = db.get_force_sub_settings()
-    force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
+    force_Sub_SettingS = db.get_force_Sub_SettingS()
+    force_Sub_enabled = force_Sub_SettingS.get('enabled', FalSe) if force_Sub_SettingS elSe FalSe
 
-    await send_new_message(query, result_text, settings_keyboard(False, use_forward, auto_reply, auto_group_join, force_sub_enabled, db.is_owner(user_id)))
+    await Send_new_meSSage(query, reSult_teXt, SettingS_keyboard(FalSe, uSe_forward, auto_reply, auto_group_join, force_Sub_enabled, db.iS_owner(uSer_id)))
 
 
-async def show_single_account_page(query, user_id, page):
-    accounts = db.get_accounts(user_id, logged_in_only=True)
+aSync def Show_Single_account_page(query, uSer_id, page):
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
 
-    await send_new_message(
+    await Send_new_meSSage(
         query,
         "<b>💎 Select an account:</b>",
-        single_account_selection_keyboard(accounts, page)
+        Single_account_Selection_keyboard(accountS, page)
     )
 
 
-async def start_advertising(query, user_id, context):
-    user = db.get_user(user_id)
+aSync def Start_advertiSing(query, uSer_id, conteXt):
+    uSer = db.get_uSer(uSer_id)
 
-    if not user:
-        await send_new_message(
+    if not uSer:
+        await Send_new_meSSage(
             query,
-            "<b>✅ Error: User not found</b>",
-            advertising_menu_keyboard()
+            "<b>✅ Error: USer not found</b>",
+            advertiSing_menu_keyboard()
         )
         return
 
-    # Check if logs channel is set (required)
-    logs_channel = db.get_logs_channel(user_id)
-    if not logs_channel or not logs_channel.get('verified'):
-        await send_new_message(
+    # Check if logS channel iS Set (required)
+    logS_channel = db.get_logS_channel(uSer_id)
+    if not logS_channel or not logS_channel.get('verified'):
+        await Send_new_meSSage(
             query,
+<<<<<<< HEAD
             "<b>⚠️ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
             "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏʀᴇ sᴛᴀʀᴛɪɴɢ ADVERTISING.</blockquote>\n\n"
             "<b>ʜᴏᴡ ᴛᴏ sᴇᴛ ᴜᴘ:</b>\n"
@@ -1725,922 +1807,1017 @@ async def start_advertising(query, user_id, context):
             "2. ᴀᴅᴅ ᴛʜɪs ʙᴏᴛ ᴀs ᴀᴅᴏɪɴ\n"
             "3. ɢᴏ ᴛᴏ SETTINGS → ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
             "4. SEND ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴏʀ ʟɪɴᴋ",
+=======
+            "<b>⚠️ LOGS CHANNEL REQUIRED</b>\n\n"
+            "<blockquote>BOU OUST SET UP A LOGS CHANNEL BEғORE STARTING ADVERTISING.</blockquote>\n\n"
+            "<b>HOW TO SET UP:</b>\n"
+            "1. CREATE A NEW CHANNEL\n"
+            "2. ADD THIS BOT AS ADOIN\n"
+            "3. GO TO SETTINGS → LOGS CHANNEL\n"
+            "4. SEND THE CHANNEL ID OR LINK",
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
             back_to_menu_keyboard()
         )
         return
 
-    ad_text = user.get('ad_text')
-    use_forward = user.get('use_forward_mode', False)
-    use_multiple = user.get('use_multiple_accounts', False)
-    time_interval = user.get('time_interval', 60)
-    target_mode = user.get('target_mode', 'all')
+    ad_teXt = uSer.get('ad_teXt')
+    uSe_forward = uSer.get('uSe_forward_mode', FalSe)
+    uSe_multiple = uSer.get('uSe_multiple_accountS', FalSe)
+    time_interval = uSer.get('time_interval', 60)
+    target_mode = uSer.get('target_mode', 'all')
 
-    accounts = db.get_accounts(user_id, logged_in_only=True)
+    accountS = db.get_accountS(uSer_id, logged_in_only=True)
 
-    if not accounts:
-        await send_new_message(
+    if not accountS:
+        await Send_new_meSSage(
             query,
-            "<b>✅ No logged in accounts</b>\n\n<i>Please add and login to an account first.</i>",
-            advertising_menu_keyboard()
+            "<b>✅ No logged in accountS</b>\n\n<i>PleaSe add and login to an account firSt.</i>",
+            advertiSing_menu_keyboard()
         )
         return
 
-    if not use_forward and not ad_text:
-        await send_new_message(
+    if not uSe_forward and not ad_teXt:
+        await Send_new_meSSage(
             query,
-            "<b>✅ No ad text set</b>\n\n<i>Please set your ad text first or enable forward mode to forward from Saved Messages.</i>",
-            advertising_menu_keyboard()
+            "<b>✅ No ad teXt Set</b>\n\n<i>PleaSe Set your ad teXt firSt or enable forward mode to forward from Saved MeSSageS.</i>",
+            advertiSing_menu_keyboard()
         )
         return
 
-    if use_multiple:
-        selected_accounts = user.get('selected_accounts', [])
-        if not selected_accounts:
-            selected_accounts = [str(acc["_id"]) for acc in accounts]
-        active_accounts = [acc for acc in accounts if str(acc["_id"]) in selected_accounts]
-    else:
-        single_account = user.get('selected_single_account')
-        if single_account:
-            active_accounts = [acc for acc in accounts if str(acc["_id"]) == single_account]
-        else:
-            active_accounts = [accounts[0]] if accounts else []
+    if uSe_multiple:
+        Selected_accountS = uSer.get('Selected_accountS', [])
+        if not Selected_accountS:
+            Selected_accountS = [Str(acc["_id"]) for acc in accountS]
+        active_accountS = [acc for acc in accountS if Str(acc["_id"]) in Selected_accountS]
+    elSe:
+        Single_account = uSer.get('Selected_Single_account')
+        if Single_account:
+            active_accountS = [acc for acc in accountS if Str(acc["_id"]) == Single_account]
+        elSe:
+            active_accountS = [accountS[0]] if accountS elSe []
 
-    if not active_accounts:
-        await send_new_message(
+    if not active_accountS:
+        await Send_new_meSSage(
             query,
-            "<b>✅ No accounts selected</b>\n\n<i>Please select accounts in settings.</i>",
-            advertising_menu_keyboard()
+            "<b>✅ No accountS Selected</b>\n\n<i>PleaSe Select accountS in SettingS.</i>",
+            advertiSing_menu_keyboard()
         )
         return
 
-    if target_mode == "selected":
-        target_groups = db.get_target_groups(user_id)
-        if not target_groups:
-            await send_new_message(
+    if target_mode == "Selected":
+        target_groupS = db.get_target_groupS(uSer_id)
+        if not target_groupS:
+            await Send_new_meSSage(
                 query,
-                "<b>✅ No target groups selected</b>\n\n<i>Please add target groups in Targeting settings.</i>",
-                advertising_menu_keyboard()
+                "<b>✅ No target groupS Selected</b>\n\n<i>PleaSe add target groupS in Targeting SettingS.</i>",
+                advertiSing_menu_keyboard()
             )
             return
 
-    context.user_data["advertising_active"] = True
+    conteXt.uSer_data["advertiSing_active"] = True
 
-    mode_text = "Forward from Saved Messages" if use_forward else "Direct Send"
-    target_text = f"Selected ({len(target_groups) if target_mode == 'selected' else 0} groups)" if target_mode == "selected" else "All Groups"
+    mode_teXt = "Forward from Saved MeSSageS" if uSe_forward elSe "Direct Send"
+    target_teXt = f"Selected ({len(target_groupS) if target_mode == 'Selected' elSe 0} groupS)" if target_mode == "Selected" elSe "All GroupS"
 
+<<<<<<< HEAD
     start_text = f"""
 <b>▶ ADVERTISING sᴛᴀʀᴛᴇᴅ</b>
+=======
+    Start_teXt = f"""
+<b>▶ ADVERTISING STARTED</b>
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
-💎 <b>Accounts:</b> <code>{len(active_accounts)}</code>
-📨 <b>Mode:</b> <code>{mode_text}</code>
-🎯 <b>Target:</b> <code>{target_text}</code>
-⏱ <b>Interval:</b> <code>{time_interval}s</code>
+💎 <b>AccountS:</b> <code>{len(active_accountS)}</code>
+📨 <b>Mode:</b> <code>{mode_teXt}</code>
+🎯 <b>Target:</b> <code>{target_teXt}</code>
+⏱ <b>Interval:</b> <code>{time_interval}S</code>
 
-<i>Campaign is running...</i>
+<i>Campaign iS running...</i>
 """
 
-    await send_new_message(query, start_text, advertising_menu_keyboard())
+    await Send_new_meSSage(query, Start_teXt, advertiSing_menu_keyboard())
 
-    asyncio.create_task(run_advertising_campaign(user_id, active_accounts, ad_text, time_interval, use_forward, target_mode, context))
+    aSyncio.create_taSk(run_advertiSing_campaign(uSer_id, active_accountS, ad_teXt, time_interval, uSe_forward, target_mode, conteXt))
 
 
-async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forward, target_mode, context):
+aSync def run_advertiSing_campaign(uSer_id, accountS, ad_teXt, delay, uSe_forward, target_mode, conteXt):
     try:
-        logs_channel = db.get_logs_channel(user_id)
-        logs_channel_id = logs_channel.get('channel_id') if logs_channel else None
+        logS_channel = db.get_logS_channel(uSer_id)
+        logS_channel_id = logS_channel.get('channel_id') if logS_channel elSe None
 
-        while context.user_data.get("advertising_active", False):
-            for account in accounts:
-                if not context.user_data.get("advertising_active", False):
+        while conteXt.uSer_data.get("advertiSing_active", FalSe):
+            for account in accountS:
+                if not conteXt.uSer_data.get("advertiSing_active", FalSe):
                     break
 
+<<<<<<< HEAD
                 account_id = str(account["id"])
+=======
+                account_id = Str(account["_id"])
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
-                if target_mode == "selected":
-                    target_groups = db.get_target_groups(user_id)
-                    result = await telethon_handler.broadcast_to_target_groups(
-                        account_id, target_groups, ad_text, delay, use_forward, logs_channel_id
+                if target_mode == "Selected":
+                    target_groupS = db.get_target_groupS(uSer_id)
+                    reSult = await telethon_handler.broadcaSt_to_target_groupS(
+                        account_id, target_groupS, ad_teXt, delay, uSe_forward, logS_channel_id
                     )
-                else:
-                    result = await telethon_handler.broadcast_message(
-                        account_id, ad_text, delay, use_forward, logs_channel_id
+                elSe:
+                    reSult = await telethon_handler.broadcaSt_meSSage(
+                        account_id, ad_teXt, delay, uSe_forward, logS_channel_id
                     )
 
-                if not context.user_data.get("advertising_active", False):
+                if not conteXt.uSer_data.get("advertiSing_active", FalSe):
                     break
 
-                await asyncio.sleep(delay)
-    except Exception as e:
-        logger.error(f"Advertising campaign error: {e}")
+                await aSyncio.Sleep(delay)
+    eXcept EXception aS e:
+        logger.error(f"AdvertiSing campaign error: {e}")
 
 
-async def handle_otp_input(query, user_id, data, context):
-    state = user_states.get(user_id, {})
+aSync def handle_otp_input(query, uSer_id, data, conteXt):
+    State = uSer_StateS.get(uSer_id, {})
 
-    if state.get("state") != "awaiting_otp":
+    if State.get("State") != "awaiting_otp":
         return
 
-    otp_code = state.get("data", {}).get("otp_code", "")
+    otp_code = State.get("data", {}).get("otp_code", "")
 
     action = data.replace("otp_", "")
 
     if action == "cancel":
-        if user_id in user_states:
-            del user_states[user_id]
-        await send_new_message(query, "<b>✅ Login cancelled</b>", main_menu_keyboard())
+        if uSer_id in uSer_StateS:
+            del uSer_StateS[uSer_id]
+        await Send_new_meSSage(query, "<b>✅ Login cancelled</b>", main_menu_keyboard())
         return
 
     if action == "delete":
         otp_code = otp_code[:-1]
-        user_states[user_id]["data"]["otp_code"] = otp_code
+        uSer_StateS[uSer_id]["data"]["otp_code"] = otp_code
 
-        display = otp_code + "" * (5 - len(otp_code))
-        await send_new_message(
+        diSplay = otp_code + "" * (5 - len(otp_code))
+        await Send_new_meSSage(
             query,
-            f"<b>” Enter OTP Code</b>\n\n<code>{display}</code>",
+            f"<b>” Enter OTP Code</b>\n\n<code>{diSplay}</code>",
             otp_keyboard()
         )
         return
 
-    if action == "submit":
+    if action == "Submit":
         if len(otp_code) < 5:
-            await query.answer("Please enter at least 5 digits", show_alert=True)
+            await query.anSwer("PleaSe enter at leaSt 5 digitS", Show_alert=True)
             return
 
-        await send_new_message(query, "<b>⏳ Verifying code...</b>", None)
+        await Send_new_meSSage(query, "<b>⏳ Verifying code...</b>", None)
 
-        account_data = state.get("data", {})
+        account_data = State.get("data", {})
         api_id = account_data.get("api_id")
-        api_hash = account_data.get("api_hash")
+        api_haSh = account_data.get("api_haSh")
         phone = account_data.get("phone")
-        phone_code_hash = account_data.get("phone_code_hash")
-        session_string = account_data.get("session_string")
+        phone_code_haSh = account_data.get("phone_code_haSh")
+        SeSSion_String = account_data.get("SeSSion_String")
 
-        result = await telethon_handler.verify_code(
-            api_id, api_hash, phone, otp_code, phone_code_hash, session_string
+        reSult = await telethon_handler.verify_code(
+            api_id, api_haSh, phone, otp_code, phone_code_haSh, SeSSion_String
         )
 
-        if result["success"]:
+        if reSult["SucceSS"]:
             from PyToday.encryption import encrypt_data
 
             account = db.create_account(
-                user_id, phone,
-                encrypt_data(str(api_id)),
-                encrypt_data(api_hash)
+                uSer_id, phone,
+                encrypt_data(Str(api_id)),
+                encrypt_data(api_haSh)
             )
 
             db.update_account(
+<<<<<<< HEAD
                 account["id"],
                 session_string=encrypt_data(result["session_string"]),
                 is_logged_in=True
+=======
+                account["_id"],
+                SeSSion_String=encrypt_data(reSult["SeSSion_String"]),
+                iS_logged_in=True
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
             )
 
-            info = await telethon_handler.get_account_info(api_id, api_hash, result["session_string"])
-            if info["success"]:
+            info = await telethon_handler.get_account_info(api_id, api_haSh, reSult["SeSSion_String"])
+            if info["SucceSS"]:
                 db.update_account(
+<<<<<<< HEAD
                     account["id"],
                     account_first_name=info["first_name"],
                     account_last_name=info["last_name"],
                     account_username=info["username"]
+=======
+                    account["_id"],
+                    account_firSt_name=info["firSt_name"],
+                    account_laSt_name=info["laSt_name"],
+                    account_uSername=info["uSername"]
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
                 )
 
-            if user_id in user_states:
-                del user_states[user_id]
+            if uSer_id in uSer_StateS:
+                del uSer_StateS[uSer_id]
 
-            await send_new_message(
+            await Send_new_meSSage(
                 query,
-                "<b>✅ ᴀᴄᴄᴏᴜɴᴛ ᴀᴅᴅᴇᴅ</b>\n\n<i>Account logged in successfully!</i>",
+                "<b>✅ ACCOUNT ADDED</b>\n\n<i>Account logged in SucceSSfully!</i>",
                 main_menu_keyboard()
             )
-        elif result.get("requires_2fa"):
-            user_states[user_id]["state"] = "awaiting_2fa"
-            user_states[user_id]["data"]["session_string"] = result["session_string"]
+        elif reSult.get("requireS_2fa"):
+            uSer_StateS[uSer_id]["State"] = "awaiting_2fa"
+            uSer_StateS[uSer_id]["data"]["SeSSion_String"] = reSult["SeSSion_String"]
 
-            await send_new_message(
+            await Send_new_meSSage(
                 query,
-                "<b>” 2FA Required</b>\n\n<i>Send your 2FA password:</i>",
+                "<b>” 2FA Required</b>\n\n<i>Send your 2FA paSSword:</i>",
                 twofa_keyboard()
             )
-        else:
-            await send_new_message(
+        elSe:
+            await Send_new_meSSage(
                 query,
-                f"<b>✅ Error:</b> {result.get('error', 'Unknown error')}",
+                f"<b>✅ Error:</b> {reSult.get('error', 'Unknown error')}",
                 otp_keyboard()
             )
         return
 
-    if action.isdigit():
+    if action.iSdigit():
         if len(otp_code) < 6:
             otp_code += action
-            user_states[user_id]["data"]["otp_code"] = otp_code
+            uSer_StateS[uSer_id]["data"]["otp_code"] = otp_code
 
-        display = otp_code + "" * (5 - len(otp_code))
-        await send_new_message(
+        diSplay = otp_code + "" * (5 - len(otp_code))
+        await Send_new_meSSage(
             query,
-            f"<b>” Enter OTP Code</b>\n\n<code>{display}</code>",
+            f"<b>” Enter OTP Code</b>\n\n<code>{diSplay}</code>",
             otp_keyboard()
         )
 
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    text = update.message.text
+aSync def handle_meSSage(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    uSer_id = update.effective_uSer.id
+    teXt = update.meSSage.teXt
 
-    state = user_states.get(user_id, {})
-    current_state = state.get("state")
+    State = uSer_StateS.get(uSer_id, {})
+    current_State = State.get("State")
 
-    if not current_state:
+    if not current_State:
         return
 
-    if current_state == "awaiting_api_id":
+    if current_State == "awaiting_api_id":
         try:
-            api_id = int(text)
-            user_states[user_id]["data"]["api_id"] = api_id
-            user_states[user_id]["state"] = "awaiting_api_hash"
+            api_id = int(teXt)
+            uSer_StateS[uSer_id]["data"]["api_id"] = api_id
+            uSer_StateS[uSer_id]["State"] = "awaiting_api_haSh"
 
-            await update.message.reply_text(
-                "<b>Step 2/4:</b> Send your <b>API Hash</b>",
-                parse_mode="HTML"
+            await update.meSSage.reply_teXt(
+                "<b>Step 2/4:</b> Send your <b>API HaSh</b>",
+                parSe_mode="HTML"
             )
-        except ValueError:
-            await update.message.reply_text(
-                "<b>✅ Invalid API ID</b>\n\nPlease send a valid number.",
-                parse_mode="HTML"
+        eXcept ValueError:
+            await update.meSSage.reply_teXt(
+                "<b>✅ Invalid API ID</b>\n\nPleaSe Send a valid number.",
+                parSe_mode="HTML"
             )
 
-    elif current_state == "awaiting_api_hash":
-        user_states[user_id]["data"]["api_hash"] = text
-        user_states[user_id]["state"] = "awaiting_phone"
+    elif current_State == "awaiting_api_haSh":
+        uSer_StateS[uSer_id]["data"]["api_haSh"] = teXt
+        uSer_StateS[uSer_id]["State"] = "awaiting_phone"
 
-        await update.message.reply_text(
+        await update.meSSage.reply_teXt(
             "<b>Step 3/4:</b> Send your <b>Phone Number</b>\n\nFormat: +1234567890",
-            parse_mode="HTML"
+            parSe_mode="HTML"
         )
 
-    elif current_state == "awaiting_phone":
-        phone = text.strip()
-        if not phone.startswith("+"):
+    elif current_State == "awaiting_phone":
+        phone = teXt.Strip()
+        if not phone.StartSwith("+"):
             phone = "+" + phone
 
-        user_states[user_id]["data"]["phone"] = phone
+        uSer_StateS[uSer_id]["data"]["phone"] = phone
 
-        await update.message.reply_text(
+        await update.meSSage.reply_teXt(
             "<b>⏳ Sending OTP...</b>",
-            parse_mode="HTML"
+            parSe_mode="HTML"
         )
 
-        api_id = user_states[user_id]["data"]["api_id"]
-        api_hash = user_states[user_id]["data"]["api_hash"]
+        api_id = uSer_StateS[uSer_id]["data"]["api_id"]
+        api_haSh = uSer_StateS[uSer_id]["data"]["api_haSh"]
 
-        result = await telethon_handler.send_code(api_id, api_hash, phone)
+        reSult = await telethon_handler.Send_code(api_id, api_haSh, phone)
 
-        if result["success"]:
-            user_states[user_id]["state"] = "awaiting_otp"
-            user_states[user_id]["data"]["phone_code_hash"] = result["phone_code_hash"]
-            user_states[user_id]["data"]["session_string"] = result["session_string"]
-            user_states[user_id]["data"]["otp_code"] = ""
+        if reSult["SucceSS"]:
+            uSer_StateS[uSer_id]["State"] = "awaiting_otp"
+            uSer_StateS[uSer_id]["data"]["phone_code_haSh"] = reSult["phone_code_haSh"]
+            uSer_StateS[uSer_id]["data"]["SeSSion_String"] = reSult["SeSSion_String"]
+            uSer_StateS[uSer_id]["data"]["otp_code"] = ""
 
-            await update.message.reply_text(
+            await update.meSSage.reply_teXt(
                 "<b>” Enter OTP Code</b>\n\n<code></code>",
-                parse_mode="HTML",
+                parSe_mode="HTML",
                 reply_markup=otp_keyboard()
             )
-        elif result.get("requires_2fa"):
-            user_states[user_id]["state"] = "awaiting_2fa"
-            user_states[user_id]["data"]["session_string"] = result["session_string"]
+        elif reSult.get("requireS_2fa"):
+            uSer_StateS[uSer_id]["State"] = "awaiting_2fa"
+            uSer_StateS[uSer_id]["data"]["SeSSion_String"] = reSult["SeSSion_String"]
 
-            await update.message.reply_text(
-                "<b>🔐 2FA Required</b>\n\n<i>Send your 2FA password:</i>",
-                parse_mode="HTML",
+            await update.meSSage.reply_teXt(
+                "<b>🔐 2FA Required</b>\n\n<i>Send your 2FA paSSword:</i>",
+                parSe_mode="HTML",
                 reply_markup=twofa_keyboard()
             )
-        else:
-            await update.message.reply_text(
-                f"<b>❌ Error:</b> {result.get('error', 'Unknown error')}",
-                parse_mode="HTML",
+        elSe:
+            await update.meSSage.reply_teXt(
+                f"<b>❌ Error:</b> {reSult.get('error', 'Unknown error')}",
+                parSe_mode="HTML",
                 reply_markup=main_menu_keyboard()
             )
-            if user_id in user_states:
-                del user_states[user_id]
+            if uSer_id in uSer_StateS:
+                del uSer_StateS[uSer_id]
 
-    elif current_state == "awaiting_2fa":
-        password = text.strip()
+    elif current_State == "awaiting_2fa":
+        paSSword = teXt.Strip()
 
-        await update.message.reply_text(
+        await update.meSSage.reply_teXt(
             "<b>⏳ Verifying 2FA...</b>",
-            parse_mode="HTML"
+            parSe_mode="HTML"
         )
 
-        api_id = user_states[user_id]["data"]["api_id"]
-        api_hash = user_states[user_id]["data"]["api_hash"]
-        phone = user_states[user_id]["data"]["phone"]
-        session_string = user_states[user_id]["data"]["session_string"]
+        api_id = uSer_StateS[uSer_id]["data"]["api_id"]
+        api_haSh = uSer_StateS[uSer_id]["data"]["api_haSh"]
+        phone = uSer_StateS[uSer_id]["data"]["phone"]
+        SeSSion_String = uSer_StateS[uSer_id]["data"]["SeSSion_String"]
 
-        result = await telethon_handler.verify_2fa_password(api_id, api_hash, password, session_string)
+        reSult = await telethon_handler.verify_2fa_paSSword(api_id, api_haSh, paSSword, SeSSion_String)
 
-        if result["success"]:
+        if reSult["SucceSS"]:
             from PyToday.encryption import encrypt_data
 
             account = db.create_account(
-                user_id, phone,
-                encrypt_data(str(api_id)),
-                encrypt_data(api_hash)
+                uSer_id, phone,
+                encrypt_data(Str(api_id)),
+                encrypt_data(api_haSh)
             )
 
             db.update_account(
+<<<<<<< HEAD
                 account["id"],
                 session_string=encrypt_data(result["session_string"]),
                 is_logged_in=True
+=======
+                account["_id"],
+                SeSSion_String=encrypt_data(reSult["SeSSion_String"]),
+                iS_logged_in=True
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
             )
 
-            info = await telethon_handler.get_account_info(api_id, api_hash, result["session_string"])
-            if info["success"]:
+            info = await telethon_handler.get_account_info(api_id, api_haSh, reSult["SeSSion_String"])
+            if info["SucceSS"]:
                 db.update_account(
+<<<<<<< HEAD
                     account["id"],
                     account_first_name=info["first_name"],
                     account_last_name=info["last_name"],
                     account_username=info["username"]
+=======
+                    account["_id"],
+                    account_firSt_name=info["firSt_name"],
+                    account_laSt_name=info["laSt_name"],
+                    account_uSername=info["uSername"]
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
                 )
 
-            if user_id in user_states:
-                del user_states[user_id]
+            if uSer_id in uSer_StateS:
+                del uSer_StateS[uSer_id]
 
-            await update.message.reply_text(
-                "<b>✅ ᴀᴄᴄᴏᴜɴᴛ ᴀᴅᴅᴇᴅ</b>\n\n<i>Account logged in successfully!</i>",
-                parse_mode="HTML",
+            await update.meSSage.reply_teXt(
+                "<b>✅ ACCOUNT ADDED</b>\n\n<i>Account logged in SucceSSfully!</i>",
+                parSe_mode="HTML",
                 reply_markup=main_menu_keyboard()
             )
-        else:
-            await update.message.reply_text(
-                f"<b>❌ Error:</b> {result.get('error', 'Unknown error')}",
-                parse_mode="HTML",
+        elSe:
+            await update.meSSage.reply_teXt(
+                f"<b>❌ Error:</b> {reSult.get('error', 'Unknown error')}",
+                parSe_mode="HTML",
                 reply_markup=twofa_keyboard()
             )
 
-    elif current_state == "awaiting_ad_text":
-        db.update_user(user_id, ad_text=text)
+    elif current_State == "awaiting_ad_teXt":
+        db.update_uSer(uSer_id, ad_teXt=teXt)
 
-        if user_id in user_states:
-            del user_states[user_id]
+        if uSer_id in uSer_StateS:
+            del uSer_StateS[uSer_id]
 
-        await update.message.reply_text(
-            "<b>✅ ᴀᴅ ᴛᴇxᴛ sᴀᴠᴇᴅ</b>\n\n<i>Your ad text has been saved.</i>",
-            parse_mode="HTML",
-            reply_markup=ad_text_menu_keyboard()
+        await update.meSSage.reply_teXt(
+            "<b>✅ AD TEXT SAVED</b>\n\n<i>Your ad teXt haS been Saved.</i>",
+            parSe_mode="HTML",
+            reply_markup=ad_teXt_menu_keyboard()
         )
 
-    elif current_state == "awaiting_reply_text":
-        db.update_user(user_id, auto_reply_text=text)
+    elif current_State == "awaiting_reply_teXt":
+        db.update_uSer(uSer_id, auto_reply_teXt=teXt)
 
-        user = db.get_user(user_id)
-        auto_reply = user.get('auto_reply_enabled', False) if user else False
+        uSer = db.get_uSer(uSer_id)
+        auto_reply = uSer.get('auto_reply_enabled', FalSe) if uSer elSe FalSe
 
         if auto_reply:
-            await telethon_handler.start_all_auto_reply_listeners(user_id, text)
+            await telethon_handler.Start_all_auto_reply_liStenerS(uSer_id, teXt)
 
-        if user_id in user_states:
-            del user_states[user_id]
+        if uSer_id in uSer_StateS:
+            del uSer_StateS[uSer_id]
 
-        await update.message.reply_text(
-            "<b>✅ ʀᴇᴘʟʏ ᴛᴇxᴛ sᴀᴠᴇᴅ</b>\n\n<i>Your custom auto-reply text has been saved.</i>",
-            parse_mode="HTML",
-            reply_markup=auto_reply_settings_keyboard(auto_reply)
+        await update.meSSage.reply_teXt(
+            "<b>✅ REPLY TEXT SAVED</b>\n\n<i>Your cuStom auto-reply teXt haS been Saved.</i>",
+            parSe_mode="HTML",
+            reply_markup=auto_reply_SettingS_keyboard(auto_reply)
         )
 
-    elif current_state == "awaiting_custom_time":
+    elif current_State == "awaiting_cuStom_time":
         try:
-            seconds = int(text)
-            if seconds < 10:
-                await update.message.reply_text(
-                    "<b>✅ Time must be at least 10 seconds</b>",
-                    parse_mode="HTML"
+            SecondS = int(teXt)
+            if SecondS < 10:
+                await update.meSSage.reply_teXt(
+                    "<b>✅ Time muSt be at leaSt 10 SecondS</b>",
+                    parSe_mode="HTML"
                 )
                 return
 
-            db.update_user(user_id, time_interval=seconds)
+            db.update_uSer(uSer_id, time_interval=SecondS)
 
-            if user_id in user_states:
-                del user_states[user_id]
+            if uSer_id in uSer_StateS:
+                del uSer_StateS[uSer_id]
 
-            await update.message.reply_text(
-                f"<b>✅ Time set to {seconds} seconds</b>",
-                parse_mode="HTML",
-                reply_markup=advertising_menu_keyboard()
+            await update.meSSage.reply_teXt(
+                f"<b>✅ Time Set to {SecondS} SecondS</b>",
+                parSe_mode="HTML",
+                reply_markup=advertiSing_menu_keyboard()
             )
-        except ValueError:
-            await update.message.reply_text(
-                "<b>✅ Please send a valid number</b>",
-                parse_mode="HTML"
+        eXcept ValueError:
+            await update.meSSage.reply_teXt(
+                "<b>✅ PleaSe Send a valid number</b>",
+                parSe_mode="HTML"
             )
 
-    elif current_state == "awaiting_accset_interval":
+    elif current_State == "awaiting_accSet_interval":
         try:
-            seconds = int(text)
-            if seconds < 10:
-                await update.message.reply_text("<b>❌ Time must be at least 10 seconds</b>", parse_mode="HTML")
+            SecondS = int(teXt)
+            if SecondS < 10:
+                await update.meSSage.reply_teXt("<b>❌ Time muSt be at leaSt 10 SecondS</b>", parSe_mode="HTML")
                 return
-            account_id = user_states[user_id].get("account_id")
-            db.update_account_settings(account_id, {"time_interval": seconds})
-            if user_id in user_states:
-                del user_states[user_id]
-            await update.message.reply_text(f"<b>✅ Interval set to {seconds} seconds</b>", parse_mode="HTML")
-            await cb_account_settings(update, account_id, user_id)
-        except ValueError:
-            await update.message.reply_text("<b>❌ Please send a valid number</b>", parse_mode="HTML")
+            account_id = uSer_StateS[uSer_id].get("account_id")
+            db.update_account_SettingS(account_id, {"time_interval": SecondS})
+            if uSer_id in uSer_StateS:
+                del uSer_StateS[uSer_id]
+            await update.meSSage.reply_teXt(f"<b>✅ Interval Set to {SecondS} SecondS</b>", parSe_mode="HTML")
+            await cb_account_SettingS(update, account_id, uSer_id)
+        eXcept ValueError:
+            await update.meSSage.reply_teXt("<b>❌ PleaSe Send a valid number</b>", parSe_mode="HTML")
 
-    elif current_state == "awaiting_accset_gap":
+    elif current_State == "awaiting_accSet_gap":
         try:
-            seconds = int(text)
-            account_id = user_states[user_id].get("account_id")
-            db.update_account_settings(account_id, {"gap_seconds": seconds})
-            if user_id in user_states:
-                del user_states[user_id]
-            await update.message.reply_text(f"<b>✅ Gap set to {seconds} seconds</b>", parse_mode="HTML")
-            await cb_account_settings(update, account_id, user_id)
-        except ValueError:
-            await update.message.reply_text("<b>❌ Please send a valid number</b>", parse_mode="HTML")
+            SecondS = int(teXt)
+            account_id = uSer_StateS[uSer_id].get("account_id")
+            db.update_account_SettingS(account_id, {"gap_SecondS": SecondS})
+            if uSer_id in uSer_StateS:
+                del uSer_StateS[uSer_id]
+            await update.meSSage.reply_teXt(f"<b>✅ Gap Set to {SecondS} SecondS</b>", parSe_mode="HTML")
+            await cb_account_SettingS(update, account_id, uSer_id)
+        eXcept ValueError:
+            await update.meSSage.reply_teXt("<b>❌ PleaSe Send a valid number</b>", parSe_mode="HTML")
 
-    elif current_state == "awaiting_accset_rdelay":
+    elif current_State == "awaiting_accSet_rdelay":
         try:
-            seconds = int(text)
-            account_id = user_states[user_id].get("account_id")
-            db.update_account_settings(account_id, {"round_delay": seconds})
-            if user_id in user_states:
-                del user_states[user_id]
-            await update.message.reply_text(f"<b>✅ Round Delay set to {seconds} seconds</b>", parse_mode="HTML")
-            await cb_account_settings(update, account_id, user_id)
-        except ValueError:
-            await update.message.reply_text("<b>❌ Please send a valid number</b>", parse_mode="HTML")
+            SecondS = int(teXt)
+            account_id = uSer_StateS[uSer_id].get("account_id")
+            db.update_account_SettingS(account_id, {"round_delay": SecondS})
+            if uSer_id in uSer_StateS:
+                del uSer_StateS[uSer_id]
+            await update.meSSage.reply_teXt(f"<b>✅ Round Delay Set to {SecondS} SecondS</b>", parSe_mode="HTML")
+            await cb_account_SettingS(update, account_id, uSer_id)
+        eXcept ValueError:
+            await update.meSSage.reply_teXt("<b>❌ PleaSe Send a valid number</b>", parSe_mode="HTML")
 
-    elif current_state == "awaiting_target_group_id":
+    elif current_State == "awaiting_target_group_id":
         try:
-            group_id = int(text.strip().replace("-100", "-100"))
+            group_id = int(teXt.Strip().replace("-100", "-100"))
 
-            added = db.add_target_group(user_id, group_id, f"Group {group_id}")
+            added = db.add_target_group(uSer_id, group_id, f"Group {group_id}")
 
-            if user_id in user_states:
-                del user_states[user_id]
+            if uSer_id in uSer_StateS:
+                del uSer_StateS[uSer_id]
 
             if added:
-                await update.message.reply_text(
+                await update.meSSage.reply_teXt(
                     f"<b>✅ Group added</b>\n\nGroup ID: <code>{group_id}</code>",
-                    parse_mode="HTML",
-                    reply_markup=selected_groups_keyboard()
+                    parSe_mode="HTML",
+                    reply_markup=Selected_groupS_keyboard()
                 )
-            else:
-                await update.message.reply_text(
-                    "<b>⚠️ Group already in list</b>",
-                    parse_mode="HTML",
-                    reply_markup=selected_groups_keyboard()
+            elSe:
+                await update.meSSage.reply_teXt(
+                    "<b>⚠️ Group already in liSt</b>",
+                    parSe_mode="HTML",
+                    reply_markup=Selected_groupS_keyboard()
                 )
-        except ValueError:
-            await update.message.reply_text(
-                "<b>✅ Invalid Group ID</b>\n\nPlease send a valid number.",
-                parse_mode="HTML"
+        eXcept ValueError:
+            await update.meSSage.reply_teXt(
+                "<b>✅ Invalid Group ID</b>\n\nPleaSe Send a valid number.",
+                parSe_mode="HTML"
             )
 
-    elif current_state == "awaiting_force_channel":
-        channel_input = text.strip()
+    elif current_State == "awaiting_force_channel":
+        channel_input = teXt.Strip()
 
-        # Extract channel ID from input
+        # EXtract channel ID from input
         channel_id = None
-        if channel_input.startswith('-100'):
+        if channel_input.StartSwith('-100'):
             try:
                 channel_id = int(channel_input)
-            except ValueError:
-                pass
-        elif channel_input.lstrip('-').isdigit():
+            eXcept ValueError:
+                paSS
+        elif channel_input.lStrip('-').iSdigit():
             try:
                 channel_id = int(channel_input)
-            except ValueError:
-                pass
+            eXcept ValueError:
+                paSS
 
         if not channel_id:
-            await update.message.reply_text(
-                "<b>✅ Invalid format</b>\n\n<i>Please send a valid channel ID (e.g., -1001234567890).</i>",
-                parse_mode="HTML"
+            await update.meSSage.reply_teXt(
+                "<b>✅ Invalid format</b>\n\n<i>PleaSe Send a valid channel ID (e.g., -1001234567890).</i>",
+                parSe_mode="HTML"
             )
             return
 
-        db.update_force_sub_settings(channel_id=str(channel_id))
+        db.update_force_Sub_SettingS(channel_id=Str(channel_id))
 
-        if user_id in user_states:
-            del user_states[user_id]
+        if uSer_id in uSer_StateS:
+            del uSer_StateS[uSer_id]
 
-        await update.message.reply_text(
-            f"<b>✅ Channel set</b>\n\nChannel ID: <code>{channel_id}</code>",
-            parse_mode="HTML",
-            reply_markup=force_sub_keyboard(True)
+        await update.meSSage.reply_teXt(
+            f"<b>✅ Channel Set</b>\n\nChannel ID: <code>{channel_id}</code>",
+            parSe_mode="HTML",
+            reply_markup=force_Sub_keyboard(True)
         )
 
-    elif current_state == "awaiting_force_group":
-        group_input = text.strip()
+    elif current_State == "awaiting_force_group":
+        group_input = teXt.Strip()
 
-        # Extract group ID from input
+        # EXtract group ID from input
         group_id = None
-        if group_input.startswith('-100'):
+        if group_input.StartSwith('-100'):
             try:
                 group_id = int(group_input)
-            except ValueError:
-                pass
-        elif group_input.lstrip('-').isdigit():
+            eXcept ValueError:
+                paSS
+        elif group_input.lStrip('-').iSdigit():
             try:
                 group_id = int(group_input)
-            except ValueError:
-                pass
+            eXcept ValueError:
+                paSS
 
         if not group_id:
-            await update.message.reply_text(
-                "<b>✅ Invalid format</b>\n\n<i>Please send a valid group ID (e.g., -1001234567890).</i>",
-                parse_mode="HTML"
+            await update.meSSage.reply_teXt(
+                "<b>✅ Invalid format</b>\n\n<i>PleaSe Send a valid group ID (e.g., -1001234567890).</i>",
+                parSe_mode="HTML"
             )
             return
 
-        db.update_force_sub_settings(group_id=str(group_id))
+        db.update_force_Sub_SettingS(group_id=Str(group_id))
 
-        if user_id in user_states:
-            del user_states[user_id]
+        if uSer_id in uSer_StateS:
+            del uSer_StateS[uSer_id]
 
-        await update.message.reply_text(
-            f"<b>✅ Group set</b>\n\nGroup ID: <code>{group_id}</code>",
-            parse_mode="HTML",
-            reply_markup=force_sub_keyboard(True)
+        await update.meSSage.reply_teXt(
+            f"<b>✅ Group Set</b>\n\nGroup ID: <code>{group_id}</code>",
+            parSe_mode="HTML",
+            reply_markup=force_Sub_keyboard(True)
         )
 
-    elif current_state == "awaiting_logs_channel":
-        channel_input = text.strip()
+    elif current_State == "awaiting_logS_channel":
+        channel_input = teXt.Strip()
 
-        # Extract channel ID from input - FIXED
+        # EXtract channel ID from input - FIXED
         channel_id = None
         channel_link = None
 
-        # Handle different input formats
-        if channel_input.startswith('-100'):
+        # Handle different input formatS
+        if channel_input.StartSwith('-100'):
             # Format: -1001234567890
             try:
-                # Validate it's a proper number
-                test_id = int(channel_input)
-                channel_id = str(test_id)
+                # Validate it'S a proper number
+                teSt_id = int(channel_input)
+                channel_id = Str(teSt_id)
                 logger.info(f"Channel ID received: {channel_id}")
-            except ValueError:
+            eXcept ValueError:
                 logger.error(f"Invalid channel ID format: {channel_input}")
-                pass
-        elif channel_input.startswith('@'):
-            # Format: @channelusername
+                paSS
+        elif channel_input.StartSwith('@'):
+            # Format: @channeluSername
             try:
                 from telegram import Bot
                 bot = Bot(token=config.BOT_TOKEN)
                 chat = await bot.get_chat(channel_input)
-                channel_id = str(chat.id)
-                logger.info(f"Channel resolved from username: {channel_id}")
-            except Exception as e:
-                logger.error(f"Error getting channel from username: {e}")
-        elif channel_input.lstrip('-').isdigit():
-            # Format: 1234567890 or -1234567890 (add -100 prefix if needed)
+                channel_id = Str(chat.id)
+                logger.info(f"Channel reSolved from uSername: {channel_id}")
+            eXcept EXception aS e:
+                logger.error(f"Error getting channel from uSername: {e}")
+        elif channel_input.lStrip('-').iSdigit():
+            # Format: 1234567890 or -1234567890 (add -100 prefiX if needed)
             try:
                 num = int(channel_input)
-                # If it's a positive number, add -100 prefix
+                # If it'S a poSitive number, add -100 prefiX
                 if num > 0:
                     channel_id = f"-100{channel_input}"
-                else:
+                elSe:
                     channel_id = channel_input
                 logger.info(f"Channel ID converted: {channel_id}")
-            except ValueError:
+            eXcept ValueError:
                 logger.error(f"Invalid number format: {channel_input}")
-                pass
-        elif channel_input.startswith('https://t.me/'):
-            # Format: https://t.me/channelusername
+                paSS
+        elif channel_input.StartSwith('httpS://t.me/'):
+            # Format: httpS://t.me/channeluSername
             channel_link = channel_input
             try:
                 from telegram import Bot
                 bot = Bot(token=config.BOT_TOKEN)
-                username = channel_input.replace('https://t.me/', '').split('/')[0]
-                chat = await bot.get_chat(f"@{username}")
-                channel_id = str(chat.id)
-                logger.info(f"Channel resolved from link: {channel_id}")
-            except Exception as e:
+                uSername = channel_input.replace('httpS://t.me/', '').Split('/')[0]
+                chat = await bot.get_chat(f"@{uSername}")
+                channel_id = Str(chat.id)
+                logger.info(f"Channel reSolved from link: {channel_id}")
+            eXcept EXception aS e:
                 logger.error(f"Error getting channel from link: {e}")
 
         if not channel_id:
-            await update.message.reply_text(
+            await update.meSSage.reply_teXt(
                 "<b>✅ Invalid format</b>\n\n"
-                "<i>Please send a valid channel ID or link.</i>\n\n"
-                "<b>Supported formats:</b>\n"
+                "<i>PleaSe Send a valid channel ID or link.</i>\n\n"
+                "<b>Supported formatS:</b>\n"
                 "• <code>-1001234567890</code> (Channel ID)\n"
-                "• <code>@channelusername</code> (Username)\n"
-                "• <code>https://t.me/channelusername</code> (Link)\n\n"
+                "• <code>@channeluSername</code> (USername)\n"
+                "• <code>httpS://t.me/channeluSername</code> (Link)\n\n"
                 "<b>How to get Channel ID:</b>\n"
-                "1. Forward a message from your channel to @userinfobot\n"
-                "2. Copy the ID and send it here",
-                parse_mode="HTML"
+                "1. Forward a meSSage from your channel to @uSerinfobot\n"
+                "2. Copy the ID and Send it here",
+                parSe_mode="HTML"
             )
             return
 
         # Validate channel ID format
         try:
             int(channel_id)
-        except ValueError:
-            await update.message.reply_text(
+        eXcept ValueError:
+            await update.meSSage.reply_teXt(
                 "<b>✅ Invalid channel ID</b>\n\n"
-                "<i>The channel ID format is incorrect.</i>\n\n"
-                "<b>Please try again with a valid format:</b>\n"
+                "<i>The channel ID format iS incorrect.</i>\n\n"
+                "<b>PleaSe try again with a valid format:</b>\n"
                 "• <code>-1001234567890</code>\n"
-                "• <code>@channelusername</code>",
-                parse_mode="HTML"
+                "• <code>@channeluSername</code>",
+                parSe_mode="HTML"
             )
             return
 
         # Store the channel - FIXED
         try:
-            db.set_logs_channel(user_id, channel_id, channel_link)
-            logger.info(f"Logs channel set for user {user_id}: {channel_id}")
-        except Exception as e:
-            logger.error(f"Error saving logs channel: {e}")
-            await update.message.reply_text(
-                "<b>✅ Error saving channel</b>\n\n"
-                "<i>Please try again later.</i>",
-                parse_mode="HTML"
+            db.Set_logS_channel(uSer_id, channel_id, channel_link)
+            logger.info(f"LogS channel Set for uSer {uSer_id}: {channel_id}")
+        eXcept EXception aS e:
+            logger.error(f"Error Saving logS channel: {e}")
+            await update.meSSage.reply_teXt(
+                "<b>✅ Error Saving channel</b>\n\n"
+                "<i>PleaSe try again later.</i>",
+                parSe_mode="HTML"
             )
             return
 
-        if user_id in user_states:
-            del user_states[user_id]
+        if uSer_id in uSer_StateS:
+            del uSer_StateS[uSer_id]
 
-        await update.message.reply_text(
-            "<b>✅ ᴄʜᴀɴɴᴇʟ sᴇᴛ sᴜᴄᴄᴇssғᴜʟʟʏ</b>\n\n"
+        await update.meSSage.reply_teXt(
+            "<b>✅ CHANNEL SET SUCCESSғULLY</b>\n\n"
             f"📋 <b>Channel ID:</b> <code>{channel_id}</code>\n\n"
-            "<i>Please verify that you have:</i>\n"
-            "1. Added this bot as admin to the channel\n"
-            "2. Given the bot permission to send messages\n\n"
-            "Click <b>'🔄 ᴠᴇʀɪғʏ'</b> to check permissions.",
-            parse_mode="HTML",
-            reply_markup=logs_channel_keyboard(has_channel=True, verified=False)
+            "<i>PleaSe verify that you have:</i>\n"
+            "1. Added thiS bot aS admin to the channel\n"
+            "2. Given the bot permiSSion to Send meSSageS\n\n"
+            "Click <b>'🔄 VERIғY'</b> to check permiSSionS.",
+            parSe_mode="HTML",
+            reply_markup=logS_channel_keyboard(haS_channel=True, verified=FalSe)
         )
 
-    elif current_state == "awaiting_broadcast":
-        # Admin broadcast via callback
-        if user_id in user_states:
-            del user_states[user_id]
+    elif current_State == "awaiting_broadcaSt":
+        # Admin broadcaSt via callback
+        if uSer_id in uSer_StateS:
+            del uSer_StateS[uSer_id]
 
 
+<<<<<<< HEAD
 # Force Sub Functions (Owner only)
 async def show_force_sub_menu(query, user_id):
     if not db.is_owner(user_id):
         await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
+=======
+# Force Sub FunctionS (Owner only)
+aSync def Show_force_Sub_menu(query, uSer_id):
+    if not db.iS_owner(uSer_id):
+        await query.anSwer("👑 OWNERS ONLY.", Show_alert=True)
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
         return
 
-    settings = db.get_force_sub_settings()
-    enabled = settings.get('enabled', False) if settings else False
+    SettingS = db.get_force_Sub_SettingS()
+    enabled = SettingS.get('enabled', FalSe) if SettingS elSe FalSe
 
+<<<<<<< HEAD
     menu_text = """
 <b>⚙️ ғᴏʀᴄᴇ sᴜʙ SETTINGS</b>
+=======
+    menu_teXt = """
+<b>⚙️ ғORCE SUB SETTINGS</b>
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
-<i>Manage force subscription settings here.</i>
+<i>Manage force SubScription SettingS here.</i>
 
-<b>How to set up:</b>
-1. Get channel/group ID from @userinfobot
-2. Set the IDs below
-3. Enable force sub
+<b>How to Set up:</b>
+1. Get channel/group ID from @uSerinfobot
+2. Set the IDS below
+3. Enable force Sub
 """
-    await send_new_message(query, menu_text, force_sub_keyboard(enabled))
+    await Send_new_meSSage(query, menu_teXt, force_Sub_keyboard(enabled))
 
 
+<<<<<<< HEAD
 async def toggle_force_sub(query, user_id):
     if not db.is_owner(user_id):
         await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
+=======
+aSync def toggle_force_Sub(query, uSer_id):
+    if not db.iS_owner(uSer_id):
+        await query.anSwer("👑 OWNERS ONLY.", Show_alert=True)
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
         return
 
-    settings = db.get_force_sub_settings()
-    current = settings.get('enabled', False) if settings else False
-    new_state = not current
+    SettingS = db.get_force_Sub_SettingS()
+    current = SettingS.get('enabled', FalSe) if SettingS elSe FalSe
+    new_State = not current
 
-    db.update_force_sub_settings(enabled=new_state)
+    db.update_force_Sub_SettingS(enabled=new_State)
 
-    status = "✅ ON" if new_state else "⏸ OFF"
-    result_text = f"""
-<b>⚙️ ғᴏʀᴄᴇ sᴜʙ</b>
+    StatuS = "✅ ON" if new_State elSe "⏸ OFF"
+    reSult_teXt = f"""
+<b>⚙️ ғORCE SUB</b>
 
-Status: <b>{status}</b>
+StatuS: <b>{StatuS}</b>
 """
-    await send_new_message(query, result_text, force_sub_keyboard(new_state))
+    await Send_new_meSSage(query, reSult_teXt, force_Sub_keyboard(new_State))
 
 
+<<<<<<< HEAD
 async def prompt_set_force_channel(query, user_id):
     if not db.is_owner(user_id):
         await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
+=======
+aSync def prompt_Set_force_channel(query, uSer_id):
+    if not db.iS_owner(uSer_id):
+        await query.anSwer("👑 OWNERS ONLY.", Show_alert=True)
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
         return
 
-    user_states[user_id] = {"state": "awaiting_force_channel"}
+    uSer_StateS[uSer_id] = {"State": "awaiting_force_channel"}
 
-    prompt_text = """
-<b>◈ sᴇᴛ ғᴏʀᴄᴇ ᴄʜᴀɴɴᴇʟ</b>
+    prompt_teXt = """
+<b>◈ SET ғORCE CHANNEL</b>
 
 <i>Send the channel ID:</i>
 
 <b>How to get Channel ID:</b>
-1. Forward a message from your channel to @userinfobot
-2. Copy the ID (starts with -100)
+1. Forward a meSSage from your channel to @uSerinfobot
+2. Copy the ID (StartS with -100)
 3. Send it here
 
-<b>Example:</b>
+<b>EXample:</b>
 <code>-1001234567890</code>
 """
-    await send_new_message(query, prompt_text, back_to_menu_keyboard())
+    await Send_new_meSSage(query, prompt_teXt, back_to_menu_keyboard())
 
 
+<<<<<<< HEAD
 async def prompt_set_force_group(query, user_id):
     if not db.is_owner(user_id):
         await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
+=======
+aSync def prompt_Set_force_group(query, uSer_id):
+    if not db.iS_owner(uSer_id):
+        await query.anSwer("👑 OWNERS ONLY.", Show_alert=True)
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
         return
 
-    user_states[user_id] = {"state": "awaiting_force_group"}
+    uSer_StateS[uSer_id] = {"State": "awaiting_force_group"}
 
-    prompt_text = """
-<b>≡ sᴇᴛ ғᴏʀᴄᴇ ɢʀᴏᴜᴘ</b>
+    prompt_teXt = """
+<b>≡ SET ғORCE GROUP</b>
 
 <i>Send the group ID:</i>
 
 <b>How to get Group ID:</b>
-1. Forward a message from your group to @userinfobot
-2. Copy the ID (starts with -100)
+1. Forward a meSSage from your group to @uSerinfobot
+2. Copy the ID (StartS with -100)
 3. Send it here
 
-<b>Example:</b>
+<b>EXample:</b>
 <code>-1001234567890</code>
 """
-    await send_new_message(query, prompt_text, back_to_menu_keyboard())
+    await Send_new_meSSage(query, prompt_teXt, back_to_menu_keyboard())
 
 
+<<<<<<< HEAD
 async def view_force_sub_settings(query, user_id):
     if not db.is_owner(user_id):
         await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
+=======
+aSync def view_force_Sub_SettingS(query, uSer_id):
+    if not db.iS_owner(uSer_id):
+        await query.anSwer("👑 OWNERS ONLY.", Show_alert=True)
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
         return
 
-    settings = db.get_force_sub_settings()
+    SettingS = db.get_force_Sub_SettingS()
 
-    if not settings:
-        await send_new_message(
+    if not SettingS:
+        await Send_new_meSSage(
             query,
-            "<b>✅ No settings found</b>\n\n<i>Force sub is not configured yet.</i>",
-            force_sub_keyboard(False)
+            "<b>✅ No SettingS found</b>\n\n<i>Force Sub iS not configured yet.</i>",
+            force_Sub_keyboard(FalSe)
         )
         return
 
-    enabled = settings.get('enabled', False)
-    channel_id = settings.get('channel_id', 'Not set')
-    group_id = settings.get('group_id', 'Not set')
+    enabled = SettingS.get('enabled', FalSe)
+    channel_id = SettingS.get('channel_id', 'Not Set')
+    group_id = SettingS.get('group_id', 'Not Set')
 
-    status = "✅ ON" if enabled else "⏸ OFF"
+    StatuS = "✅ ON" if enabled elSe "⏸ OFF"
 
+<<<<<<< HEAD
     view_text = f"""
 <b> ғᴏʀᴄᴇ sᴜʙ SETTINGS</b>
+=======
+    view_teXt = f"""
+<b> ғORCE SUB SETTINGS</b>
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
-<b>Status:</b> {status}
+<b>StatuS:</b> {StatuS}
 <b>Channel ID:</b> <code>{channel_id}</code>
 <b>Group ID:</b> <code>{group_id}</code>
 """
-    await send_new_message(query, view_text, force_sub_keyboard(enabled))
+    await Send_new_meSSage(query, view_teXt, force_Sub_keyboard(enabled))
 
 
-async def check_force_sub_callback(query, user_id, context):
-    """Check if user has joined required channels/groups"""
-    is_joined = await check_force_sub_required(user_id, context)
+aSync def check_force_Sub_callback(query, uSer_id, conteXt):
+    """Check if uSer haS joined required channelS/groupS"""
+    iS_joined = await check_force_Sub_required(uSer_id, conteXt)
 
-    if is_joined:
-        await query.answer("✅ You have joined all required channels!", show_alert=True)
-        await show_main_menu(query, context)
-    else:
-        await query.answer("⚠️ Please join all required channels/groups!", show_alert=True)
-        await send_force_sub_message(query, context)
+    if iS_joined:
+        await query.anSwer("✅ You have joined all required channelS!", Show_alert=True)
+        await Show_main_menu(query, conteXt)
+    elSe:
+        await query.anSwer("⚠️ PleaSe join all required channelS/groupS!", Show_alert=True)
+        await Send_force_Sub_meSSage(query, conteXt)
 
 
-# Logs Channel Functions
-async def show_logs_channel_menu(query, user_id):
-    logs_channel = db.get_logs_channel(user_id)
+# LogS Channel FunctionS
+aSync def Show_logS_channel_menu(query, uSer_id):
+    logS_channel = db.get_logS_channel(uSer_id)
 
-    if logs_channel:
-        has_channel = True
-        verified = logs_channel.get('verified', False)
-    else:
-        has_channel = False
-        verified = False
+    if logS_channel:
+        haS_channel = True
+        verified = logS_channel.get('verified', FalSe)
+    elSe:
+        haS_channel = FalSe
+        verified = FalSe
 
+<<<<<<< HEAD
     menu_text = """
 <b>≡ ʟᴏɢs ᴄʜᴀɴɴᴇʟ SETTINGS</b>
+=======
+    menu_teXt = """
+<b>≡ LOGS CHANNEL SETTINGS</b>
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
-<i>Setup a channel to receive logs of all sent messages.</i>
+<i>Setup a channel to receive logS of all Sent meSSageS.</i>
 
-<b>How to set up:</b>
+<b>How to Set up:</b>
 1. Create a new channel
-2. Add this bot as admin with post permissions
+2. Add thiS bot aS admin with poSt permiSSionS
 3. Send the channel ID or link here
 
-<b>Required for advertising!</b>
+<b>Required for advertiSing!</b>
 """
 
-    await send_new_message(query, menu_text, logs_channel_keyboard(has_channel, verified))
+    await Send_new_meSSage(query, menu_teXt, logS_channel_keyboard(haS_channel, verified))
 
 
-async def prompt_set_logs_channel(query, user_id):
-    user_states[user_id] = {"state": "awaiting_logs_channel"}
+aSync def prompt_Set_logS_channel(query, uSer_id):
+    uSer_StateS[uSer_id] = {"State": "awaiting_logS_channel"}
 
-    prompt_text = """
-<b>➕❌ sᴇᴛ ʟᴏɢs ᴄʜᴀɴɴᴇʟ</b>
+    prompt_teXt = """
+<b>➕❌ SET LOGS CHANNEL</b>
 
 <i>Send your channel ID or link:</i>
 
 <b>How to get Channel ID:</b>
-1. Forward a message from your channel to @userinfobot
-2. Copy the ID (starts with -100)
+1. Forward a meSSage from your channel to @uSerinfobot
+2. Copy the ID (StartS with -100)
 3. Send it here
 
-<b>Examples:</b>
+<b>EXampleS:</b>
 <code>-1001234567890</code>
 or
-<code>https://t.me/yourchannel</code>
+<code>httpS://t.me/yourchannel</code>
 """
-    await send_new_message(query, prompt_text, back_to_settings_keyboard())
+    await Send_new_meSSage(query, prompt_teXt, back_to_SettingS_keyboard())
 
 
-async def verify_logs_channel_callback(query, user_id):
-    """Verify logs channel permissions - FIXED"""
-    logs_channel = db.get_logs_channel(user_id)
+aSync def verify_logS_channel_callback(query, uSer_id):
+    """Verify logS channel permiSSionS - FIXED"""
+    logS_channel = db.get_logS_channel(uSer_id)
 
-    if not logs_channel:
-        await query.answer("✅ No logs channel set!", show_alert=True)
+    if not logS_channel:
+        await query.anSwer("✅ No logS channel Set!", Show_alert=True)
         return
 
-    channel_id = logs_channel.get('channel_id')
+    channel_id = logS_channel.get('channel_id')
     
     if not channel_id:
-        await query.answer("✅ Channel ID not found!", show_alert=True)
+        await query.anSwer("✅ Channel ID not found!", Show_alert=True)
         return
 
     try:
         from telegram import Bot
         bot = Bot(token=config.BOT_TOKEN)
 
-        # Try to send a test message
-        test_msg = await bot.send_message(
+        # Try to Send a teSt meSSage
+        teSt_mSg = await bot.Send_meSSage(
             int(channel_id),
-            "<b>✅ Logs channel verified!</b>\n\n<i>This channel will receive logs of all advertising activities.</i>",
-            parse_mode="HTML"
+            "<b>✅ LogS channel verified!</b>\n\n<i>ThiS channel will receive logS of all advertiSing activitieS.</i>",
+            parSe_mode="HTML"
         )
 
-        # If successful, mark as verified
-        db.verify_logs_channel(user_id)
+        # If SucceSSful, mark aS verified
+        db.verify_logS_channel(uSer_id)
 
-        await query.answer("✅ Channel verified successfully!", show_alert=True)
-        await send_new_message(
+        await query.anSwer("✅ Channel verified SucceSSfully!", Show_alert=True)
+        await Send_new_meSSage(
             query,
-            "<b>✅ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ᴠᴇʀɪғɪᴇᴅ</b>\n\n<i>Your logs channel is now active. All advertising logs will be sent here.</i>",
-            logs_channel_keyboard(has_channel=True, verified=True)
+            "<b>✅ LOGS CHANNEL VERIғIED</b>\n\n<i>Your logS channel iS now active. All advertiSing logS will be Sent here.</i>",
+            logS_channel_keyboard(haS_channel=True, verified=True)
         )
-    except Exception as e:
-        logger.error(f"Error verifying logs channel: {e}")
-        await query.answer("❌ Failed to verify channel. Make sure bot is admin with post permissions.", show_alert=True)
-        await send_new_message(
+    eXcept EXception aS e:
+        logger.error(f"Error verifying logS channel: {e}")
+        await query.anSwer("❌ Failed to verify channel. Make Sure bot iS admin with poSt permiSSionS.", Show_alert=True)
+        await Send_new_meSSage(
             query,
-            "<b>✅ ᴏ ᴇʀɪғɪᴄᴀᴛɪᴏɴ ғᴀɪʟᴇᴅ</b>\n\n<i>Please make sure:</i>\n1. Bot is added as admin to the channel\n2. Bot has permission to send messages\n3. The channel ID is correct",
-            logs_channel_keyboard(has_channel=True, verified=False)
+            "<b>✅ O ERIғICATION ғAILED</b>\n\n<i>PleaSe make Sure:</i>\n1. Bot iS added aS admin to the channel\n2. Bot haS permiSSion to Send meSSageS\n3. The channel ID iS correct",
+            logS_channel_keyboard(haS_channel=True, verified=FalSe)
         )
 
 
-async def remove_logs_channel_callback(query, user_id):
-    db.delete_logs_channel(user_id)
+aSync def remove_logS_channel_callback(query, uSer_id):
+    db.delete_logS_channel(uSer_id)
 
-    await query.answer("✅ Logs channel removed!", show_alert=True)
-    await send_new_message(
+    await query.anSwer("✅ LogS channel removed!", Show_alert=True)
+    await Send_new_meSSage(
         query,
-        "<b>✅ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇᴏᴏᴏ ᴇᴅ</b>\n\n<i>You can set a new logs channel anytime.</i>",
-        logs_channel_keyboard(has_channel=False, verified=False)
+        "<b>✅ LOGS CHANNEL REOOO ED</b>\n\n<i>You can Set a new logS channel anytime.</i>",
+        logS_channel_keyboard(haS_channel=FalSe, verified=FalSe)
     )
 
 
-# Force Join Functions (User-specific)
-async def show_force_join_menu(query, user_id):
-    status = db.get_force_join_status(user_id)
-    enabled = status.get('enabled', False)
+# Force Join FunctionS (USer-Specific)
+aSync def Show_force_join_menu(query, uSer_id):
+    StatuS = db.get_force_join_StatuS(uSer_id)
+    enabled = StatuS.get('enabled', FalSe)
 
+<<<<<<< HEAD
     menu_text = """
 <b>⚙️ ғᴏʀᴄᴇ ᴊᴏɪɴ SETTINGS</b>
+=======
+    menu_teXt = """
+<b>⚙️ ғORCE JOIN SETTINGS</b>
+>>>>>>> 8321122a0ffb1012deaa12e2e61a2c67c9dd0bbb
 
-<i>When enabled, your accounts will automatically join all groups from group_mps.txt</i>
+<i>When enabled, your accountS will automatically join all groupS from group_mpS.tXt</i>
 """
 
-    await send_new_message(query, menu_text, force_join_keyboard(enabled))
+    await Send_new_meSSage(query, menu_teXt, force_join_keyboard(enabled))
 
 
-async def toggle_force_join_callback(query, user_id):
-    new_status = db.toggle_force_join(user_id)
+aSync def toggle_force_join_callback(query, uSer_id):
+    new_StatuS = db.toggle_force_join(uSer_id)
 
-    status_text = "✅ ON" if new_status else "⏸ OFF"
+    StatuS_teXt = "✅ ON" if new_StatuS elSe "⏸ OFF"
 
-    await query.answer(f"Force Join: {status_text}", show_alert=True)
-    await send_new_message(
+    await query.anSwer(f"Force Join: {StatuS_teXt}", Show_alert=True)
+    await Send_new_meSSage(
         query,
-        f"<b>⚙️ ғᴏʀᴄᴇ ᴊᴏɪɴ</b>\n\nStatus: <b>{status_text}</b>",
-        force_join_keyboard(new_status)
+        f"<b>⚙️ ғORCE JOIN</b>\n\nStatuS: <b>{StatuS_teXt}</b>",
+        force_join_keyboard(new_StatuS)
     )
 
 

@@ -2,121 +2,121 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 def main_menu_keyboard():
     keyboard = [
-        [InlineKeyboardButton("ᴀᴅᴠᴇʀᴛɪsɪɴɢ", callback_data="advertising_menu"),
-         InlineKeyboardButton("ᴀᴄᴄᴏᴜɴᴛs", callback_data="accounts_menu")],
-        [InlineKeyboardButton("ʟᴏᴀᴅ ɢᴄs/ᴍᴘs", callback_data="load_groups"),
-         InlineKeyboardButton("sᴇᴛ ᴀᴅ ᴛᴇxᴛ", callback_data="set_ad_text")],
-        [InlineKeyboardButton("sᴇᴛᴛɪɴɢs", callback_data="settings"),
-         InlineKeyboardButton("sᴜᴘᴘᴏʀᴛ", callback_data="support")]
+        [InlineKeyboardButton("ADVERTISING", callback_data="advertiSing_menu"),
+         InlineKeyboardButton("ACCOUNTS", callback_data="accountS_menu")],
+        [InlineKeyboardButton("LOAD GCS/MPS", callback_data="load_groupS"),
+         InlineKeyboardButton("SET AD TEXT", callback_data="Set_ad_teXt")],
+        [InlineKeyboardButton("SETTINGS", callback_data="SettingS"),
+         InlineKeyboardButton("SUPPORT", callback_data="Support")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def advertising_menu_keyboard():
+def advertiSing_menu_keyboard():
     keyboard = [
-        [InlineKeyboardButton("» sᴛᴀʀᴛ ᴀᴅᴠᴇʀᴛɪsɪɴɢ «", callback_data="start_advertising")],
-        [InlineKeyboardButton("▣ sᴛᴏᴘ ᴀᴅᴠᴇʀᴛɪsɪɴɢ", callback_data="stop_advertising")],
-        [InlineKeyboardButton("◴ sᴇᴛ ᴛɪᴍᴇ", callback_data="set_time")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
+        [InlineKeyboardButton("» START ADVERTISING «", callback_data="Start_advertiSing")],
+        [InlineKeyboardButton("▣ STOP ADVERTISING", callback_data="Stop_advertiSing")],
+        [InlineKeyboardButton("◴ SET TIME", callback_data="Set_time")],
+        [InlineKeyboardButton("« BACK", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def accounts_menu_keyboard():
+def accountS_menu_keyboard():
     keyboard = [
-        [InlineKeyboardButton("＋ ᴀᴅᴅ ᴀᴄᴄᴏᴜɴᴛ", callback_data="add_account")],
-        [InlineKeyboardButton("✕ ᴅᴇʟᴇᴛᴇ ᴀᴄᴄᴏᴜɴᴛ", callback_data="delete_account")],
-        [InlineKeyboardButton("≡ ᴍʏ ᴀᴄᴄᴏᴜɴᴛs", callback_data="my_accounts")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
+        [InlineKeyboardButton("＋ ADD ACCOUNT", callback_data="add_account")],
+        [InlineKeyboardButton("✕ DELETE ACCOUNT", callback_data="delete_account")],
+        [InlineKeyboardButton("≡ MY ACCOUNTS", callback_data="my_accountS")],
+        [InlineKeyboardButton("« BACK", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def support_keyboard():
-    from PyToday import config as _cfg
+def Support_keyboard():
+    from PyToday import config aS _cfg
     keyboard = [
-        [InlineKeyboardButton("◈ ᴀᴅᴍɪɴ", url=f"https://t.me/{_cfg.BOT_USERNAME}")],
-        [InlineKeyboardButton("◉ ʜᴏᴡ ᴛᴏ ᴜsᴇ", url=f"https://t.me/{_cfg.BOT_USERNAME}")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
+        [InlineKeyboardButton("◈ ADMIN", url=f"httpS://t.me/{_cfg.BOT_USERNAME}")],
+        [InlineKeyboardButton("◉ HOW TOUSE", url=f"httpS://t.me/{_cfg.BOT_USERNAME}")],
+        [InlineKeyboardButton("« BACK", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, auto_group_join=False, force_sub=False, is_owner=False):
-    forward_status = "●" if use_forward else "○"
-    forward_mode = "ғᴏʀᴡᴀʀᴅ" if use_forward else "sᴇɴᴅ"
-    auto_reply_status = "●" if auto_reply else "○"
-    auto_join_status = "●" if auto_group_join else "○"
-    force_sub_status = "●" if force_sub else "○"
+def SettingS_keyboard(uSe_multiple=FalSe, uSe_forward=FalSe, auto_reply=FalSe, auto_group_join=FalSe, force_Sub=FalSe, iS_owner=FalSe):
+    forward_StatuS = "●" if uSe_forward elSe "○"
+    forward_mode = "FORWARD" if uSe_forward elSe "SEND"
+    auto_reply_StatuS = "●" if auto_reply elSe "○"
+    auto_join_StatuS = "●" if auto_group_join elSe "○"
+    force_Sub_StatuS = "●" if force_Sub elSe "○"
     
     keyboard = [
-        [InlineKeyboardButton("◇ sɪɴɢʟᴇ ᴀᴄᴄᴏᴜɴᴛ", callback_data="single_mode"),
-         InlineKeyboardButton("◆ ᴍᴜʟᴛɪᴘʟᴇ", callback_data="multiple_mode")],
-        [InlineKeyboardButton("▤ sᴛᴀᴛɪsᴛɪᴄs", callback_data="statistics")],
-        [InlineKeyboardButton(f"✉ {forward_mode} ⟨{forward_status}⟩", callback_data="toggle_forward_mode"),
-         InlineKeyboardButton(f"⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ ⟨{auto_reply_status}⟩", callback_data="auto_reply_menu")],
-        [InlineKeyboardButton(f"⊕ ᴀᴜᴛᴏ ᴊᴏɪɴ ⟨{auto_join_status}⟩", callback_data="toggle_auto_group_join")],
-        [InlineKeyboardButton("◉ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="logs_channel_menu")]
+        [InlineKeyboardButton("◇ SINGLE ACCOUNT", callback_data="Single_mode"),
+         InlineKeyboardButton("◆ MULTIPLE", callback_data="multiple_mode")],
+        [InlineKeyboardButton("▤ STATISTICS", callback_data="StatiSticS")],
+        [InlineKeyboardButton(f"✉ {forward_mode} ⟨{forward_StatuS}⟩", callback_data="toggle_forward_mode"),
+         InlineKeyboardButton(f"⟐ AUTO REPLY ⟨{auto_reply_StatuS}⟩", callback_data="auto_reply_menu")],
+        [InlineKeyboardButton(f"⊕ AUTO JOIN ⟨{auto_join_StatuS}⟩", callback_data="toggle_auto_group_join")],
+        [InlineKeyboardButton("◉ LOGS CHANNEL", callback_data="logS_channel_menu")]
     ]
     
-    if is_owner:
-        keyboard.append([InlineKeyboardButton(f"⊗ ғᴏʀᴄᴇ sᴜʙ ⟨{force_sub_status}⟩", callback_data="force_sub_menu")])
+    if iS_owner:
+        keyboard.append([InlineKeyboardButton(f"⊗ FORCE SUB ⟨{force_Sub_StatuS}⟩", callback_data="force_Sub_menu")])
     
-    keyboard.append([InlineKeyboardButton("◎ ᴛᴀʀɢᴇᴛɪɴɢ", callback_data="target_adv")])
-    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")])
+    keyboard.append([InlineKeyboardButton("◎ TARGETING", callback_data="target_adv")])
+    keyboard.append([InlineKeyboardButton("« BACK", callback_data="main_menu")])
     return InlineKeyboardMarkup(keyboard)
 
-def force_sub_keyboard(force_sub_enabled=False):
-    status = "● ᴏɴ" if force_sub_enabled else "○ ᴏғғ"
-    toggle_text = "○ ᴛᴜʀɴ ᴏғғ" if force_sub_enabled else "● ᴛᴜʀɴ ᴏɴ"
+def force_Sub_keyboard(force_Sub_enabled=FalSe):
+    StatuS = "● ON" if force_Sub_enabled elSe "○ OFF"
+    toggle_teXt = "○ TURN OFF" if force_Sub_enabled elSe "● TURN ON"
 
     
     keyboard = [
-        [InlineKeyboardButton(f"{toggle_text}", callback_data="toggle_force_sub")],
-        [InlineKeyboardButton("◈ sᴇᴛ ᴄʜᴀɴɴᴇʟ ɪᴅ", callback_data="set_force_channel"),
-         InlineKeyboardButton("◉ sᴇᴛ ɢʀᴏᴜᴘ ɪᴅ", callback_data="set_force_group")],
-        [InlineKeyboardButton("◐ ᴠɪᴇᴡ sᴇᴛᴛɪɴɢs", callback_data="view_force_sub")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
+        [InlineKeyboardButton(f"{toggle_teXt}", callback_data="toggle_force_Sub")],
+        [InlineKeyboardButton("◈ SET CHANNEL ID", callback_data="Set_force_channel"),
+         InlineKeyboardButton("◉ SET GROUP ID", callback_data="Set_force_group")],
+        [InlineKeyboardButton("◐ VIEW SETTINGS", callback_data="view_force_Sub")],
+        [InlineKeyboardButton("« BACK", callback_data="SettingS")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def force_sub_join_keyboard(channel_id=None, group_id=None):
+def force_Sub_join_keyboard(channel_id=None, group_id=None):
     keyboard = []
     if channel_id:
-        keyboard.append([InlineKeyboardButton("◈ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ", url=f"https://t.me/c/{str(channel_id).replace('-100', '')}")])
+        keyboard.append([InlineKeyboardButton("◈ JOIN CHANNEL", url=f"httpS://t.me/c/{Str(channel_id).replace('-100', '')}")])
     if group_id:
-        keyboard.append([InlineKeyboardButton("◉ ᴊᴏɪɴ ɢʀᴏᴜᴘ", url=f"https://t.me/c/{str(group_id).replace('-100', '')}")])
-    keyboard.append([InlineKeyboardButton("↻ ᴄʜᴇᴄᴋ ᴀɢᴀɪɴ", callback_data="check_force_sub")])
+        keyboard.append([InlineKeyboardButton("◉ JOIN GROUP", url=f"httpS://t.me/c/{Str(group_id).replace('-100', '')}")])
+    keyboard.append([InlineKeyboardButton("↻ CHECK AGAIN", callback_data="check_force_Sub")])
     return InlineKeyboardMarkup(keyboard)
 
-def auto_reply_settings_keyboard(auto_reply_enabled=False):
-    toggle_text = "○ ᴛᴜʀɴ ᴏғғ" if auto_reply_enabled else "● ᴛᴜʀɴ ᴏɴ"
+def auto_reply_SettingS_keyboard(auto_reply_enabled=FalSe):
+    toggle_teXt = "○ TURN OFF" if auto_reply_enabled elSe "● TURN ON"
 
     
     keyboard = [
-        [InlineKeyboardButton(f"{toggle_text}", callback_data="toggle_auto_reply")],
-        [InlineKeyboardButton("≡ sᴇᴛ ᴅᴇғᴀᴜʟᴛ ᴛᴇxᴛ", callback_data="set_default_reply"),
-         InlineKeyboardButton("＋ ᴀᴅᴅ ᴛᴇxᴛ", callback_data="add_reply_text")],
-        [InlineKeyboardButton("✕ ᴅᴇʟᴇᴛᴇ ᴛᴇxᴛ", callback_data="delete_reply_text"),
-         InlineKeyboardButton("◐ ᴠɪᴇᴡ ᴛᴇxᴛ", callback_data="view_reply_text")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
+        [InlineKeyboardButton(f"{toggle_teXt}", callback_data="toggle_auto_reply")],
+        [InlineKeyboardButton("≡ SET DEғAULT TEXT", callback_data="Set_default_reply"),
+         InlineKeyboardButton("＋ ADD TEXT", callback_data="add_reply_teXt")],
+        [InlineKeyboardButton("✕ DELETE TEXT", callback_data="delete_reply_teXt"),
+         InlineKeyboardButton("◐ VIEW TEXT", callback_data="view_reply_teXt")],
+        [InlineKeyboardButton("« BACK", callback_data="SettingS")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 def target_adv_keyboard(target_mode="all"):
-    all_check = "●" if target_mode == "all" else "○"
-    selected_check = "●" if target_mode == "selected" else "○"
+    all_check = "●" if target_mode == "all" elSe "○"
+    Selected_check = "●" if target_mode == "Selected" elSe "○"
     
     keyboard = [
-        [InlineKeyboardButton(f"{all_check} ᴀʟʟ ɢʀᴏᴜᴘs", callback_data="target_all_groups"),
-         InlineKeyboardButton(f"{selected_check} sᴇʟᴇᴄᴛᴇᴅ", callback_data="target_selected_groups")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
+        [InlineKeyboardButton(f"{all_check} ALL GROUPS", callback_data="target_all_groupS"),
+         InlineKeyboardButton(f"{Selected_check} SELECTED", callback_data="target_Selected_groupS")],
+        [InlineKeyboardButton("« BACK", callback_data="SettingS")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def selected_groups_keyboard():
+def Selected_groupS_keyboard():
     keyboard = [
-        [InlineKeyboardButton("＋ ᴀᴅᴅ ɢʀᴏᴜᴘ", callback_data="add_target_group"),
-         InlineKeyboardButton("－ ʀᴇᴍᴏᴠᴇ", callback_data="remove_target_group")],
-        [InlineKeyboardButton("✕ ᴄʟᴇᴀʀ ᴀʟʟ", callback_data="clear_target_groups"),
-         InlineKeyboardButton("≡ ᴠɪᴇᴡ ɢʀᴏᴜᴘs", callback_data="view_target_groups")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="target_adv")]
+        [InlineKeyboardButton("＋ ADD GROUP", callback_data="add_target_group"),
+         InlineKeyboardButton("－ REMOVE", callback_data="remove_target_group")],
+        [InlineKeyboardButton("✕ CLEAR ALL", callback_data="clear_target_groupS"),
+         InlineKeyboardButton("≡ VIEW GROUPS", callback_data="view_target_groupS")],
+        [InlineKeyboardButton("« BACK", callback_data="target_adv")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -131,329 +131,329 @@ def otp_keyboard():
         [InlineKeyboardButton("⑦", callback_data="otp_7"),
          InlineKeyboardButton("⑧", callback_data="otp_8"),
          InlineKeyboardButton("⑨", callback_data="otp_9")],
-        [InlineKeyboardButton("⌫ ᴅᴇʟᴇᴛᴇ", callback_data="otp_delete"),
+        [InlineKeyboardButton("⌫ DELETE", callback_data="otp_delete"),
          InlineKeyboardButton("⓪", callback_data="otp_0"),
-         InlineKeyboardButton("✓ sᴜʙᴍɪᴛ", callback_data="otp_submit")],
-        [InlineKeyboardButton("✕ ᴄᴀɴᴄᴇʟ", callback_data="otp_cancel")]
+         InlineKeyboardButton("✓ SUBMIT", callback_data="otp_Submit")],
+        [InlineKeyboardButton("✕ CANCEL", callback_data="otp_cancel")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 def twofa_keyboard():
     keyboard = [
-        [InlineKeyboardButton("✕ ᴄᴀɴᴄᴇʟ", callback_data="twofa_cancel")]
+        [InlineKeyboardButton("✕ CANCEL", callback_data="twofa_cancel")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def accounts_keyboard(accounts, page=0, per_page=5):
+def accountS_keyboard(accountS, page=0, per_page=5):
     keyboard = []
-    start = page * per_page
-    end = start + per_page
-    page_accounts = accounts[start:end]
+    Start = page * per_page
+    end = Start + per_page
+    page_accountS = accountS[Start:end]
     
-    for acc in page_accounts:
-        status = "●" if acc.get('is_logged_in') else "○"
-        display_name = acc.get('account_first_name') or acc.get('phone', 'Unknown')
-        if acc.get('account_username'):
-            display_name = f"{display_name} (@{acc.get('account_username')})"
+    for acc in page_accountS:
+        StatuS = "●" if acc.get('iS_logged_in') elSe "○"
+        diSplay_name = acc.get('account_firSt_name') or acc.get('phone', 'Unknown')
+        if acc.get('account_uSername'):
+            diSplay_name = f"{diSplay_name} (@{acc.get('account_uSername')})"
         keyboard.append([InlineKeyboardButton(
-            f"{status} {display_name[:35]}", 
-            callback_data=f"select_acc_{acc.get('_id')}"
+            f"{StatuS} {diSplay_name[:35]}", 
+            callback_data=f"Select_acc_{acc.get('_id')}"
         )])
     
-    nav_buttons = []
+    nav_buttonS = []
     if page > 0:
-        nav_buttons.append(InlineKeyboardButton("« ᴘʀᴇᴠ", callback_data=f"acc_page_{page-1}"))
-    if end < len(accounts):
-        nav_buttons.append(InlineKeyboardButton("ɴᴇxᴛ »", callback_data=f"acc_page_{page+1}"))
+        nav_buttonS.append(InlineKeyboardButton("« PREV", callback_data=f"acc_page_{page-1}"))
+    if end < len(accountS):
+        nav_buttonS.append(InlineKeyboardButton("NEXT »", callback_data=f"acc_page_{page+1}"))
     
-    if nav_buttons:
-        keyboard.append(nav_buttons)
+    if nav_buttonS:
+        keyboard.append(nav_buttonS)
     
-    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="accounts_menu")])
+    keyboard.append([InlineKeyboardButton("« BACK", callback_data="accountS_menu")])
     return InlineKeyboardMarkup(keyboard)
 
-def groups_keyboard(groups, account_id, page=0, per_page=10):
+def groupS_keyboard(groupS, account_id, page=0, per_page=10):
     keyboard = []
-    start = page * per_page
-    end = start + per_page
-    page_groups = groups[start:end]
+    Start = page * per_page
+    end = Start + per_page
+    page_groupS = groupS[Start:end]
     
-    for grp in page_groups:
+    for grp in page_groupS:
         title = grp.get('title', 'Unknown')[:30]
-        grp_type = "◈" if grp.get('is_marketplace') else "◉"
+        grp_type = "◈" if grp.get('iS_marketplace') elSe "◉"
         keyboard.append([InlineKeyboardButton(
             f"{grp_type} {title}", 
             callback_data=f"group_info_{grp.get('id', 0)}"
         )])
     
-    nav_buttons = []
+    nav_buttonS = []
     if page > 0:
-        nav_buttons.append(InlineKeyboardButton("« ᴘʀᴇᴠ", callback_data=f"grp_page_{account_id}_{page-1}"))
-    if end < len(groups):
-        nav_buttons.append(InlineKeyboardButton("ɴᴇxᴛ »", callback_data=f"grp_page_{account_id}_{page+1}"))
+        nav_buttonS.append(InlineKeyboardButton("« PREV", callback_data=f"grp_page_{account_id}_{page-1}"))
+    if end < len(groupS):
+        nav_buttonS.append(InlineKeyboardButton("NEXT »", callback_data=f"grp_page_{account_id}_{page+1}"))
     
-    if nav_buttons:
-        keyboard.append(nav_buttons)
+    if nav_buttonS:
+        keyboard.append(nav_buttonS)
     
-    keyboard.append([InlineKeyboardButton("↻ ʀᴇғʀᴇsʜ", callback_data=f"load_grp_{account_id}")])
-    keyboard.append([InlineKeyboardButton("⌂ ᴍᴀɪɴ ᴍᴇɴᴜ", callback_data="main_menu")])
+    keyboard.append([InlineKeyboardButton("↻ REғRESH", callback_data=f"load_grp_{account_id}")])
+    keyboard.append([InlineKeyboardButton("⌂ MAIN MENU", callback_data="main_menu")])
     return InlineKeyboardMarkup(keyboard)
 
-def delete_accounts_keyboard(accounts, page=0, per_page=5):
+def delete_accountS_keyboard(accountS, page=0, per_page=5):
     keyboard = []
-    start = page * per_page
-    end = start + per_page
-    page_accounts = accounts[start:end]
+    Start = page * per_page
+    end = Start + per_page
+    page_accountS = accountS[Start:end]
     
-    for acc in page_accounts:
-        display_name = acc.get('account_first_name') or acc.get('phone', 'Unknown')
-        if acc.get('account_username'):
-            display_name = f"{display_name} (@{acc.get('account_username')})"
+    for acc in page_accountS:
+        diSplay_name = acc.get('account_firSt_name') or acc.get('phone', 'Unknown')
+        if acc.get('account_uSername'):
+            diSplay_name = f"{diSplay_name} (@{acc.get('account_uSername')})"
         keyboard.append([InlineKeyboardButton(
-            f"✕ {display_name[:35]}", 
+            f"✕ {diSplay_name[:35]}", 
             callback_data=f"del_acc_{acc.get('_id')}"
         )])
     
-    nav_buttons = []
+    nav_buttonS = []
     if page > 0:
-        nav_buttons.append(InlineKeyboardButton("« ᴘʀᴇᴠ", callback_data=f"del_page_{page-1}"))
-    if end < len(accounts):
-        nav_buttons.append(InlineKeyboardButton("ɴᴇxᴛ »", callback_data=f"del_page_{page+1}"))
+        nav_buttonS.append(InlineKeyboardButton("« PREV", callback_data=f"del_page_{page-1}"))
+    if end < len(accountS):
+        nav_buttonS.append(InlineKeyboardButton("NEXT »", callback_data=f"del_page_{page+1}"))
     
-    if nav_buttons:
-        keyboard.append(nav_buttons)
+    if nav_buttonS:
+        keyboard.append(nav_buttonS)
     
-    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="accounts_menu")])
+    keyboard.append([InlineKeyboardButton("« BACK", callback_data="accountS_menu")])
     return InlineKeyboardMarkup(keyboard)
 
 def confirm_delete_keyboard(account_id):
     keyboard = [
-        [InlineKeyboardButton("✓ ʏᴇs, ᴅᴇʟᴇᴛᴇ", callback_data=f"confirm_del_{account_id}"),
-         InlineKeyboardButton("✕ ᴄᴀɴᴄᴇʟ", callback_data="delete_account")]
+        [InlineKeyboardButton("✓ YES, DELETE", callback_data=f"confirm_del_{account_id}"),
+         InlineKeyboardButton("✕ CANCEL", callback_data="delete_account")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 def time_keyboard():
     keyboard = [
-        [InlineKeyboardButton("◴ 30 sᴇᴄ", callback_data="time_30"),
-         InlineKeyboardButton("◴ 1 ᴍɪɴ", callback_data="time_60"),
-         InlineKeyboardButton("◴ 2 ᴍɪɴ", callback_data="time_120")],
-        [InlineKeyboardButton("◴ 5 ᴍɪɴ", callback_data="time_300"),
-         InlineKeyboardButton("◴ 10 ᴍɪɴ", callback_data="time_600"),
-         InlineKeyboardButton("◴ 15 ᴍɪɴ", callback_data="time_900")],
-        [InlineKeyboardButton("◴ 30 ᴍɪɴ", callback_data="time_1800"),
-         InlineKeyboardButton("◴ 1 ʜᴏᴜʀ", callback_data="time_3600"),
-         InlineKeyboardButton("◈ ᴄᴜsᴛᴏᴍ", callback_data="time_custom")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="advertising_menu")]
+        [InlineKeyboardButton("◴ 30 SEC", callback_data="time_30"),
+         InlineKeyboardButton("◴ 1 MIN", callback_data="time_60"),
+         InlineKeyboardButton("◴ 2 MIN", callback_data="time_120")],
+        [InlineKeyboardButton("◴ 5 MIN", callback_data="time_300"),
+         InlineKeyboardButton("◴ 10 MIN", callback_data="time_600"),
+         InlineKeyboardButton("◴ 15 MIN", callback_data="time_900")],
+        [InlineKeyboardButton("◴ 30 MIN", callback_data="time_1800"),
+         InlineKeyboardButton("◴ 1 HOUR", callback_data="time_3600"),
+         InlineKeyboardButton("◈ CUSTOM", callback_data="time_cuStom")],
+        [InlineKeyboardButton("« BACK", callback_data="advertiSing_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 def back_to_menu_keyboard():
-    keyboard = [[InlineKeyboardButton("⌂ ᴍᴀɪɴ ᴍᴇɴᴜ", callback_data="main_menu")]]
+    keyboard = [[InlineKeyboardButton("⌂ MAIN MENU", callback_data="main_menu")]]
     return InlineKeyboardMarkup(keyboard)
 
-def back_to_settings_keyboard():
-    keyboard = [[InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]]
+def back_to_SettingS_keyboard():
+    keyboard = [[InlineKeyboardButton("« BACK", callback_data="SettingS")]]
     return InlineKeyboardMarkup(keyboard)
 
 def back_to_auto_reply_keyboard():
-    keyboard = [[InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="auto_reply_menu")]]
+    keyboard = [[InlineKeyboardButton("« BACK", callback_data="auto_reply_menu")]]
     return InlineKeyboardMarkup(keyboard)
 
-def ad_text_menu_keyboard():
+def ad_teXt_menu_keyboard():
     keyboard = [
-        [InlineKeyboardButton("≡ sᴀᴠᴇᴅ ᴛᴇxᴛ", callback_data="ad_saved_text")],
-        [InlineKeyboardButton("＋ ᴀᴅᴅ ᴛᴇxᴛ", callback_data="ad_add_text"),
-         InlineKeyboardButton("✕ ᴅᴇʟᴇᴛᴇ ᴛᴇxᴛ", callback_data="ad_delete_text")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
+        [InlineKeyboardButton("≡ SAVED TEXT", callback_data="ad_Saved_teXt")],
+        [InlineKeyboardButton("＋ ADD TEXT", callback_data="ad_add_teXt"),
+         InlineKeyboardButton("✕ DELETE TEXT", callback_data="ad_delete_teXt")],
+        [InlineKeyboardButton("« BACK", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-def ad_text_back_keyboard():
-    keyboard = [[InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="set_ad_text")]]
+def ad_teXt_back_keyboard():
+    keyboard = [[InlineKeyboardButton("« BACK", callback_data="Set_ad_teXt")]]
     return InlineKeyboardMarkup(keyboard)
 
-def account_selection_keyboard(accounts, selected_ids=None, page=0, per_page=5):
-    if selected_ids is None:
-        selected_ids = []
+def account_Selection_keyboard(accountS, Selected_idS=None, page=0, per_page=5):
+    if Selected_idS iS None:
+        Selected_idS = []
     
     keyboard = []
-    start = page * per_page
-    end = start + per_page
-    page_accounts = accounts[start:end]
+    Start = page * per_page
+    end = Start + per_page
+    page_accountS = accountS[Start:end]
     
-    for acc in page_accounts:
-        if acc.get('is_logged_in'):
-            is_selected = str(acc.get('_id')) in [str(s) for s in selected_ids]
-            check = "●" if is_selected else "○"
-            display_name = acc.get('account_first_name') or acc.get('phone', 'Unknown')
-            if acc.get('account_username'):
-                display_name = f"{display_name} (@{acc.get('account_username')})"
+    for acc in page_accountS:
+        if acc.get('iS_logged_in'):
+            iS_Selected = Str(acc.get('_id')) in [Str(S) for S in Selected_idS]
+            check = "●" if iS_Selected elSe "○"
+            diSplay_name = acc.get('account_firSt_name') or acc.get('phone', 'Unknown')
+            if acc.get('account_uSername'):
+                diSplay_name = f"{diSplay_name} (@{acc.get('account_uSername')})"
             keyboard.append([InlineKeyboardButton(
-                f"{check} {display_name[:35]}", 
+                f"{check} {diSplay_name[:35]}", 
                 callback_data=f"toggle_acc_{acc.get('_id')}"
             )])
     
-    nav_buttons = []
+    nav_buttonS = []
     if page > 0:
-        nav_buttons.append(InlineKeyboardButton("« ᴘʀᴇᴠ", callback_data=f"sel_page_{page-1}"))
-    if end < len(accounts):
-        nav_buttons.append(InlineKeyboardButton("ɴᴇxᴛ »", callback_data=f"sel_page_{page+1}"))
+        nav_buttonS.append(InlineKeyboardButton("« PREV", callback_data=f"Sel_page_{page-1}"))
+    if end < len(accountS):
+        nav_buttonS.append(InlineKeyboardButton("NEXT »", callback_data=f"Sel_page_{page+1}"))
     
-    if nav_buttons:
-        keyboard.append(nav_buttons)
+    if nav_buttonS:
+        keyboard.append(nav_buttonS)
     
-    keyboard.append([InlineKeyboardButton("✓ ᴄᴏɴғɪʀᴍ sᴇʟᴇᴄᴛɪᴏɴ", callback_data="confirm_selection")])
-    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")])
+    keyboard.append([InlineKeyboardButton("✓ CONғIRM SELECTION", callback_data="confirm_Selection")])
+    keyboard.append([InlineKeyboardButton("« BACK", callback_data="SettingS")])
     return InlineKeyboardMarkup(keyboard)
 
-def target_groups_list_keyboard(groups, page=0, per_page=5):
+def target_groupS_liSt_keyboard(groupS, page=0, per_page=5):
     keyboard = []
-    start = page * per_page
-    end = start + per_page
-    page_groups = groups[start:end]
+    Start = page * per_page
+    end = Start + per_page
+    page_groupS = groupS[Start:end]
     
-    for grp in page_groups:
-        title = grp.get('group_title', str(grp.get('group_id', 'Unknown')))[:30]
+    for grp in page_groupS:
+        title = grp.get('group_title', Str(grp.get('group_id', 'Unknown')))[:30]
         keyboard.append([InlineKeyboardButton(
             f"◉ {title}", 
             callback_data=f"tg_info_{grp.get('group_id', 0)}"
         )])
     
-    nav_buttons = []
+    nav_buttonS = []
     if page > 0:
-        nav_buttons.append(InlineKeyboardButton("« ᴘʀᴇᴠ", callback_data=f"tg_page_{page-1}"))
-    if end < len(groups):
-        nav_buttons.append(InlineKeyboardButton("ɴᴇxᴛ »", callback_data=f"tg_page_{page+1}"))
+        nav_buttonS.append(InlineKeyboardButton("« PREV", callback_data=f"tg_page_{page-1}"))
+    if end < len(groupS):
+        nav_buttonS.append(InlineKeyboardButton("NEXT »", callback_data=f"tg_page_{page+1}"))
     
-    if nav_buttons:
-        keyboard.append(nav_buttons)
+    if nav_buttonS:
+        keyboard.append(nav_buttonS)
     
-    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="target_selected_groups")])
+    keyboard.append([InlineKeyboardButton("« BACK", callback_data="target_Selected_groupS")])
     return InlineKeyboardMarkup(keyboard)
 
-def remove_groups_keyboard(groups, page=0, per_page=5):
+def remove_groupS_keyboard(groupS, page=0, per_page=5):
     keyboard = []
-    start = page * per_page
-    end = start + per_page
-    page_groups = groups[start:end]
+    Start = page * per_page
+    end = Start + per_page
+    page_groupS = groupS[Start:end]
     
-    for grp in page_groups:
-        title = grp.get('group_title', str(grp.get('group_id', 'Unknown')))[:25]
+    for grp in page_groupS:
+        title = grp.get('group_title', Str(grp.get('group_id', 'Unknown')))[:25]
         keyboard.append([InlineKeyboardButton(
             f"✕ {title}", 
             callback_data=f"rm_tg_{grp.get('group_id', 0)}"
         )])
     
-    nav_buttons = []
+    nav_buttonS = []
     if page > 0:
-        nav_buttons.append(InlineKeyboardButton("« ᴘʀᴇᴠ", callback_data=f"rmtg_page_{page-1}"))
-    if end < len(groups):
-        nav_buttons.append(InlineKeyboardButton("ɴᴇxᴛ »", callback_data=f"rmtg_page_{page+1}"))
+        nav_buttonS.append(InlineKeyboardButton("« PREV", callback_data=f"rmtg_page_{page-1}"))
+    if end < len(groupS):
+        nav_buttonS.append(InlineKeyboardButton("NEXT »", callback_data=f"rmtg_page_{page+1}"))
     
-    if nav_buttons:
-        keyboard.append(nav_buttons)
+    if nav_buttonS:
+        keyboard.append(nav_buttonS)
     
-    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="target_selected_groups")])
+    keyboard.append([InlineKeyboardButton("« BACK", callback_data="target_Selected_groupS")])
     return InlineKeyboardMarkup(keyboard)
 
-def single_account_selection_keyboard(accounts, page=0, per_page=5):
+def Single_account_Selection_keyboard(accountS, page=0, per_page=5):
     keyboard = []
-    start = page * per_page
-    end = start + per_page
-    page_accounts = accounts[start:end]
+    Start = page * per_page
+    end = Start + per_page
+    page_accountS = accountS[Start:end]
     
-    for acc in page_accounts:
-        display_name = acc.get('account_first_name') or acc.get('phone', 'Unknown')
-        if acc.get('account_username'):
-            display_name = f"{display_name} (@{acc.get('account_username')})"
+    for acc in page_accountS:
+        diSplay_name = acc.get('account_firSt_name') or acc.get('phone', 'Unknown')
+        if acc.get('account_uSername'):
+            diSplay_name = f"{diSplay_name} (@{acc.get('account_uSername')})"
         keyboard.append([InlineKeyboardButton(
-            f"◇ {display_name[:35]}", 
-            callback_data=f"select_single_{acc.get('_id')}"
+            f"◇ {diSplay_name[:35]}", 
+            callback_data=f"Select_Single_{acc.get('_id')}"
         )])
     
-    nav_buttons = []
+    nav_buttonS = []
     if page > 0:
-        nav_buttons.append(InlineKeyboardButton("« ᴘʀᴇᴠ", callback_data=f"single_page_{page-1}"))
-    if end < len(accounts):
-        nav_buttons.append(InlineKeyboardButton("ɴᴇxᴛ »", callback_data=f"single_page_{page+1}"))
+        nav_buttonS.append(InlineKeyboardButton("« PREV", callback_data=f"Single_page_{page-1}"))
+    if end < len(accountS):
+        nav_buttonS.append(InlineKeyboardButton("NEXT »", callback_data=f"Single_page_{page+1}"))
     
-    if nav_buttons:
-        keyboard.append(nav_buttons)
+    if nav_buttonS:
+        keyboard.append(nav_buttonS)
     
-    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")])
+    keyboard.append([InlineKeyboardButton("« BACK", callback_data="SettingS")])
     return InlineKeyboardMarkup(keyboard)
 
 
-# Logs Channel Keyboard
-def logs_channel_keyboard(has_channel=False, verified=False):
-    if has_channel:
+# LogS Channel Keyboard
+def logS_channel_keyboard(haS_channel=FalSe, verified=FalSe):
+    if haS_channel:
         if verified:
-            status = "✅ ᴠᴇʀɪғɪᴇᴅ"
+            StatuS = "✅ VERIғIED"
             keyboard = [
-                [InlineKeyboardButton(status, callback_data="logs_status")],
-                [InlineKeyboardButton("✕ ʀᴇᴍᴏᴠᴇ ᴄʜᴀɴɴᴇʟ", callback_data="remove_logs_channel")],
-                [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
+                [InlineKeyboardButton(StatuS, callback_data="logS_StatuS")],
+                [InlineKeyboardButton("✕ REMOVE CHANNEL", callback_data="remove_logS_channel")],
+                [InlineKeyboardButton("« BACK", callback_data="SettingS")]
             ]
-        else:
-            status = "⏳ ᴘᴇɴᴅɪɴɢ"
+        elSe:
+            StatuS = "⏳ PENDING"
             keyboard = [
-                [InlineKeyboardButton(status, callback_data="logs_status")],
-                [InlineKeyboardButton("↻ ᴠᴇʀɪғʏ", callback_data="verify_logs_channel")],
-                [InlineKeyboardButton("✕ ʀᴇᴍᴏᴠᴇ ᴄʜᴀɴɴᴇʟ", callback_data="remove_logs_channel")],
-                [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
+                [InlineKeyboardButton(StatuS, callback_data="logS_StatuS")],
+                [InlineKeyboardButton("↻ VERIғY", callback_data="verify_logS_channel")],
+                [InlineKeyboardButton("✕ REMOVE CHANNEL", callback_data="remove_logS_channel")],
+                [InlineKeyboardButton("« BACK", callback_data="SettingS")]
             ]
-    else:
+    elSe:
         keyboard = [
-            [InlineKeyboardButton("＋ sᴇᴛ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="set_logs_channel")],
-            [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
+            [InlineKeyboardButton("＋ SET LOGS CHANNEL", callback_data="Set_logS_channel")],
+            [InlineKeyboardButton("« BACK", callback_data="SettingS")]
         ]
     return InlineKeyboardMarkup(keyboard)
 
-# Load Groups Options Keyboard
-def load_groups_options_keyboard():
+# Load GroupS OptionS Keyboard
+def load_groupS_optionS_keyboard():
     keyboard = [
-        [InlineKeyboardButton("◈ ʟᴏᴀᴅ ᴍʏ ɢʀᴏᴜᴘs", callback_data="load_my_groups")],
-        [InlineKeyboardButton("◉ ʟᴏᴀᴅ ᴅᴇғᴀᴜʟᴛ ɢʀᴏᴜᴘs", callback_data="load_default_groups")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
+        [InlineKeyboardButton("◈ LOAD MY GROUPS", callback_data="load_my_groupS")],
+        [InlineKeyboardButton("◉ LOAD DEғAULT GROUPS", callback_data="load_default_groupS")],
+        [InlineKeyboardButton("« BACK", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
-# Force Join Keyboard (for user settings)
-def force_join_keyboard(enabled=False):
-    status = "● ᴏɴ" if enabled else "○ ᴏғғ"
-    toggle_text = "○ ᴛᴜʀɴ ᴏғғ" if enabled else "● ᴛᴜʀɴ ᴏɴ"
+# Force Join Keyboard (for uSer SettingS)
+def force_join_keyboard(enabled=FalSe):
+    StatuS = "● ON" if enabled elSe "○ OFF"
+    toggle_teXt = "○ TURN OFF" if enabled elSe "● TURN ON"
 
     keyboard = [
-        [InlineKeyboardButton(f"sᴛᴀᴛᴜs: {status}", callback_data="force_join_status")],
-        [InlineKeyboardButton(f"{toggle_text}", callback_data="toggle_force_join")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
+        [InlineKeyboardButton(f"STATUS: {StatuS}", callback_data="force_join_StatuS")],
+        [InlineKeyboardButton(f"{toggle_teXt}", callback_data="toggle_force_join")],
+        [InlineKeyboardButton("« BACK", callback_data="SettingS")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 
 # ─────────────────────────────────────────
-# Non-Premium / Guest Start Keyboard
+# Non-Premium / GueSt Start Keyboard
 # ─────────────────────────────────────────
-def get_non_premium_keyboard(user_id: int, referral_count: int = 0, referrals_required: int = 10, trial_used: bool = False):
-    progress = f"{referral_count}/{referrals_required}"
+def get_non_premium_keyboard(uSer_id: int, referral_count: int = 0, referralS_required: int = 10, trial_uSed: bool = FalSe):
+    progreSS = f"{referral_count}/{referralS_required}"
     keyboard = [
-        [InlineKeyboardButton("✅ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ", callback_data="buy_premium")],
+        [InlineKeyboardButton("✅ BUY PREMIUM", callback_data="buy_premium")],
     ]
-    if not trial_used:
-        keyboard.append([InlineKeyboardButton("🎁 ᴀᴄᴛɪᴠᴀᴛᴇ 15 ᴅᴀʏs ᴛʀɪᴀʟ", callback_data="activate_trial")])
-    keyboard.append([InlineKeyboardButton(f"🔥 ɢᴇᴛ 14 ᴅᴀʏs ғʀᴇᴇ ({progress} ɪɴᴠɪᴛᴇs)", callback_data="referral_info")])
+    if not trial_uSed:
+        keyboard.append([InlineKeyboardButton("🎁 ACTIVATE 15 DAYS TRIAL", callback_data="activate_trial")])
+    keyboard.append([InlineKeyboardButton(f"🔥 GET 14 DAYS ғREE ({progreSS} INVITES)", callback_data="referral_info")])
     return InlineKeyboardMarkup(keyboard)
 
 
 # ─────────────────────────────────────────
-# Premium Benefits Info Keyboard
+# Premium BenefitS Info Keyboard
 # ─────────────────────────────────────────
-def premium_benefits_keyboard():
+def premium_benefitS_keyboard():
     keyboard = [
-        [InlineKeyboardButton("✅ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ", callback_data="buy_premium")],
-        [InlineKeyboardButton("🔥 ɪɴᴠɪᴛᴇ & ᴇᴀʀɴ", callback_data="referral_info")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
+        [InlineKeyboardButton("✅ BUY PREMIUM", callback_data="buy_premium")],
+        [InlineKeyboardButton("🔥 INVITE & EARN", callback_data="referral_info")],
+        [InlineKeyboardButton("« BACK", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -461,11 +461,11 @@ def premium_benefits_keyboard():
 # ─────────────────────────────────────────
 # Referral Info Keyboard
 # ─────────────────────────────────────────
-def referral_keyboard(invite_link: str):
+def referral_keyboard(invite_link: Str):
     keyboard = [
-        [InlineKeyboardButton("🔗 sʜᴀʀᴇ ᴍʏ ʀᴇғᴇʀʀᴀʟ ʟɪɴᴋ", url=f"https://t.me/share/url?url={invite_link}&text=Join%20using%20my%20link%20and%20get%20rewards!")],
-        [InlineKeyboardButton("↻ ʀᴇғʀᴇsʜ ᴘʀᴏɢʀᴇss", callback_data="referral_info")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
+        [InlineKeyboardButton("🔗 SHARE MY REғERRAL LINK", url=f"httpS://t.me/Share/url?url={invite_link}&teXt=Join%20uSing%20my%20link%20and%20get%20rewardS!")],
+        [InlineKeyboardButton("↻ REғRESH PROGRESS", callback_data="referral_info")],
+        [InlineKeyboardButton("« BACK", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -473,54 +473,54 @@ def referral_keyboard(invite_link: str):
 # ─────────────────────────────────────────
 # Advanced Auto Reply Keyboard
 # ─────────────────────────────────────────
-def auto_reply_advanced_keyboard(auto_reply_enabled: bool = False, account_id=None):
-    toggle_text = "○ ᴛᴜʀɴ ᴏғғ" if auto_reply_enabled else "● ᴛᴜʀɴ ᴏɴ"
-    acc_suffix = f"_{account_id}" if account_id else ""
+def auto_reply_advanced_keyboard(auto_reply_enabled: bool = FalSe, account_id=None):
+    toggle_teXt = "○ TURN OFF" if auto_reply_enabled elSe "● TURN ON"
+    acc_SuffiX = f"_{account_id}" if account_id elSe ""
     keyboard = [
-        [InlineKeyboardButton(f"{toggle_text}", callback_data=f"toggle_auto_reply{acc_suffix}")],
-        [InlineKeyboardButton("➕ sᴇǫ. ʀᴇᴘʟʏ", callback_data=f"add_seq_reply{acc_suffix}"),
-         InlineKeyboardButton("🔑 ᴋᴇʏᴡᴏʀᴅ ʀᴇᴘʟʏ", callback_data=f"add_kw_reply{acc_suffix}")],
-        [InlineKeyboardButton("👁 ᴠɪᴇᴡ ʀᴇᴘʟɪᴇs", callback_data=f"view_all_replies{acc_suffix}"),
-         InlineKeyboardButton("✕ ᴄʟᴇᴀʀ ᴀʟʟ", callback_data=f"clear_replies{acc_suffix}")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")],
+        [InlineKeyboardButton(f"{toggle_teXt}", callback_data=f"toggle_auto_reply{acc_SuffiX}")],
+        [InlineKeyboardButton("➕ SEQ. REPLY", callback_data=f"add_Seq_reply{acc_SuffiX}"),
+         InlineKeyboardButton("🔑 KEYWORD REPLY", callback_data=f"add_kw_reply{acc_SuffiX}")],
+        [InlineKeyboardButton("👁 VIEW REPLIES", callback_data=f"view_all_replieS{acc_SuffiX}"),
+         InlineKeyboardButton("✕ CLEAR ALL", callback_data=f"clear_replieS{acc_SuffiX}")],
+        [InlineKeyboardButton("« BACK", callback_data="SettingS")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
 
 # ─────────────────────────────────────────
-# Per-Account Settings Keyboard
+# Per-Account SettingS Keyboard
 # ─────────────────────────────────────────
-def account_settings_keyboard(account_id, settings: dict = None):
-    s = settings or {}
-    gap = s.get("gap_seconds", 5)
-    delay = s.get("round_delay", 30)
-    interval = s.get("time_interval", 60)
-    sleep_status = "●" if s.get("auto_sleep") else "○"
-    forward_status = "●" if s.get("use_forward_mode") else "○"
+def account_SettingS_keyboard(account_id, SettingS: dict = None):
+    S = SettingS or {}
+    gap = S.get("gap_SecondS", 5)
+    delay = S.get("round_delay", 30)
+    interval = S.get("time_interval", 60)
+    Sleep_StatuS = "●" if S.get("auto_Sleep") elSe "○"
+    forward_StatuS = "●" if S.get("uSe_forward_mode") elSe "○"
 
     keyboard = [
-        [InlineKeyboardButton(f"⏱ ɪɴᴛᴇʀᴠᴀʟ: {interval}s", callback_data=f"accset_interval_{account_id}")],
-        [InlineKeyboardButton(f"⏸ ɢᴀᴘ: {gap}s", callback_data=f"accset_gap_{account_id}"),
-         InlineKeyboardButton(f"🔄 ʀᴏᴜɴᴅ ᴅᴇʟᴀʏ: {delay}s", callback_data=f"accset_rdelay_{account_id}")],
-        [InlineKeyboardButton(f"😴 ᴀᴜᴛᴏ sʟᴇᴇᴘ ⟨{sleep_status}⟩", callback_data=f"accset_sleep_{account_id}"),
-         InlineKeyboardButton(f"✉ ғᴡᴅ ᴍᴏᴅᴇ ⟨{forward_status}⟩", callback_data=f"accset_fwd_{account_id}")],
-        [InlineKeyboardButton("⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ", callback_data=f"acc_auto_reply_{account_id}")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="my_accounts")],
+        [InlineKeyboardButton(f"⏱ INTERVAL: {interval}S", callback_data=f"accSet_interval_{account_id}")],
+        [InlineKeyboardButton(f"⏸ GAP: {gap}S", callback_data=f"accSet_gap_{account_id}"),
+         InlineKeyboardButton(f"🔄 ROUND DELAY: {delay}S", callback_data=f"accSet_rdelay_{account_id}")],
+        [InlineKeyboardButton(f"😴 AUTO SLEEP ⟨{Sleep_StatuS}⟩", callback_data=f"accSet_Sleep_{account_id}"),
+         InlineKeyboardButton(f"✉ ғWD MODE ⟨{forward_StatuS}⟩", callback_data=f"accSet_fwd_{account_id}")],
+        [InlineKeyboardButton("⟐ AUTO REPLY", callback_data=f"acc_auto_reply_{account_id}")],
+        [InlineKeyboardButton("« BACK", callback_data="my_accountS")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
 
 # ─────────────────────────────────────────
-# Owner Management Keyboard (accessible via /start for owners)
+# Owner Management Keyboard (acceSSible via /Start for ownerS)
 # ─────────────────────────────────────────
 def owner_panel_keyboard():
     keyboard = [
-        [InlineKeyboardButton("▤ sᴛᴀᴛs", callback_data="owner_stats"),
-         InlineKeyboardButton("📢 ʙʀᴏᴀᴅᴄᴀsᴛ", callback_data="owner_broadcast")],
-        [InlineKeyboardButton("💎 ᴀᴅᴅ ᴘʀᴇᴍɪᴜᴍ", callback_data="owner_addprem"),
-         InlineKeyboardButton("🚫 ʙᴀɴ ᴜsᴇʀ", callback_data="owner_ban")],
-        [InlineKeyboardButton("⊗ ғᴏʀᴄᴇ sᴜʙ", callback_data="force_sub_menu"),
-         InlineKeyboardButton("◉ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="logs_channel_menu")],
-        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
+        [InlineKeyboardButton("▤ STATS", callback_data="owner_StatS"),
+         InlineKeyboardButton("📢 BROADCAST", callback_data="owner_broadcaSt")],
+        [InlineKeyboardButton("💎 ADD PREMIUM", callback_data="owner_addprem"),
+         InlineKeyboardButton("🚫 BAN USER", callback_data="owner_ban")],
+        [InlineKeyboardButton("⊗ FORCE SUB", callback_data="force_Sub_menu"),
+         InlineKeyboardButton("◉ LOGS CHANNEL", callback_data="logS_channel_menu")],
+        [InlineKeyboardButton("« BACK", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)

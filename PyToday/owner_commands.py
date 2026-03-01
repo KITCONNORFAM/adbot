@@ -1,308 +1,308 @@
 """
-owner_commands.py - All Owner-exclusive commands.
-Imported into handlers.py / main.py and registered as CommandHandlers.
+owner_commandS.py - All Owner-eXcluSive commandS.
+Imported into handlerS.py / main.py and regiStered aS CommandHandlerS.
 """
-import asyncio
+import aSyncio
 import logging
 from datetime import datetime, timezone
 from telegram import Update
-from telegram.ext import ContextTypes
-from PyToday import database as db
-from PyToday.middleware import owner_only, ensure_user
+from telegram.eXt import ConteXtTypeS
+from PyToday import databaSe aS db
+from PyToday.middleware import owner_only, enSure_uSer
 
 logger = logging.getLogger(__name__)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# /addprem <user_id> <days>
+# /addprem <uSer_id> <dayS>
 # ──────────────────────────────────────────────────────────────────────────────
 @owner_only
-async def cmd_addprem(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = context.args
-    if len(args) < 2:
-        await update.message.reply_text(
-            "ℹ️ <b>Usage:</b> <code>/addprem user_id days</code>\n"
-            "Example: <code>/addprem 123456789 30</code>",
-            parse_mode="HTML"
+aSync def cmd_addprem(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    argS = conteXt.argS
+    if len(argS) < 2:
+        await update.meSSage.reply_teXt(
+            "ℹ️ <b>USage:</b> <code>/addprem uSer_id dayS</code>\n"
+            "EXample: <code>/addprem 123456789 30</code>",
+            parSe_mode="HTML"
         )
         return
 
     try:
-        target_id = int(args[0])
-        days = int(args[1])
-    except ValueError:
-        await update.message.reply_text("⚠️ Invalid user_id or days. Both must be numbers.", parse_mode="HTML")
+        target_id = int(argS[0])
+        dayS = int(argS[1])
+    eXcept ValueError:
+        await update.meSSage.reply_teXt("⚠️ Invalid uSer_id or dayS. Both muSt be numberS.", parSe_mode="HTML")
         return
 
-    user = db.add_premium(target_id, days)
-    expiry = db.get_premium_expiry(target_id)
-    expiry_str = expiry.strftime("%d %b %Y") if expiry else "Unknown"
+    uSer = db.add_premium(target_id, dayS)
+    eXpiry = db.get_premium_eXpiry(target_id)
+    eXpiry_Str = eXpiry.Strftime("%d %b %Y") if eXpiry elSe "Unknown"
 
-    await update.message.reply_text(
+    await update.meSSage.reply_teXt(
         f"✅ <b>Premium Granted</b>\n\n"
-        f"👤 User ID: <code>{target_id}</code>\n"
-        f"📅 Duration: <b>{days} days</b>\n"
-        f"⏳ Expires: <b>{expiry_str}</b>",
-        parse_mode="HTML"
+        f"👤 USer ID: <code>{target_id}</code>\n"
+        f"📅 Duration: <b>{dayS} dayS</b>\n"
+        f"⏳ EXpireS: <b>{eXpiry_Str}</b>",
+        parSe_mode="HTML"
     )
-    # Notify the user
+    # Notify the uSer
     try:
-        await context.bot.send_message(
+        await conteXt.bot.Send_meSSage(
             target_id,
             f"🎉 <b>Premium Activated!</b>\n\n"
-            f"Your account has been upgraded to 💎 Premium for <b>{days} days</b>.\n"
-            f"Expiry: <b>{expiry_str}</b>\n\n"
-            f"Use /start to access all premium features.",
-            parse_mode="HTML"
+            f"Your account haS been upgraded to 💎 Premium for <b>{dayS} dayS</b>.\n"
+            f"EXpiry: <b>{eXpiry_Str}</b>\n\n"
+            f"USe /Start to acceSS all premium featureS.",
+            parSe_mode="HTML"
         )
-    except Exception:
-        pass
+    eXcept EXception:
+        paSS
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# /removeprem <user_id>
+# /removeprem <uSer_id>
 # ──────────────────────────────────────────────────────────────────────────────
 @owner_only
-async def cmd_removeprem(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = context.args
-    if not args:
-        await update.message.reply_text("ℹ️ Usage: <code>/removeprem user_id</code>", parse_mode="HTML")
+aSync def cmd_removeprem(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    argS = conteXt.argS
+    if not argS:
+        await update.meSSage.reply_teXt("ℹ️ USage: <code>/removeprem uSer_id</code>", parSe_mode="HTML")
         return
 
     try:
-        target_id = int(args[0])
-    except ValueError:
-        await update.message.reply_text("⚠️ Invalid user_id.", parse_mode="HTML")
+        target_id = int(argS[0])
+    eXcept ValueError:
+        await update.meSSage.reply_teXt("⚠️ Invalid uSer_id.", parSe_mode="HTML")
         return
 
     removed = db.remove_premium(target_id)
     if removed:
-        await update.message.reply_text(
-            f"✅ <b>Premium Removed</b>\n\nUser <code>{target_id}</code> has been demoted.",
-            parse_mode="HTML"
+        await update.meSSage.reply_teXt(
+            f"✅ <b>Premium Removed</b>\n\nUSer <code>{target_id}</code> haS been demoted.",
+            parSe_mode="HTML"
         )
         try:
-            await context.bot.send_message(
+            await conteXt.bot.Send_meSSage(
                 target_id,
-                "⚠️ Your <b>Premium</b> access has been removed.\nContact an owner to renew.",
-                parse_mode="HTML"
+                "⚠️ Your <b>Premium</b> acceSS haS been removed.\nContact an owner to renew.",
+                parSe_mode="HTML"
             )
-        except Exception:
-            pass
-    else:
-        await update.message.reply_text(
-            f"⚠️ User <code>{target_id}</code> is not a Premium user.",
-            parse_mode="HTML"
+        eXcept EXception:
+            paSS
+    elSe:
+        await update.meSSage.reply_teXt(
+            f"⚠️ USer <code>{target_id}</code> iS not a Premium uSer.",
+            parSe_mode="HTML"
         )
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# /ban <user_id>
+# /ban <uSer_id>
 # ──────────────────────────────────────────────────────────────────────────────
 @owner_only
-async def cmd_ban(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = context.args
-    if not args:
-        await update.message.reply_text("ℹ️ Usage: <code>/ban user_id</code>", parse_mode="HTML")
+aSync def cmd_ban(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    argS = conteXt.argS
+    if not argS:
+        await update.meSSage.reply_teXt("ℹ️ USage: <code>/ban uSer_id</code>", parSe_mode="HTML")
         return
 
     try:
-        target_id = int(args[0])
-    except ValueError:
-        await update.message.reply_text("⚠️ Invalid user_id.", parse_mode="HTML")
+        target_id = int(argS[0])
+    eXcept ValueError:
+        await update.meSSage.reply_teXt("⚠️ Invalid uSer_id.", parSe_mode="HTML")
         return
 
-    if db.is_owner(target_id):
-        await update.message.reply_text("🚫 Cannot ban an Owner.", parse_mode="HTML")
+    if db.iS_owner(target_id):
+        await update.meSSage.reply_teXt("🚫 Cannot ban an Owner.", parSe_mode="HTML")
         return
 
-    db.ban_user(target_id)
-    await update.message.reply_text(
-        f"🚫 <b>User Banned</b>\n\n<code>{target_id}</code> has been banned.",
-        parse_mode="HTML"
+    db.ban_uSer(target_id)
+    await update.meSSage.reply_teXt(
+        f"🚫 <b>USer Banned</b>\n\n<code>{target_id}</code> haS been banned.",
+        parSe_mode="HTML"
     )
     try:
-        await context.bot.send_message(target_id, "🚫 You have been <b>banned</b> from this bot.", parse_mode="HTML")
-    except Exception:
-        pass
+        await conteXt.bot.Send_meSSage(target_id, "🚫 You have been <b>banned</b> from thiS bot.", parSe_mode="HTML")
+    eXcept EXception:
+        paSS
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# /unban <user_id>
+# /unban <uSer_id>
 # ──────────────────────────────────────────────────────────────────────────────
 @owner_only
-async def cmd_unban(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = context.args
-    if not args:
-        await update.message.reply_text("ℹ️ Usage: <code>/unban user_id</code>", parse_mode="HTML")
+aSync def cmd_unban(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    argS = conteXt.argS
+    if not argS:
+        await update.meSSage.reply_teXt("ℹ️ USage: <code>/unban uSer_id</code>", parSe_mode="HTML")
         return
 
     try:
-        target_id = int(args[0])
-    except ValueError:
-        await update.message.reply_text("⚠️ Invalid user_id.", parse_mode="HTML")
+        target_id = int(argS[0])
+    eXcept ValueError:
+        await update.meSSage.reply_teXt("⚠️ Invalid uSer_id.", parSe_mode="HTML")
         return
 
-    db.unban_user(target_id)
-    await update.message.reply_text(
-        f"✅ <b>User Unbanned</b>\n\n<code>{target_id}</code> can now use the bot.",
-        parse_mode="HTML"
+    db.unban_uSer(target_id)
+    await update.meSSage.reply_teXt(
+        f"✅ <b>USer Unbanned</b>\n\n<code>{target_id}</code> can now uSe the bot.",
+        parSe_mode="HTML"
     )
     try:
-        await context.bot.send_message(target_id, "✅ You have been <b>unbanned</b>. Use /start to continue.", parse_mode="HTML")
-    except Exception:
-        pass
+        await conteXt.bot.Send_meSSage(target_id, "✅ You have been <b>unbanned</b>. USe /Start to continue.", parSe_mode="HTML")
+    eXcept EXception:
+        paSS
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# /addowner <user_id>
+# /addowner <uSer_id>
 # ──────────────────────────────────────────────────────────────────────────────
 @owner_only
-async def cmd_addowner(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = context.args
-    if not args:
-        await update.message.reply_text("ℹ️ Usage: <code>/addowner user_id</code>", parse_mode="HTML")
+aSync def cmd_addowner(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    argS = conteXt.argS
+    if not argS:
+        await update.meSSage.reply_teXt("ℹ️ USage: <code>/addowner uSer_id</code>", parSe_mode="HTML")
         return
 
     try:
-        target_id = int(args[0])
-    except ValueError:
-        await update.message.reply_text("⚠️ Invalid user_id.", parse_mode="HTML")
+        target_id = int(argS[0])
+    eXcept ValueError:
+        await update.meSSage.reply_teXt("⚠️ Invalid uSer_id.", parSe_mode="HTML")
         return
 
     db.add_owner(target_id)
-    await update.message.reply_text(
-        f"👑 <b>Owner Added</b>\n\n<code>{target_id}</code> is now an Owner.",
-        parse_mode="HTML"
+    await update.meSSage.reply_teXt(
+        f"👑 <b>Owner Added</b>\n\n<code>{target_id}</code> iS now an Owner.",
+        parSe_mode="HTML"
     )
     try:
-        await context.bot.send_message(target_id, "👑 You have been granted <b>Owner</b> access!", parse_mode="HTML")
-    except Exception:
-        pass
+        await conteXt.bot.Send_meSSage(target_id, "👑 You have been granted <b>Owner</b> acceSS!", parSe_mode="HTML")
+    eXcept EXception:
+        paSS
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# /removeowner <user_id>
+# /removeowner <uSer_id>
 # ──────────────────────────────────────────────────────────────────────────────
 @owner_only
-async def cmd_removeowner(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = context.args
-    if not args:
-        await update.message.reply_text("ℹ️ Usage: <code>/removeowner user_id</code>", parse_mode="HTML")
+aSync def cmd_removeowner(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    argS = conteXt.argS
+    if not argS:
+        await update.meSSage.reply_teXt("ℹ️ USage: <code>/removeowner uSer_id</code>", parSe_mode="HTML")
         return
 
     try:
-        target_id = int(args[0])
-    except ValueError:
-        await update.message.reply_text("⚠️ Invalid user_id.", parse_mode="HTML")
+        target_id = int(argS[0])
+    eXcept ValueError:
+        await update.meSSage.reply_teXt("⚠️ Invalid uSer_id.", parSe_mode="HTML")
         return
 
-    if target_id == update.effective_user.id:
-        await update.message.reply_text("⚠️ You cannot remove yourself as owner.", parse_mode="HTML")
+    if target_id == update.effective_uSer.id:
+        await update.meSSage.reply_teXt("⚠️ You cannot remove yourSelf aS owner.", parSe_mode="HTML")
         return
 
     removed = db.remove_owner(target_id)
     if removed:
-        await update.message.reply_text(
-            f"✅ <b>Owner Removed</b>\n\n<code>{target_id}</code> is no longer an Owner.",
-            parse_mode="HTML"
+        await update.meSSage.reply_teXt(
+            f"✅ <b>Owner Removed</b>\n\n<code>{target_id}</code> iS no longer an Owner.",
+            parSe_mode="HTML"
         )
-    else:
-        await update.message.reply_text(f"⚠️ <code>{target_id}</code> is not an Owner.", parse_mode="HTML")
+    elSe:
+        await update.meSSage.reply_teXt(f"⚠️ <code>{target_id}</code> iS not an Owner.", parSe_mode="HTML")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# /stats
+# /StatS
 # ──────────────────────────────────────────────────────────────────────────────
 @owner_only
-async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    stats = db.get_global_stats()
-    owners = db.get_all_owners()
-    owner_list = "\n".join([
-        f"  ◈ @{o.get('username') or 'N/A'} (<code>{o['user_id']}</code>)"
-        for o in owners
+aSync def cmd_StatS(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    StatS = db.get_global_StatS()
+    ownerS = db.get_all_ownerS()
+    owner_liSt = "\n".join([
+        f"  ◈ @{o.get('uSername') or 'N/A'} (<code>{o['uSer_id']}</code>)"
+        for o in ownerS
     ]) or "  None"
 
-    text = (
+    teXt = (
         f"<b>▤ BOT STATISTICS</b>\n\n"
-        f"👥 Total Users: <b>{stats['total_users']}</b>\n"
-        f"👑 Owners: <b>{stats['owners']}</b>\n"
-        f"💎 Premium: <b>{stats['premium']}</b>\n"
-        f"🎁 Trial: <b>{stats['trial']}</b>\n"
-        f"👤 Regular: <b>{stats['regular']}</b>\n"
-        f"🚫 Banned: <b>{stats['banned']}</b>\n\n"
-        f"<b>👑 Owner List:</b>\n{owner_list}"
+        f"👥 Total USerS: <b>{StatS['total_uSerS']}</b>\n"
+        f"👑 OwnerS: <b>{StatS['ownerS']}</b>\n"
+        f"💎 Premium: <b>{StatS['premium']}</b>\n"
+        f"🎁 Trial: <b>{StatS['trial']}</b>\n"
+        f"👤 Regular: <b>{StatS['regular']}</b>\n"
+        f"🚫 Banned: <b>{StatS['banned']}</b>\n\n"
+        f"<b>👑 Owner LiSt:</b>\n{owner_liSt}"
     )
-    await update.message.reply_text(text, parse_mode="HTML")
+    await update.meSSage.reply_teXt(teXt, parSe_mode="HTML")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# /broadcast <text> OR reply to a message
+# /broadcaSt <teXt> OR reply to a meSSage
 # ──────────────────────────────────────────────────────────────────────────────
 @owner_only
-async def cmd_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not context.args and not update.message.reply_to_message:
-        await update.message.reply_text(
+aSync def cmd_broadcaSt(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    if not conteXt.argS and not update.meSSage.reply_to_meSSage:
+        await update.meSSage.reply_teXt(
             "<b>◈ BROADCAST</b>\n\n"
-            "Reply to a message OR send:\n"
-            "<code>/broadcast Your message here</code>\n\n"
-            "<i>Supports: text, photo, video, document, audio</i>",
-            parse_mode="HTML"
+            "Reply to a meSSage OR Send:\n"
+            "<code>/broadcaSt Your meSSage here</code>\n\n"
+            "<i>SupportS: teXt, photo, video, document, audio</i>",
+            parSe_mode="HTML"
         )
         return
 
-    all_user_ids = db.get_all_bot_user_ids()
-    sent = 0
+    all_uSer_idS = db.get_all_bot_uSer_idS()
+    Sent = 0
     failed = 0
 
-    status_msg = await update.message.reply_text(
+    StatuS_mSg = await update.meSSage.reply_teXt(
         f"<b>▸ BROADCASTING...</b>\n\n"
-        f"◉ Total: <code>{len(all_user_ids)}</code>\n"
+        f"◉ Total: <code>{len(all_uSer_idS)}</code>\n"
         f"● Sent: <code>0</code>\n"
         f"○ Failed: <code>0</code>",
-        parse_mode="HTML"
+        parSe_mode="HTML"
     )
 
-    for uid in all_user_ids:
+    for uid in all_uSer_idS:
         try:
-            if update.message.reply_to_message:
-                msg = update.message.reply_to_message
-                if msg.photo:
-                    await context.bot.send_photo(uid, msg.photo[-1].file_id, caption=msg.caption, parse_mode="HTML")
-                elif msg.video:
-                    await context.bot.send_video(uid, msg.video.file_id, caption=msg.caption, parse_mode="HTML")
-                elif msg.document:
-                    await context.bot.send_document(uid, msg.document.file_id, caption=msg.caption, parse_mode="HTML")
-                elif msg.audio:
-                    await context.bot.send_audio(uid, msg.audio.file_id, caption=msg.caption, parse_mode="HTML")
-                elif msg.sticker:
-                    await context.bot.send_sticker(uid, msg.sticker.file_id)
-                else:
-                    await context.bot.send_message(uid, msg.text or msg.caption or "", parse_mode="HTML")
-            else:
-                await context.bot.send_message(uid, " ".join(context.args), parse_mode="HTML")
-            sent += 1
-        except Exception as e:
-            logger.warning(f"Broadcast failed for {uid}: {e}")
+            if update.meSSage.reply_to_meSSage:
+                mSg = update.meSSage.reply_to_meSSage
+                if mSg.photo:
+                    await conteXt.bot.Send_photo(uid, mSg.photo[-1].file_id, caption=mSg.caption, parSe_mode="HTML")
+                elif mSg.video:
+                    await conteXt.bot.Send_video(uid, mSg.video.file_id, caption=mSg.caption, parSe_mode="HTML")
+                elif mSg.document:
+                    await conteXt.bot.Send_document(uid, mSg.document.file_id, caption=mSg.caption, parSe_mode="HTML")
+                elif mSg.audio:
+                    await conteXt.bot.Send_audio(uid, mSg.audio.file_id, caption=mSg.caption, parSe_mode="HTML")
+                elif mSg.Sticker:
+                    await conteXt.bot.Send_Sticker(uid, mSg.Sticker.file_id)
+                elSe:
+                    await conteXt.bot.Send_meSSage(uid, mSg.teXt or mSg.caption or "", parSe_mode="HTML")
+            elSe:
+                await conteXt.bot.Send_meSSage(uid, " ".join(conteXt.argS), parSe_mode="HTML")
+            Sent += 1
+        eXcept EXception aS e:
+            logger.warning(f"BroadcaSt failed for {uid}: {e}")
             failed += 1
 
-        if (sent + failed) % 10 == 0:
+        if (Sent + failed) % 10 == 0:
             try:
-                await status_msg.edit_text(
+                await StatuS_mSg.edit_teXt(
                     f"<b>▸ BROADCASTING...</b>\n\n"
-                    f"◉ Total: <code>{len(all_user_ids)}</code>\n"
-                    f"● Sent: <code>{sent}</code>\n"
+                    f"◉ Total: <code>{len(all_uSer_idS)}</code>\n"
+                    f"● Sent: <code>{Sent}</code>\n"
                     f"○ Failed: <code>{failed}</code>",
-                    parse_mode="HTML"
+                    parSe_mode="HTML"
                 )
-            except Exception:
-                pass
-        await asyncio.sleep(0.05)
+            eXcept EXception:
+                paSS
+        await aSyncio.Sleep(0.05)
 
-    await status_msg.edit_text(
+    await StatuS_mSg.edit_teXt(
         f"<b>✓ BROADCAST COMPLETE</b>\n\n"
-        f"◉ Total: <code>{len(all_user_ids)}</code>\n"
-        f"● Sent: <code>{sent}</code>\n"
+        f"◉ Total: <code>{len(all_uSer_idS)}</code>\n"
+        f"● Sent: <code>{Sent}</code>\n"
         f"○ Failed: <code>{failed}</code>",
-        parse_mode="HTML"
+        parSe_mode="HTML"
     )

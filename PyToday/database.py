@@ -1,50 +1,50 @@
 """
-database.py - Full Supabase-backed persistence layer.
-Replaces all previous MongoDB (motor) and SQLITE (aiosqlite) code.
-All operations are synchronous Supabase REST calls wrapped in async contexts.
+databaSe.py - Full SupabaSe-backed perSiStence layer.
+ReplaceS all previouS MongoDB (motor) and SQLITE (aioSqlite) code.
+All operationS are SynchronouS SupabaSe REST callS wrapped in aSync conteXtS.
 """
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Optional, List, Dict
+from typing import Optional, LiSt, Dict
 
-from supabase import create_client, Client
+from SupabaSe import create_client, Client
 from PyToday import config
 
 logger = logging.getLogger(__name__)
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Supabase client (singleton)
+# SupabaSe client (Singleton)
 # ──────────────────────────────────────────────────────────────────────────────
-_supabase: Optional[Client] = None
+_SupabaSe: Optional[Client] = None
 
 
 def get_client() -> Client:
-    global _supabase
-    if _supabase is None:
+    global _SupabaSe
+    if _SupabaSe iS None:
         if not config.SUPABASE_URL or not config.SUPABASE_KEY:
-            raise RuntimeError("SUPABASE_URL and SUPABASE_KEY must be set in .env")
-        _supabase = create_client(config.SUPABASE_URL, config.SUPABASE_KEY)
-    return _supabase
+            raiSe RuntimeError("SUPABASE_URL and SUPABASE_KEY muSt be Set in .env")
+        _SupabaSe = create_client(config.SUPABASE_URL, config.SUPABASE_KEY)
+    return _SupabaSe
 
 
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _now_iSo() -> Str:
+    return datetime.now(timezone.utc).iSoformat()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# DATABASE INIT - Create tables via raw Supabase SQL (run once)
+# DATABASE INIT - Create tableS via raw SupabaSe SQL (run once)
 # ══════════════════════════════════════════════════════════════════════════════
 
 SUPABASE_SCHEMA_SQL = """
 -- USERS / ROLES -----------------------------------------------------------
-CREATE TABLE IF NOT EXISTS users (
-    user_id       BIGINT PRIMARY KEY,
-    first_name    TEXT,
-    username      TEXT,
-    role          TEXT NOT NULL DEFAULT 'user',   -- 'owner', 'premium', 'user', 'trial'
-    trial_used    BOOLEAN NOT NULL DEFAULT FALSE,
-    trial_expiry  TIMESTAMPTZ,
-    premium_expiry TIMESTAMPTZ,
+CREATE TABLE IF NOT EXISTS uSerS (
+    uSer_id       BIGINT PRIMARY KEY,
+    firSt_name    TEXT,
+    uSername      TEXT,
+    role          TEXT NOT NULL DEFAULT 'uSer',   -- 'owner', 'premium', 'uSer', 'trial'
+    trial_uSed    BOOLEAN NOT NULL DEFAULT FALSE,
+    trial_eXpiry  TIMESTAMPTZ,
+    premium_eXpiry TIMESTAMPTZ,
     banned        BOOLEAN NOT NULL DEFAULT FALSE,
     referred_by   BIGINT,
     referral_count INT NOT NULL DEFAULT 0,
@@ -52,91 +52,91 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- TELEGRAM ACCOUNTS ---------------------------------------------------------
-CREATE TABLE IF NOT EXISTS telegram_accounts (
+CREATE TABLE IF NOT EXISTS telegram_accountS (
     id              BIGSERIAL PRIMARY KEY,
-    user_id         BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    uSer_id         BIGINT NOT NULL REFERENCES uSerS(uSer_id) ON DELETE CASCADE,
     phone           TEXT,
     api_id          TEXT,
-    api_hash        TEXT,
-    session_string  TEXT,
-    is_logged_in    BOOLEAN NOT NULL DEFAULT FALSE,
-    phone_code_hash TEXT,
-    account_first_name TEXT,
-    account_last_name  TEXT,
-    account_username   TEXT,
+    api_haSh        TEXT,
+    SeSSion_String  TEXT,
+    iS_logged_in    BOOLEAN NOT NULL DEFAULT FALSE,
+    phone_code_haSh TEXT,
+    account_firSt_name TEXT,
+    account_laSt_name  TEXT,
+    account_uSername   TEXT,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    last_used       TIMESTAMPTZ
+    laSt_uSed       TIMESTAMPTZ
 );
 
--- ACCOUNT SETTINGS (per-account, not per-user) ------------------------------
-CREATE TABLE IF NOT EXISTS account_settings (
-    account_id      BIGINT PRIMARY KEY REFERENCES telegram_accounts(id) ON DELETE CASCADE,
-    ad_text         TEXT,
-    saved_message_id BIGINT,
+-- ACCOUNT SETTINGS (per-account, not per-uSer) ------------------------------
+CREATE TABLE IF NOT EXISTS account_SettingS (
+    account_id      BIGINT PRIMARY KEY REFERENCES telegram_accountS(id) ON DELETE CASCADE,
+    ad_teXt         TEXT,
+    Saved_meSSage_id BIGINT,
     time_interval   INT NOT NULL DEFAULT 60,
-    gap_seconds     INT NOT NULL DEFAULT 5,
+    gap_SecondS     INT NOT NULL DEFAULT 5,
     round_delay     INT NOT NULL DEFAULT 30,
-    auto_sleep      BOOLEAN NOT NULL DEFAULT FALSE,
-    use_forward_mode BOOLEAN NOT NULL DEFAULT FALSE,
+    auto_Sleep      BOOLEAN NOT NULL DEFAULT FALSE,
+    uSe_forward_mode BOOLEAN NOT NULL DEFAULT FALSE,
     target_mode     TEXT NOT NULL DEFAULT 'all',
-    selected_groups TEXT NOT NULL DEFAULT '[]'
+    Selected_groupS TEXT NOT NULL DEFAULT '[]'
 );
 
 -- ACCOUNT STATS (per-account) -----------------------------------------------
-CREATE TABLE IF NOT EXISTS account_stats (
-    account_id         BIGINT PRIMARY KEY REFERENCES telegram_accounts(id) ON DELETE CASCADE,
-    messages_sent      INT NOT NULL DEFAULT 0,
-    messages_failed    INT NOT NULL DEFAULT 0,
-    dms_received       INT NOT NULL DEFAULT 0,
-    replies_triggered  INT NOT NULL DEFAULT 0,
-    groups_joined      INT NOT NULL DEFAULT 0,
-    active_status      BOOLEAN NOT NULL DEFAULT TRUE,
-    last_broadcast     TIMESTAMPTZ
+CREATE TABLE IF NOT EXISTS account_StatS (
+    account_id         BIGINT PRIMARY KEY REFERENCES telegram_accountS(id) ON DELETE CASCADE,
+    meSSageS_Sent      INT NOT NULL DEFAULT 0,
+    meSSageS_failed    INT NOT NULL DEFAULT 0,
+    dmS_received       INT NOT NULL DEFAULT 0,
+    replieS_triggered  INT NOT NULL DEFAULT 0,
+    groupS_joined      INT NOT NULL DEFAULT 0,
+    active_StatuS      BOOLEAN NOT NULL DEFAULT TRUE,
+    laSt_broadcaSt     TIMESTAMPTZ
 );
 
--- AUTO REPLIES (per-account, supports sequential + keyword + media) ----------
-CREATE TABLE IF NOT EXISTS auto_replies (
+-- AUTO REPLIES (per-account, SupportS Sequential + keyword + media) ----------
+CREATE TABLE IF NOT EXISTS auto_replieS (
     id              BIGSERIAL PRIMARY KEY,
-    account_id      BIGINT NOT NULL REFERENCES telegram_accounts(id) ON DELETE CASCADE,
-    type            TEXT NOT NULL DEFAULT 'sequential',  -- 'sequential' | 'keyword'
-    trigger_keyword TEXT,       -- NULL for sequential replies
-    message_text    TEXT,
+    account_id      BIGINT NOT NULL REFERENCES telegram_accountS(id) ON DELETE CASCADE,
+    type            TEXT NOT NULL DEFAULT 'Sequential',  -- 'Sequential' | 'keyword'
+    trigger_keyword TEXT,       -- NULL for Sequential replieS
+    meSSage_teXt    TEXT,
     media_file_id   TEXT,       -- Telegram file_id for media (image/video)
-    reply_order     INT NOT NULL DEFAULT 0,  -- for sequential ordering
+    reply_order     INT NOT NULL DEFAULT 0,  -- for Sequential ordering
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- AUTO REPLY STATE (tracks which sequential index was last sent per DM) ------
-CREATE TABLE IF NOT EXISTS auto_reply_state (
+-- AUTO REPLY STATE (trackS which Sequential indeX waS laSt Sent per DM) ------
+CREATE TABLE IF NOT EXISTS auto_reply_State (
     id          BIGSERIAL PRIMARY KEY,
     account_id  BIGINT NOT NULL,
-    from_user_id BIGINT NOT NULL,
-    next_index  INT NOT NULL DEFAULT 0,
+    from_uSer_id BIGINT NOT NULL,
+    neXt_indeX  INT NOT NULL DEFAULT 0,
     replied_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(account_id, from_user_id)
+    UNIQUE(account_id, from_uSer_id)
 );
 
 -- TARGET GROUPS (per-account) -----------------------------------------------
-CREATE TABLE IF NOT EXISTS target_groups (
+CREATE TABLE IF NOT EXISTS target_groupS (
     id          BIGSERIAL PRIMARY KEY,
-    account_id  BIGINT NOT NULL REFERENCES telegram_accounts(id) ON DELETE CASCADE,
+    account_id  BIGINT NOT NULL REFERENCES telegram_accountS(id) ON DELETE CASCADE,
     group_id    BIGINT NOT NULL,
     group_title TEXT,
     added_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(account_id, group_id)
 );
 
--- LOGS CHANNELS (per-user) --------------------------------------------------
-CREATE TABLE IF NOT EXISTS logs_channels (
-    user_id      BIGINT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+-- LOGS CHANNELS (per-uSer) --------------------------------------------------
+CREATE TABLE IF NOT EXISTS logS_channelS (
+    uSer_id      BIGINT PRIMARY KEY REFERENCES uSerS(uSer_id) ON DELETE CASCADE,
     channel_id   TEXT,
     channel_link TEXT,
     verified     BOOLEAN NOT NULL DEFAULT FALSE,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- FORCE SUBSCRIBE (global setting) ------------------------------------------
-CREATE TABLE IF NOT EXISTS force_sub (
+-- FORCE SUBSCRIBE (global Setting) ------------------------------------------
+CREATE TABLE IF NOT EXISTS force_Sub (
     id         INT PRIMARY KEY DEFAULT 1,
     channel_id TEXT,
     group_id   TEXT,
@@ -147,263 +147,263 @@ CREATE TABLE IF NOT EXISTS force_sub (
 CREATE TABLE IF NOT EXISTS referral_log (
     id           BIGSERIAL PRIMARY KEY,
     referrer_id  BIGINT NOT NULL,
-    referred_id  BIGINT NOT NULL UNIQUE,  -- each user referred only once
+    referred_id  BIGINT NOT NULL UNIQUE,  -- each uSer referred only once
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- MESSAGE LOGS ---------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS message_logs (
+CREATE TABLE IF NOT EXISTS meSSage_logS (
     id            BIGSERIAL PRIMARY KEY,
-    user_id       BIGINT NOT NULL,
+    uSer_id       BIGINT NOT NULL,
     account_id    BIGINT NOT NULL,
     chat_id       BIGINT,
     chat_title    TEXT,
-    status        TEXT NOT NULL DEFAULT 'pending',
-    error_message TEXT,
+    StatuS        TEXT NOT NULL DEFAULT 'pending',
+    error_meSSage TEXT,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Seed force_sub singleton ---------------------------------------------------
-INSERT INTO force_sub (id, enabled) VALUES (1, FALSE) ON CONFLICT DO NOTHING;
+-- Seed force_Sub Singleton ---------------------------------------------------
+INSERT INTO force_Sub (id, enabled) VALUES (1, FALSE) ON CONFLICT DONOTHING;
 """
 
 
-async def init_db():
-    """Initialize the database. Call once at bot startup."""
+aSync def init_db():
+    """Initialize the databaSe. Call once at bot Startup."""
     db = get_client()
     try:
-        # Simple connectivity check - query users table (must exist via supabase_schema.sql)
-        db.table("bot_users").select("user_id").limit(1).execute()
-        logger.info("\u2705 Supabase connected (schema already present)")
-    except Exception as e:
+        # Simple connectivity check - query uSerS table (muSt eXiSt via SupabaSe_Schema.Sql)
+        db.table("bot_uSerS").Select("uSer_id").limit(1).eXecute()
+        logger.info("\u2705 SupabaSe connected (Schema already preSent)")
+    eXcept EXception aS e:
         logger.error(
-            f"Supabase connectivity check failed: {e}\n"
-            "Make sure you have run supabase_schema.sql in your Supabase SQL Editor!"
+            f"SupabaSe connectivity check failed: {e}\n"
+            "Make Sure you have run SupabaSe_Schema.Sql in your SupabaSe SQL Editor!"
         )
-        raise
+        raiSe
 
-    # Seed initial owners from env into DB (idempotent)
+    # Seed initial ownerS from env into DB (idempotent)
     for owner_id in config.INITIAL_OWNER_IDS:
-        _upsert_owner_bootstrap(db, owner_id)
+        _upSert_owner_bootStrap(db, owner_id)
 
 
-def _upsert_owner_bootstrap(db: Client, user_id: int):
+def _upSert_owner_bootStrap(db: Client, uSer_id: int):
     try:
-        # Use limit(1) instead of single() to avoid crash when no rows
-        result = db.table("bot_users").select("user_id, role").eq("user_id", user_id).limit(1).execute()
-        existing_data = result.data[0] if result.data else None
-        if existing_data and existing_data.get("role") != "owner":
-            db.table("bot_users").update({"role": "owner"}).eq("user_id", user_id).execute()
-            logger.info(f"Owner role updated: {user_id}")
-        elif not existing_data:
-            db.table("bot_users").insert({
-                "user_id": user_id,
+        # USe limit(1) inStead of Single() to avoid craSh when no rowS
+        reSult = db.table("bot_uSerS").Select("uSer_id, role").eq("uSer_id", uSer_id).limit(1).eXecute()
+        eXiSting_data = reSult.data[0] if reSult.data elSe None
+        if eXiSting_data and eXiSting_data.get("role") != "owner":
+            db.table("bot_uSerS").update({"role": "owner"}).eq("uSer_id", uSer_id).eXecute()
+            logger.info(f"Owner role updated: {uSer_id}")
+        elif not eXiSting_data:
+            db.table("bot_uSerS").inSert({
+                "uSer_id": uSer_id,
                 "role": "owner",
-                "created_at": _now_iso()
-            }).execute()
-            logger.info(f"Owner seeded: {user_id}")
-        else:
-            logger.info(f"Owner already exists: {user_id}")
-    except Exception as e:
-        logger.warning(f"Owner bootstrap error for {user_id}: {e}")
+                "created_at": _now_iSo()
+            }).eXecute()
+            logger.info(f"Owner Seeded: {uSer_id}")
+        elSe:
+            logger.info(f"Owner already eXiStS: {uSer_id}")
+    eXcept EXception aS e:
+        logger.warning(f"Owner bootStrap error for {uSer_id}: {e}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # USER OPERATIONS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_user(user_id: int) -> Optional[Dict]:
+def get_uSer(uSer_id: int) -> Optional[Dict]:
     db = get_client()
     try:
-        result = db.table("bot_users").select("*").eq("user_id", user_id).single().execute()
-        return result.data
-    except Exception:
+        reSult = db.table("bot_uSerS").Select("*").eq("uSer_id", uSer_id).Single().eXecute()
+        return reSult.data
+    eXcept EXception:
         return None
 
 
-def create_or_update_user(user_id: int, first_name: str = None, username: str = None) -> Dict:
+def create_or_update_uSer(uSer_id: int, firSt_name: Str = None, uSername: Str = None) -> Dict:
     db = get_client()
-    existing = get_user(user_id)
-    if not existing:
+    eXiSting = get_uSer(uSer_id)
+    if not eXiSting:
         data = {
-            "user_id": user_id,
-            "first_name": first_name,
-            "username": username,
-            "role": "user",
-            "created_at": _now_iso()
+            "uSer_id": uSer_id,
+            "firSt_name": firSt_name,
+            "uSername": uSername,
+            "role": "uSer",
+            "created_at": _now_iSo()
         }
-        db.table("bot_users").insert(data).execute()
-    else:
-        db.table("bot_users").update({
-            "first_name": first_name,
-            "username": username
-        }).eq("user_id", user_id).execute()
-    return get_user(user_id)
+        db.table("bot_uSerS").inSert(data).eXecute()
+    elSe:
+        db.table("bot_uSerS").update({
+            "firSt_name": firSt_name,
+            "uSername": uSername
+        }).eq("uSer_id", uSer_id).eXecute()
+    return get_uSer(uSer_id)
 
 
-def get_user_role(user_id: int) -> str:
-    """Returns role string: 'owner', 'premium', 'trial', 'user', or 'banned'."""
-    user = get_user(user_id)
-    if not user:
-        return "user"
-    if user.get("banned"):
+def get_uSer_role(uSer_id: int) -> Str:
+    """ReturnS role String: 'owner', 'premium', 'trial', 'uSer', or 'banned'."""
+    uSer = get_uSer(uSer_id)
+    if not uSer:
+        return "uSer"
+    if uSer.get("banned"):
         return "banned"
-    role = user.get("role", "user")
-    # Check expiry for premium / trial
+    role = uSer.get("role", "uSer")
+    # Check eXpiry for premium / trial
     if role in ("premium", "trial"):
-        expiry_field = "premium_expiry" if role == "premium" else "trial_expiry"
-        expiry_str = user.get(expiry_field)
-        if expiry_str:
-            expiry = datetime.fromisoformat(expiry_str)
-            if expiry.tzinfo is None:
-                expiry = expiry.replace(tzinfo=timezone.utc)
-            if datetime.now(timezone.utc) > expiry:
+        eXpiry_field = "premium_eXpiry" if role == "premium" elSe "trial_eXpiry"
+        eXpiry_Str = uSer.get(eXpiry_field)
+        if eXpiry_Str:
+            eXpiry = datetime.fromiSoformat(eXpiry_Str)
+            if eXpiry.tzinfo iS None:
+                eXpiry = eXpiry.replace(tzinfo=timezone.utc)
+            if datetime.now(timezone.utc) > eXpiry:
                 # Auto-demote on read
-                _expire_user(user_id)
-                return "user"
+                _eXpire_uSer(uSer_id)
+                return "uSer"
     return role
 
 
-def _expire_user(user_id: int):
+def _eXpire_uSer(uSer_id: int):
     db = get_client()
     try:
-        db.table("bot_users").update({
-            "role": "user",
-            "premium_expiry": None,
-            "trial_expiry": None
-        }).eq("user_id", user_id).execute()
-    except Exception:
-        # Fallback if trial_expiry/premium_expiry columns don't exist yet
+        db.table("bot_uSerS").update({
+            "role": "uSer",
+            "premium_eXpiry": None,
+            "trial_eXpiry": None
+        }).eq("uSer_id", uSer_id).eXecute()
+    eXcept EXception:
+        # Fallback if trial_eXpiry/premium_eXpiry columnS don't eXiSt yet
         try:
-            db.table("bot_users").update({"role": "user"}).eq("user_id", user_id).execute()
-        except Exception as e:
-            logger.error(f"_expire_user error: {e}")
+            db.table("bot_uSerS").update({"role": "uSer"}).eq("uSer_id", uSer_id).eXecute()
+        eXcept EXception aS e:
+            logger.error(f"_eXpire_uSer error: {e}")
 
 
-def is_owner(user_id: int) -> bool:
-    user = get_user(user_id)
-    return bool(user and user.get("role") == "owner")
+def iS_owner(uSer_id: int) -> bool:
+    uSer = get_uSer(uSer_id)
+    return bool(uSer and uSer.get("role") == "owner")
 
 
-def is_premium_or_above(user_id: int) -> bool:
-    role = get_user_role(user_id)
+def iS_premium_or_above(uSer_id: int) -> bool:
+    role = get_uSer_role(uSer_id)
     return role in ("owner", "premium")
 
 
-def is_trial(user_id: int) -> bool:
-    return get_user_role(user_id) == "trial"
+def iS_trial(uSer_id: int) -> bool:
+    return get_uSer_role(uSer_id) == "trial"
 
 
-def is_banned(user_id: int) -> bool:
-    user = get_user(user_id)
-    return bool(user and user.get("banned"))
+def iS_banned(uSer_id: int) -> bool:
+    uSer = get_uSer(uSer_id)
+    return bool(uSer and uSer.get("banned"))
 
 
-def get_all_users() -> List[Dict]:
+def get_all_uSerS() -> LiSt[Dict]:
     db = get_client()
-    result = db.table("bot_users").select("*").execute()
-    return result.data or []
+    reSult = db.table("bot_uSerS").Select("*").eXecute()
+    return reSult.data or []
 
 
-def get_all_bot_user_ids() -> List[int]:
-    users = get_all_users()
-    return [u["user_id"] for u in users]
+def get_all_bot_uSer_idS() -> LiSt[int]:
+    uSerS = get_all_uSerS()
+    return [u["uSer_id"] for u in uSerS]
 
 
-def get_users_count() -> int:
-    return len(get_all_users())
+def get_uSerS_count() -> int:
+    return len(get_all_uSerS())
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # OWNER MANAGEMENT
 # ══════════════════════════════════════════════════════════════════════════════
 
-def add_owner(user_id: int) -> Dict:
+def add_owner(uSer_id: int) -> Dict:
     db = get_client()
-    create_or_update_user(user_id)
-    db.table("bot_users").update({"role": "owner"}).eq("user_id", user_id).execute()
-    return get_user(user_id)
+    create_or_update_uSer(uSer_id)
+    db.table("bot_uSerS").update({"role": "owner"}).eq("uSer_id", uSer_id).eXecute()
+    return get_uSer(uSer_id)
 
 
-def update_owner_username(user_id: int, username: str) -> bool:
-    """Cache the Telegram username for an owner so it shows in tags."""
+def update_owner_uSername(uSer_id: int, uSername: Str) -> bool:
+    """Cache the Telegram uSername for an owner So it ShowS in tagS."""
     db = get_client()
     try:
-        db.table("bot_users").update({"username": username}).eq("user_id", user_id).execute()
+        db.table("bot_uSerS").update({"uSername": uSername}).eq("uSer_id", uSer_id).eXecute()
         return True
-    except Exception as e:
-        logger.warning(f"update_owner_username error: {e}")
-        return False
+    eXcept EXception aS e:
+        logger.warning(f"update_owner_uSername error: {e}")
+        return FalSe
 
 
-def remove_owner(user_id: int) -> bool:
+def remove_owner(uSer_id: int) -> bool:
     db = get_client()
-    if is_owner(user_id):
-        db.table("bot_users").update({"role": "user"}).eq("user_id", user_id).execute()
+    if iS_owner(uSer_id):
+        db.table("bot_uSerS").update({"role": "uSer"}).eq("uSer_id", uSer_id).eXecute()
         return True
-    return False
+    return FalSe
 
 
-def get_all_owners() -> List[Dict]:
+def get_all_ownerS() -> LiSt[Dict]:
     db = get_client()
-    result = db.table("bot_users").select("*").eq("role", "owner").execute()
-    return result.data or []
+    reSult = db.table("bot_uSerS").Select("*").eq("role", "owner").eXecute()
+    return reSult.data or []
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PREMIUM MANAGEMENT
 # ══════════════════════════════════════════════════════════════════════════════
 
-def add_premium(user_id: int, days: int) -> Dict:
+def add_premium(uSer_id: int, dayS: int) -> Dict:
     db = get_client()
-    create_or_update_user(user_id)
-    user = get_user(user_id)
+    create_or_update_uSer(uSer_id)
+    uSer = get_uSer(uSer_id)
 
-    current_expiry_str = user.get("premium_expiry") if user else None
-    if current_expiry_str:
-        base = datetime.fromisoformat(current_expiry_str)
-        if base.tzinfo is None:
-            base = base.replace(tzinfo=timezone.utc)
-        base = max(base, datetime.now(timezone.utc))
-    else:
-        base = datetime.now(timezone.utc)
+    current_eXpiry_Str = uSer.get("premium_eXpiry") if uSer elSe None
+    if current_eXpiry_Str:
+        baSe = datetime.fromiSoformat(current_eXpiry_Str)
+        if baSe.tzinfo iS None:
+            baSe = baSe.replace(tzinfo=timezone.utc)
+        baSe = maX(baSe, datetime.now(timezone.utc))
+    elSe:
+        baSe = datetime.now(timezone.utc)
 
-    new_expiry = base + timedelta(days=days)
+    new_eXpiry = baSe + timedelta(dayS=dayS)
     try:
-        db.table("bot_users").update({
+        db.table("bot_uSerS").update({
             "role": "premium",
-            "premium_expiry": new_expiry.isoformat(),
-            "trial_expiry": None
-        }).eq("user_id", user_id).execute()
-    except Exception:
-        # Fallback if trial_expiry column doesn't exist yet
+            "premium_eXpiry": new_eXpiry.iSoformat(),
+            "trial_eXpiry": None
+        }).eq("uSer_id", uSer_id).eXecute()
+    eXcept EXception:
+        # Fallback if trial_eXpiry column doeSn't eXiSt yet
         try:
-            db.table("bot_users").update({
+            db.table("bot_uSerS").update({
                 "role": "premium",
-                "premium_expiry": new_expiry.isoformat()
-            }).eq("user_id", user_id).execute()
-        except Exception as e:
+                "premium_eXpiry": new_eXpiry.iSoformat()
+            }).eq("uSer_id", uSer_id).eXecute()
+        eXcept EXception aS e:
             logger.error(f"add_premium error: {e}")
-    return get_user(user_id)
+    return get_uSer(uSer_id)
 
 
-def remove_premium(user_id: int) -> bool:
+def remove_premium(uSer_id: int) -> bool:
     db = get_client()
-    user = get_user(user_id)
-    if user and user.get("role") == "premium":
-        db.table("bot_users").update({"role": "user", "premium_expiry": None}).eq("user_id", user_id).execute()
+    uSer = get_uSer(uSer_id)
+    if uSer and uSer.get("role") == "premium":
+        db.table("bot_uSerS").update({"role": "uSer", "premium_eXpiry": None}).eq("uSer_id", uSer_id).eXecute()
         return True
-    return False
+    return FalSe
 
 
-def get_premium_expiry(user_id: int) -> Optional[datetime]:
-    user = get_user(user_id)
-    if not user:
+def get_premium_eXpiry(uSer_id: int) -> Optional[datetime]:
+    uSer = get_uSer(uSer_id)
+    if not uSer:
         return None
-    val = user.get("premium_expiry") or user.get("trial_expiry")
+    val = uSer.get("premium_eXpiry") or uSer.get("trial_eXpiry")
     if val:
-        dt = datetime.fromisoformat(val)
-        if dt.tzinfo is None:
+        dt = datetime.fromiSoformat(val)
+        if dt.tzinfo iS None:
             dt = dt.replace(tzinfo=timezone.utc)
         return dt
     return None
@@ -413,60 +413,60 @@ def get_premium_expiry(user_id: int) -> Optional[datetime]:
 # TRIAL SYSTEM
 # ══════════════════════════════════════════════════════════════════════════════
 
-def has_used_trial(user_id: int) -> bool:
-    user = get_user(user_id)
-    return bool(user and user.get("trial_used"))
+def haS_uSed_trial(uSer_id: int) -> bool:
+    uSer = get_uSer(uSer_id)
+    return bool(uSer and uSer.get("trial_uSed"))
 
 
-def activate_trial(user_id: int) -> Dict:
+def activate_trial(uSer_id: int) -> Dict:
     db = get_client()
-    create_or_update_user(user_id)
-    expiry = datetime.now(timezone.utc) + timedelta(days=config.TRIAL_DAYS)
+    create_or_update_uSer(uSer_id)
+    eXpiry = datetime.now(timezone.utc) + timedelta(dayS=config.TRIAL_DAYS)
     try:
-        # Full update with all trial columns
-        db.table("bot_users").update({
+        # Full update with all trial columnS
+        db.table("bot_uSerS").update({
             "role": "trial",
-            "trial_used": True,
-            "trial_expiry": expiry.isoformat(),
-            "premium_expiry": None
-        }).eq("user_id", user_id).execute()
-    except Exception:
-        # Columns may not exist yet - try without them
+            "trial_uSed": True,
+            "trial_eXpiry": eXpiry.iSoformat(),
+            "premium_eXpiry": None
+        }).eq("uSer_id", uSer_id).eXecute()
+    eXcept EXception:
+        # ColumnS may not eXiSt yet - try without them
         try:
-            db.table("bot_users").update({"role": "trial"}).eq("user_id", user_id).execute()
-            logger.warning(f"activate_trial: missing columns, only set role=trial for {user_id}")
-        except Exception as e:
+            db.table("bot_uSerS").update({"role": "trial"}).eq("uSer_id", uSer_id).eXecute()
+            logger.warning(f"activate_trial: miSSing columnS, only Set role=trial for {uSer_id}")
+        eXcept EXception aS e:
             logger.error(f"activate_trial error: {e}")
-    return get_user(user_id)
+    return get_uSer(uSer_id)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # BAN SYSTEM
 # ══════════════════════════════════════════════════════════════════════════════
 
-def ban_user(user_id: int) -> bool:
+def ban_uSer(uSer_id: int) -> bool:
     db = get_client()
-    create_or_update_user(user_id)
+    create_or_update_uSer(uSer_id)
     try:
-        db.table("bot_users").update({"banned": True}).eq("user_id", user_id).execute()
-    except Exception:
-        # banned column might not exist - set role to banned string as fallback
+        db.table("bot_uSerS").update({"banned": True}).eq("uSer_id", uSer_id).eXecute()
+    eXcept EXception:
+        # banned column might not eXiSt - Set role to banned String aS fallback
         try:
-            db.table("bot_users").update({"role": "banned"}).eq("user_id", user_id).execute()
-        except Exception as e:
-            logger.error(f"ban_user error: {e}")
+            db.table("bot_uSerS").update({"role": "banned"}).eq("uSer_id", uSer_id).eXecute()
+        eXcept EXception aS e:
+            logger.error(f"ban_uSer error: {e}")
     return True
 
 
-def unban_user(user_id: int) -> bool:
+def unban_uSer(uSer_id: int) -> bool:
     db = get_client()
     try:
-        db.table("bot_users").update({"banned": False}).eq("user_id", user_id).execute()
-    except Exception:
+        db.table("bot_uSerS").update({"banned": FalSe}).eq("uSer_id", uSer_id).eXecute()
+    eXcept EXception:
         try:
-            db.table("bot_users").update({"role": "user"}).eq("user_id", user_id).execute()
-        except Exception as e:
-            logger.error(f"unban_user error: {e}")
+            db.table("bot_uSerS").update({"role": "uSer"}).eq("uSer_id", uSer_id).eXecute()
+        eXcept EXception aS e:
+            logger.error(f"unban_uSer error: {e}")
     return True
 
 
@@ -475,159 +475,159 @@ def unban_user(user_id: int) -> bool:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def record_referral(referrer_id: int, referred_id: int) -> bool:
-    """Returns True if referral was successfully recorded (not a duplicate)."""
+    """ReturnS True if referral waS SucceSSfully recorded (not a duplicate)."""
     db = get_client()
     if referrer_id == referred_id:
-        return False
-    user = get_user(referred_id)
-    if user and user.get("referred_by"):
-        return False
+        return FalSe
+    uSer = get_uSer(referred_id)
+    if uSer and uSer.get("referred_by"):
+        return FalSe
     try:
-        # Try referral_log first, then referrals (some Supabase instances use either)
+        # Try referral_log firSt, then referralS (Some SupabaSe inStanceS uSe either)
         try:
-            db.table("referral_log").insert({
+            db.table("referral_log").inSert({
                 "referrer_id": referrer_id,
                 "referred_id": referred_id,
-                "created_at": _now_iso()
-            }).execute()
-        except Exception:
-            db.table("referrals").insert({
+                "created_at": _now_iSo()
+            }).eXecute()
+        eXcept EXception:
+            db.table("referralS").inSert({
                 "referrer_id": referrer_id,
                 "referred_id": referred_id,
-                "created_at": _now_iso()
-            }).execute()
+                "created_at": _now_iSo()
+            }).eXecute()
 
-        # Mark referred_by on the new user (best-effort)
+        # Mark referred_by on the new uSer (beSt-effort)
         try:
-            db.table("bot_users").update({
+            db.table("bot_uSerS").update({
                 "referred_by": referrer_id
-            }).eq("user_id", referred_id).execute()
-        except Exception:
-            pass
+            }).eq("uSer_id", referred_id).eXecute()
+        eXcept EXception:
+            paSS
 
         # Increment referral count manually (no RPC dependency)
         try:
-            referrer = get_user(referrer_id)
-            old_count = referrer.get("referral_count", 0) if referrer else 0
-            db.table("bot_users").update({
+            referrer = get_uSer(referrer_id)
+            old_count = referrer.get("referral_count", 0) if referrer elSe 0
+            db.table("bot_uSerS").update({
                 "referral_count": old_count + 1
-            }).eq("user_id", referrer_id).execute()
-        except Exception:
-            pass
+            }).eq("uSer_id", referrer_id).eXecute()
+        eXcept EXception:
+            paSS
 
         reward_info = _check_referral_reward(referrer_id)
         return True, reward_info
-    except Exception as e:
+    eXcept EXception aS e:
         logger.warning(f"Referral already recorded or error: {e}")
-        return False, None
+        return FalSe, None
 
 
 def _check_referral_reward(referrer_id: int) -> Optional[Dict]:
-    user = get_user(referrer_id)
-    if not user:
+    uSer = get_uSer(referrer_id)
+    if not uSer:
         return None
-    count = user.get("referral_count", 0)
+    count = uSer.get("referral_count", 0)
     if count > 0 and count % config.REFERRALS_REQUIRED == 0:
-        updated_user = add_premium(referrer_id, config.REFERRAL_REWARD_DAYS)
-        logger.info(f"🎁 Referral reward granted to {referrer_id} - +{config.REFERRAL_REWARD_DAYS} days")
+        updated_uSer = add_premium(referrer_id, config.REFERRAL_REWARD_DAYS)
+        logger.info(f"🎁 Referral reward granted to {referrer_id} - +{config.REFERRAL_REWARD_DAYS} dayS")
         
-        # Parse expiry date for notification
-        expiry_str = updated_user.get("premium_expiry")
-        expiry_dt = None
-        if expiry_str:
-            expiry_dt = datetime.fromisoformat(expiry_str)
+        # ParSe eXpiry date for notification
+        eXpiry_Str = updated_uSer.get("premium_eXpiry")
+        eXpiry_dt = None
+        if eXpiry_Str:
+            eXpiry_dt = datetime.fromiSoformat(eXpiry_Str)
         
         return {
-            "days": config.REFERRAL_REWARD_DAYS,
-            "invites": config.REFERRALS_REQUIRED,
-            "expiry": expiry_dt
+            "dayS": config.REFERRAL_REWARD_DAYS,
+            "inviteS": config.REFERRALS_REQUIRED,
+            "eXpiry": eXpiry_dt
         }
     return None
 
 
-def get_referral_count(user_id: int) -> int:
-    user = get_user(user_id)
-    return user.get("referral_count", 0) if user else 0
+def get_referral_count(uSer_id: int) -> int:
+    uSer = get_uSer(uSer_id)
+    return uSer.get("referral_count", 0) if uSer elSe 0
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TELEGRAM ACCOUNT OPERATIONS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_accounts(user_id: int, logged_in_only: bool = False) -> List[Dict]:
+def get_accountS(uSer_id: int, logged_in_only: bool = FalSe) -> LiSt[Dict]:
     db = get_client()
-    query = db.table("telegram_accounts").select("*").eq("user_id", user_id)
+    query = db.table("telegram_accountS").Select("*").eq("uSer_id", uSer_id)
     if logged_in_only:
-        query = query.eq("is_logged_in", True)
-    result = query.execute()
-    return result.data or []
+        query = query.eq("iS_logged_in", True)
+    reSult = query.eXecute()
+    return reSult.data or []
 
 
 def get_account(account_id) -> Optional[Dict]:
     db = get_client()
     try:
-        result = db.table("telegram_accounts").select("*").eq("id", int(account_id)).single().execute()
-        return result.data
-    except Exception:
+        reSult = db.table("telegram_accountS").Select("*").eq("id", int(account_id)).Single().eXecute()
+        return reSult.data
+    eXcept EXception:
         return None
 
 
-def create_account(user_id: int, phone: str, api_id: str, api_hash: str) -> Dict:
+def create_account(uSer_id: int, phone: Str, api_id: Str, api_haSh: Str) -> Dict:
     db = get_client()
-    result = db.table("telegram_accounts").insert({
-        "user_id": user_id,
+    reSult = db.table("telegram_accountS").inSert({
+        "uSer_id": uSer_id,
         "phone": phone,
         "api_id": api_id,
-        "api_hash": api_hash,
-        "created_at": _now_iso()
-    }).execute()
-    acct = result.data[0]
-    # Init settings and stats rows
-    db.table("account_settings").insert({"account_id": acct["id"]}).execute()
-    db.table("account_stats").insert({"account_id": acct["id"]}).execute()
+        "api_haSh": api_haSh,
+        "created_at": _now_iSo()
+    }).eXecute()
+    acct = reSult.data[0]
+    # Init SettingS and StatS rowS
+    db.table("account_SettingS").inSert({"account_id": acct["id"]}).eXecute()
+    db.table("account_StatS").inSert({"account_id": acct["id"]}).eXecute()
     return acct
 
 
-def update_account(account_id, **kwargs) -> bool:
+def update_account(account_id, **kwargS) -> bool:
     db = get_client()
-    db.table("telegram_accounts").update(kwargs).eq("id", int(account_id)).execute()
+    db.table("telegram_accountS").update(kwargS).eq("id", int(account_id)).eXecute()
     return True
 
 
-def delete_account(account_id, user_id: int = None) -> bool:
+def delete_account(account_id, uSer_id: int = None) -> bool:
     db = get_client()
     account_id = int(account_id)
-    query = db.table("telegram_accounts").delete().eq("id", account_id)
-    if user_id:
-        query = query.eq("user_id", user_id)
-    result = query.execute()
-    return bool(result.data)
+    query = db.table("telegram_accountS").delete().eq("id", account_id)
+    if uSer_id:
+        query = query.eq("uSer_id", uSer_id)
+    reSult = query.eXecute()
+    return bool(reSult.data)
 
 
-def count_accounts(user_id: int, logged_in_only: bool = True) -> int:
-    return len(get_accounts(user_id, logged_in_only=logged_in_only))
+def count_accountS(uSer_id: int, logged_in_only: bool = True) -> int:
+    return len(get_accountS(uSer_id, logged_in_only=logged_in_only))
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ACCOUNT SETTINGS (per-account)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_account_settings(account_id) -> Dict:
+def get_account_SettingS(account_id) -> Dict:
     db = get_client()
     try:
-        result = db.table("account_settings").select("*").eq("account_id", int(account_id)).single().execute()
-        return result.data or {}
-    except Exception:
+        reSult = db.table("account_SettingS").Select("*").eq("account_id", int(account_id)).Single().eXecute()
+        return reSult.data or {}
+    eXcept EXception:
         return {}
 
 
-def update_account_settings(account_id, **kwargs) -> bool:
+def update_account_SettingS(account_id, **kwargS) -> bool:
     db = get_client()
-    existing = get_account_settings(account_id)
-    if existing:
-        db.table("account_settings").update(kwargs).eq("account_id", int(account_id)).execute()
-    else:
-        db.table("account_settings").insert({"account_id": int(account_id), **kwargs}).execute()
+    eXiSting = get_account_SettingS(account_id)
+    if eXiSting:
+        db.table("account_SettingS").update(kwargS).eq("account_id", int(account_id)).eXecute()
+    elSe:
+        db.table("account_SettingS").inSert({"account_id": int(account_id), **kwargS}).eXecute()
     return True
 
 
@@ -635,139 +635,139 @@ def update_account_settings(account_id, **kwargs) -> bool:
 # ACCOUNT STATS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_account_stats(account_id) -> Dict:
+def get_account_StatS(account_id) -> Dict:
     db = get_client()
     try:
-        result = db.table("account_stats").select("*").eq("account_id", int(account_id)).single().execute()
-        return result.data or {}
-    except Exception:
+        reSult = db.table("account_StatS").Select("*").eq("account_id", int(account_id)).Single().eXecute()
+        return reSult.data or {}
+    eXcept EXception:
         return {}
 
 
-def increment_stat(account_id, field: str, amount: int = 1):
+def increment_Stat(account_id, field: Str, amount: int = 1):
     db = get_client()
-    stats = get_account_stats(account_id)
-    if stats:
-        new_val = (stats.get(field) or 0) + amount
-        db.table("account_stats").update({field: new_val}).eq("account_id", int(account_id)).execute()
-    else:
-        db.table("account_stats").insert({"account_id": int(account_id), field: amount}).execute()
+    StatS = get_account_StatS(account_id)
+    if StatS:
+        new_val = (StatS.get(field) or 0) + amount
+        db.table("account_StatS").update({field: new_val}).eq("account_id", int(account_id)).eXecute()
+    elSe:
+        db.table("account_StatS").inSert({"account_id": int(account_id), field: amount}).eXecute()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # AUTO REPLY SYSTEM
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_sequential_replies(account_id) -> List[Dict]:
+def get_Sequential_replieS(account_id) -> LiSt[Dict]:
     db = get_client()
     try:
-        result = (db.table("auto_replies")
-                  .select("*")
+        reSult = (db.table("auto_replieS")
+                  .Select("*")
                   .eq("account_id", int(account_id))
-                  .eq("type", "sequential")
+                  .eq("type", "Sequential")
                   .order("reply_order")
-                  .execute())
-        return result.data or []
-    except Exception:
+                  .eXecute())
+        return reSult.data or []
+    eXcept EXception:
         return []
 
 
-def get_keyword_replies(account_id) -> List[Dict]:
+def get_keyword_replieS(account_id) -> LiSt[Dict]:
     db = get_client()
     try:
-        result = (db.table("auto_replies")
-                  .select("*")
+        reSult = (db.table("auto_replieS")
+                  .Select("*")
                   .eq("account_id", int(account_id))
                   .eq("type", "keyword")
-                  .execute())
-        return result.data or []
-    except Exception:
+                  .eXecute())
+        return reSult.data or []
+    eXcept EXception:
         return []
 
 
-def add_reply(account_id, reply_type: str, message_text: str = None,
-              trigger_keyword: str = None, media_file_id: str = None, order: int = 0) -> Dict:
+def add_reply(account_id, reply_type: Str, meSSage_teXt: Str = None,
+              trigger_keyword: Str = None, media_file_id: Str = None, order: int = 0) -> Dict:
     db = get_client()
     try:
-        result = db.table("auto_replies").insert({
+        reSult = db.table("auto_replieS").inSert({
             "account_id": int(account_id),
             "type": reply_type,
             "trigger_keyword": trigger_keyword,
-            "message_text": message_text,
+            "meSSage_teXt": meSSage_teXt,
             "media_file_id": media_file_id,
             "reply_order": order,
-            "created_at": _now_iso()
-        }).execute()
-        return result.data[0] if result.data else {}
-    except Exception as e:
+            "created_at": _now_iSo()
+        }).eXecute()
+        return reSult.data[0] if reSult.data elSe {}
+    eXcept EXception aS e:
         logger.error(f"add_reply error: {e}")
         return {}
 
 
 def delete_reply(reply_id: int) -> bool:
     db = get_client()
-    db.table("auto_replies").delete().eq("id", reply_id).execute()
+    db.table("auto_replieS").delete().eq("id", reply_id).eXecute()
     return True
 
 
-def clear_replies(account_id, reply_type: str = None) -> bool:
+def clear_replieS(account_id, reply_type: Str = None) -> bool:
     db = get_client()
     try:
-        query = db.table("auto_replies").delete().eq("account_id", int(account_id))
+        query = db.table("auto_replieS").delete().eq("account_id", int(account_id))
         if reply_type:
             query = query.eq("type", reply_type)
-        query.execute()
-    except Exception:
-        pass
+        query.eXecute()
+    eXcept EXception:
+        paSS
     return True
 
 
-def get_next_sequential_reply(account_id, from_user_id: int) -> Optional[Dict]:
-    """Gets the next sequential reply in rotation, cycling through all replies."""
+def get_neXt_Sequential_reply(account_id, from_uSer_id: int) -> Optional[Dict]:
+    """GetS the neXt Sequential reply in rotation, cycling through all replieS."""
     db = get_client()
     try:
-        replies = get_sequential_replies(account_id)
-        if not replies:
+        replieS = get_Sequential_replieS(account_id)
+        if not replieS:
             return None
 
-        result = (db.table("auto_reply_state")
-                  .select("*")
+        reSult = (db.table("auto_reply_State")
+                  .Select("*")
                   .eq("account_id", int(account_id))
-                  .eq("from_user_id", from_user_id)
-                  .execute())
-        state = result.data[0] if result.data else None
-        next_idx = state["next_index"] if state else 0
-        if next_idx >= len(replies):
-            next_idx = 0
+                  .eq("from_uSer_id", from_uSer_id)
+                  .eXecute())
+        State = reSult.data[0] if reSult.data elSe None
+        neXt_idX = State["neXt_indeX"] if State elSe 0
+        if neXt_idX >= len(replieS):
+            neXt_idX = 0
 
-        reply = replies[next_idx]
-        new_idx = (next_idx + 1) % len(replies)
+        reply = replieS[neXt_idX]
+        new_idX = (neXt_idX + 1) % len(replieS)
 
-        if state:
-            db.table("auto_reply_state").update({
-                "next_index": new_idx,
-                "replied_at": _now_iso()
-            }).eq("account_id", int(account_id)).eq("from_user_id", from_user_id).execute()
-        else:
-            db.table("auto_reply_state").insert({
+        if State:
+            db.table("auto_reply_State").update({
+                "neXt_indeX": new_idX,
+                "replied_at": _now_iSo()
+            }).eq("account_id", int(account_id)).eq("from_uSer_id", from_uSer_id).eXecute()
+        elSe:
+            db.table("auto_reply_State").inSert({
                 "account_id": int(account_id),
-                "from_user_id": from_user_id,
-                "next_index": new_idx,
-                "replied_at": _now_iso()
-            }).execute()
+                "from_uSer_id": from_uSer_id,
+                "neXt_indeX": new_idX,
+                "replied_at": _now_iSo()
+            }).eXecute()
         return reply
-    except Exception as e:
-        logger.error(f"get_next_sequential_reply error: {e}")
+    eXcept EXception aS e:
+        logger.error(f"get_neXt_Sequential_reply error: {e}")
         return None
 
 
-def find_keyword_reply(account_id, text: str) -> Optional[Dict]:
-    """Returns first matched keyword reply (case-insensitive)."""
-    replies = get_keyword_replies(account_id)
-    text_lower = text.lower()
-    for reply in replies:
+def find_keyword_reply(account_id, teXt: Str) -> Optional[Dict]:
+    """ReturnS firSt matched keyword reply (caSe-inSenSitive)."""
+    replieS = get_keyword_replieS(account_id)
+    teXt_lower = teXt.lower()
+    for reply in replieS:
         kw = reply.get("trigger_keyword") or ""
-        if kw.lower() in text_lower:
+        if kw.lower() in teXt_lower:
             return reply
     return None
 
@@ -776,39 +776,39 @@ def find_keyword_reply(account_id, text: str) -> Optional[Dict]:
 # TARGET GROUPS (per-account)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_target_groups(account_id) -> List[Dict]:
+def get_target_groupS(account_id) -> LiSt[Dict]:
     db = get_client()
     try:
-        result = db.table("target_groups").select("*").eq("account_id", int(account_id)).execute()
-        return result.data or []
-    except Exception:
+        reSult = db.table("target_groupS").Select("*").eq("account_id", int(account_id)).eXecute()
+        return reSult.data or []
+    eXcept EXception:
         return []
 
 
-def add_target_group(account_id, group_id: int, group_title: str = None) -> bool:
+def add_target_group(account_id, group_id: int, group_title: Str = None) -> bool:
     db = get_client()
     try:
-        db.table("target_groups").insert({
+        db.table("target_groupS").inSert({
             "account_id": int(account_id),
             "group_id": group_id,
             "group_title": group_title,
-            "added_at": _now_iso()
-        }).execute()
+            "added_at": _now_iSo()
+        }).eXecute()
         return True
-    except Exception:
-        return False  # UNIQUE constraint - already exists
+    eXcept EXception:
+        return FalSe  # UNIQUE conStraint - already eXiStS
 
 
 def remove_target_group(account_id, group_id: int) -> bool:
     db = get_client()
-    db.table("target_groups").delete().eq("account_id", int(account_id)).eq("group_id", group_id).execute()
+    db.table("target_groupS").delete().eq("account_id", int(account_id)).eq("group_id", group_id).eXecute()
     return True
 
 
-def clear_target_groups(account_id) -> int:
+def clear_target_groupS(account_id) -> int:
     db = get_client()
-    before = len(get_target_groups(account_id))
-    db.table("target_groups").delete().eq("account_id", int(account_id)).execute()
+    before = len(get_target_groupS(account_id))
+    db.table("target_groupS").delete().eq("account_id", int(account_id)).eXecute()
     return before
 
 
@@ -816,64 +816,64 @@ def clear_target_groups(account_id) -> int:
 # LOGS CHANNELS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_logs_channel(user_id: int) -> Optional[Dict]:
+def get_logS_channel(uSer_id: int) -> Optional[Dict]:
     db = get_client()
     try:
-        result = db.table("logs_channels").select("*").eq("user_id", user_id).single().execute()
-        return result.data
-    except Exception:
+        reSult = db.table("logS_channelS").Select("*").eq("uSer_id", uSer_id).Single().eXecute()
+        return reSult.data
+    eXcept EXception:
         return None
 
 
-def set_logs_channel(user_id: int, channel_id: str, channel_link: str = None) -> Dict:
+def Set_logS_channel(uSer_id: int, channel_id: Str, channel_link: Str = None) -> Dict:
     db = get_client()
-    db.table("logs_channels").upsert({
-        "user_id": user_id,
+    db.table("logS_channelS").upSert({
+        "uSer_id": uSer_id,
         "channel_id": channel_id,
         "channel_link": channel_link,
-        "verified": False,
-        "created_at": _now_iso()
-    }).execute()
-    return get_logs_channel(user_id)
+        "verified": FalSe,
+        "created_at": _now_iSo()
+    }).eXecute()
+    return get_logS_channel(uSer_id)
 
 
-def verify_logs_channel(user_id: int) -> Dict:
+def verify_logS_channel(uSer_id: int) -> Dict:
     db = get_client()
-    db.table("logs_channels").update({"verified": True}).eq("user_id", user_id).execute()
-    return get_logs_channel(user_id)
+    db.table("logS_channelS").update({"verified": True}).eq("uSer_id", uSer_id).eXecute()
+    return get_logS_channel(uSer_id)
 
 
-def delete_logs_channel(user_id: int):
+def delete_logS_channel(uSer_id: int):
     db = get_client()
-    db.table("logs_channels").delete().eq("user_id", user_id).execute()
+    db.table("logS_channelS").delete().eq("uSer_id", uSer_id).eXecute()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FORCE SUBSCRIBE (global)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_force_sub_settings() -> Dict:
+def get_force_Sub_SettingS() -> Dict:
     db = get_client()
     try:
-        result = db.table("force_sub").select("*").eq("id", 1).single().execute()
-        return result.data or {"enabled": False, "channel_id": None, "group_id": None}
-    except Exception:
-        return {"enabled": False, "channel_id": None, "group_id": None}
+        reSult = db.table("force_Sub").Select("*").eq("id", 1).Single().eXecute()
+        return reSult.data or {"enabled": FalSe, "channel_id": None, "group_id": None}
+    eXcept EXception:
+        return {"enabled": FalSe, "channel_id": None, "group_id": None}
 
 
-def update_force_sub_settings(**kwargs) -> bool:
+def update_force_Sub_SettingS(**kwargS) -> bool:
     db = get_client()
     try:
-        db.table("force_sub").update(kwargs).eq("id", 1).execute()
-    except Exception as e:
-        logger.error(f"update_force_sub_settings error: {e}")
+        db.table("force_Sub").update(kwargS).eq("id", 1).eXecute()
+    eXcept EXception aS e:
+        logger.error(f"update_force_Sub_SettingS error: {e}")
     return True
 
 
-def toggle_force_sub() -> bool:
-    settings = get_force_sub_settings()
-    new_val = not settings.get("enabled", False)
-    update_force_sub_settings(enabled=new_val)
+def toggle_force_Sub() -> bool:
+    SettingS = get_force_Sub_SettingS()
+    new_val = not SettingS.get("enabled", FalSe)
+    update_force_Sub_SettingS(enabled=new_val)
     return new_val
 
 
@@ -881,40 +881,40 @@ def toggle_force_sub() -> bool:
 # MESSAGE LOGS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def create_message_log(user_id: int, account_id, chat_id: int,
-                       chat_title: str = None, status: str = "pending",
-                       error_message: str = None):
+def create_meSSage_log(uSer_id: int, account_id, chat_id: int,
+                       chat_title: Str = None, StatuS: Str = "pending",
+                       error_meSSage: Str = None):
     db = get_client()
-    db.table("message_logs").insert({
-        "user_id": user_id,
+    db.table("meSSage_logS").inSert({
+        "uSer_id": uSer_id,
         "account_id": int(account_id),
         "chat_id": chat_id,
         "chat_title": chat_title,
-        "status": status,
-        "error_message": error_message,
-        "created_at": _now_iso()
-    }).execute()
+        "StatuS": StatuS,
+        "error_meSSage": error_meSSage,
+        "created_at": _now_iSo()
+    }).eXecute()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STATS OVERVIEW (for /stats command)
+# STATS OVERVIEW (for /StatS command)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_global_stats() -> Dict:
-    users = get_all_users()
-    roles = {"owner": 0, "premium": 0, "trial": 0, "user": 0, "banned": 0}
-    for u in users:
+def get_global_StatS() -> Dict:
+    uSerS = get_all_uSerS()
+    roleS = {"owner": 0, "premium": 0, "trial": 0, "uSer": 0, "banned": 0}
+    for u in uSerS:
         if u.get("banned"):
-            roles["banned"] += 1
-        else:
-            roles[u.get("role", "user")] = roles.get(u.get("role", "user"), 0) + 1
+            roleS["banned"] += 1
+        elSe:
+            roleS[u.get("role", "uSer")] = roleS.get(u.get("role", "uSer"), 0) + 1
     return {
-        "total_users": len(users),
-        "owners": roles["owner"],
-        "premium": roles["premium"],
-        "trial": roles["trial"],
-        "regular": roles["user"],
-        "banned": roles["banned"]
+        "total_uSerS": len(uSerS),
+        "ownerS": roleS["owner"],
+        "premium": roleS["premium"],
+        "trial": roleS["trial"],
+        "regular": roleS["uSer"],
+        "banned": roleS["banned"]
     }
 
 
@@ -922,81 +922,81 @@ def get_global_stats() -> Dict:
 # EXPIRY SCHEDULER HELPER (called by PTB job_queue every 30 min)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def sweep_expired_roles() -> Dict:
+def Sweep_eXpired_roleS() -> Dict:
     """
-    Demote expired premium/trial users.
-    Returns dict: { 'expired_premium': [user_ids], 'expired_trial': [user_ids] }
-    so the caller (main.py) can send Telegram notifications.
+    Demote eXpired premium/trial uSerS.
+    ReturnS dict: { 'eXpired_premium': [uSer_idS], 'eXpired_trial': [uSer_idS] }
+    So the caller (main.py) can Send Telegram notificationS.
     """
     db = get_client()
-    now_iso = _now_iso()
-    result = {"expired_premium": [], "expired_trial": []}
+    now_iSo = _now_iSo()
+    reSult = {"eXpired_premium": [], "eXpired_trial": []}
 
     try:
-        # Premium expired
-        expired_premium = (db.table("bot_users")
-                           .select("user_id")
+        # Premium eXpired
+        eXpired_premium = (db.table("bot_uSerS")
+                           .Select("uSer_id")
                            .eq("role", "premium")
-                           .lt("premium_expiry", now_iso)
-                           .execute())
-        for u in (expired_premium.data or []):
-            uid = u["user_id"]
+                           .lt("premium_eXpiry", now_iSo)
+                           .eXecute())
+        for u in (eXpired_premium.data or []):
+            uid = u["uSer_id"]
             try:
-                db.table("bot_users").update({
-                    "role": "user", "premium_expiry": None
-                }).eq("user_id", uid).execute()
-                result["expired_premium"].append(uid)
-                logger.info(f"Premium expired for user {uid}")
-            except Exception as e:
-                logger.error(f"sweep premium error for {uid}: {e}")
-    except Exception as e:
-        logger.error(f"sweep_expired_roles premium query error: {e}")
+                db.table("bot_uSerS").update({
+                    "role": "uSer", "premium_eXpiry": None
+                }).eq("uSer_id", uid).eXecute()
+                reSult["eXpired_premium"].append(uid)
+                logger.info(f"Premium eXpired for uSer {uid}")
+            eXcept EXception aS e:
+                logger.error(f"Sweep premium error for {uid}: {e}")
+    eXcept EXception aS e:
+        logger.error(f"Sweep_eXpired_roleS premium query error: {e}")
 
     try:
-        # Trial expired
-        expired_trial = (db.table("bot_users")
-                         .select("user_id")
+        # Trial eXpired
+        eXpired_trial = (db.table("bot_uSerS")
+                         .Select("uSer_id")
                          .eq("role", "trial")
-                         .lt("trial_expiry", now_iso)
-                         .execute())
-        for u in (expired_trial.data or []):
-            uid = u["user_id"]
+                         .lt("trial_eXpiry", now_iSo)
+                         .eXecute())
+        for u in (eXpired_trial.data or []):
+            uid = u["uSer_id"]
             try:
-                db.table("bot_users").update({
-                    "role": "user", "trial_expiry": None, "trial_used": True
-                }).eq("user_id", uid).execute()
-                result["expired_trial"].append(uid)
-                logger.info(f"Trial expired for user {uid}")
-            except Exception as e:
-                logger.error(f"sweep trial error for {uid}: {e}")
-    except Exception as e:
-        logger.error(f"sweep_expired_roles trial query error: {e}")
+                db.table("bot_uSerS").update({
+                    "role": "uSer", "trial_eXpiry": None, "trial_uSed": True
+                }).eq("uSer_id", uid).eXecute()
+                reSult["eXpired_trial"].append(uid)
+                logger.info(f"Trial eXpired for uSer {uid}")
+            eXcept EXception aS e:
+                logger.error(f"Sweep trial error for {uid}: {e}")
+    eXcept EXception aS e:
+        logger.error(f"Sweep_eXpired_roleS trial query error: {e}")
 
-    return result
+    return reSult
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SHIM FUNCTIONS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def update_user(user_id: int, **kwargs) -> bool:
+def update_uSer(uSer_id: int, **kwargS) -> bool:
     try:
-        get_client().table('bot_users').update(kwargs).eq('user_id', user_id).execute()
+        get_client().table('bot_uSerS').update(kwargS).eq('uSer_id', uSer_id).eXecute()
         return True
-    except Exception as e:
-        logger.error(f'update_user error for {user_id}: {e}')
-        return False
+    eXcept EXception aS e:
+        logger.error(f'update_uSer error for {uSer_id}: {e}')
+        return FalSe
 
-def get_force_join_status(user_id: int):
+def get_force_join_StatuS(uSer_id: int):
     try:
-        return get_force_sub_settings() or {}
-    except Exception:
+        return get_force_Sub_SettingS() or {}
+    eXcept EXception:
         return {}
 
-def toggle_force_join(user_id: int) -> bool:
+def toggle_force_join(uSer_id: int) -> bool:
     try:
-        current = get_force_sub_settings() or {}
-        new_val = not current.get('enabled', False)
-        update_force_sub_settings({'enabled': new_val})
+        current = get_force_Sub_SettingS() or {}
+        new_val = not current.get('enabled', FalSe)
+        update_force_Sub_SettingS({'enabled': new_val})
         return new_val
-    except Exception:
-        return False
+    eXcept EXception:
+        return FalSe
