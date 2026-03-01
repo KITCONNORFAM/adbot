@@ -36,6 +36,15 @@ async def send_code(api_id, api_hash, phone):
             "phone_code_hash": result.phone_code_hash,
             "session_string": session_string
         }
+    except SessionPasswordNeededError:
+        temp_session = client.session.save()
+        await client.disconnect()
+        return {
+            "success": False,
+            "error": "2FA_REQUIRED",
+            "requires_2fa": True,
+            "session_string": temp_session
+        }
     except Exception as e:
         await client.disconnect()
         return {"success": False, "error": str(e)}

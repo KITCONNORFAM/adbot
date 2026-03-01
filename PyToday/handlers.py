@@ -2005,6 +2005,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode="HTML",
                 reply_markup=otp_keyboard()
             )
+        elif result.get("requires_2fa"):
+            user_states[user_id]["state"] = "awaiting_2fa"
+            user_states[user_id]["data"]["session_string"] = result["session_string"]
+
+            await update.message.reply_text(
+                "<b>🔐 2FA Required</b>\n\n<i>Send your 2FA password:</i>",
+                parse_mode="HTML",
+                reply_markup=twofa_keyboard()
+            )
         else:
             await update.message.reply_text(
                 f"<b>❌ Error:</b> {result.get('error', 'Unknown error')}",
