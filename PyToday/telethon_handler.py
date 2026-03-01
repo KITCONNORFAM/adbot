@@ -111,7 +111,7 @@ async def verify_2fa_password(api_id, api_hash, password, session_string, user_i
         return {"success": True, "session_string": new_session}
     except PasswordHashInvalidError:
         await client.disconnect()
-        return {"success": False, "error": "Invalid 2FA password. Please try again."}
+        return {"success": False, "error": "Invalid 2FA Cloud Password. Telegram completely rejected the password you typed. Please double-check your exact spelling and capitalization (it is case-sensitive), and ensure you aren't accidentally typing your username."}
     except Exception as e:
         await client.disconnect()
         return {"success": False, "error": str(e)}
