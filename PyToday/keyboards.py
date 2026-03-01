@@ -39,24 +39,24 @@ def support_keyboard():
     return InlineKeyboardMarkup(keyboard)
 
 def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, auto_group_join=False, force_sub=False, is_owner=False):
-    forward_status = "●" if use_forward else "○"
+    forward_status = "[ON]" if use_forward else "[OFF]"
     forward_mode = "FORWARD" if use_forward else "SEND"
-    auto_reply_status = "●" if auto_reply else "○"
-    auto_join_status = "●" if auto_group_join else "○"
-    force_sub_status = "●" if force_sub else "○"
+    auto_reply_status = "[ON]" if auto_reply else "[OFF]"
+    auto_join_status = "[ON]" if auto_group_join else "[OFF]"
+    force_sub_status = "[ON]" if force_sub else "[OFF]"
     
     keyboard = [
         [InlineKeyboardButton("◇ SINGLE ACCOUNT", callback_data="single_mode"),
          InlineKeyboardButton("◆ MULTIPLE", callback_data="multiple_mode")],
         [InlineKeyboardButton("▤ STATISTICS", callback_data="statistics")],
-        [InlineKeyboardButton(f"✉ {forward_mode} ⟨{forward_status}⟩", callback_data="toggle_forward_mode"),
-         InlineKeyboardButton(f"⟐ AUTO REPLY ⟨{auto_reply_status}⟩", callback_data="auto_reply_menu")],
-        [InlineKeyboardButton(f"⊕ AUTO JOIN ⟨{auto_join_status}⟩", callback_data="toggle_auto_group_join")],
+        [InlineKeyboardButton(f"✉ {forward_mode} {forward_status}", callback_data="toggle_forward_mode"),
+         InlineKeyboardButton(f"⟐ AUTO REPLY {auto_reply_status}", callback_data="auto_reply_menu")],
+        [InlineKeyboardButton(f"⊕ AUTO JOIN {auto_join_status}", callback_data="toggle_auto_group_join")],
         [InlineKeyboardButton("◉ LOGS CHANNEL", callback_data="logs_channel_menu")]
     ]
     
     if is_owner:
-        keyboard.append([InlineKeyboardButton(f"⊗ FORCE SUB ⟨{force_sub_status}⟩", callback_data="force_sub_menu")])
+        keyboard.append([InlineKeyboardButton(f"⊗ FORCE SUB {force_sub_status}", callback_data="force_sub_menu")])
     
     keyboard.append([InlineKeyboardButton("◎ TARGETING", callback_data="target_adv")])
     keyboard.append([InlineKeyboardButton("« BACK", callback_data="main_menu")])

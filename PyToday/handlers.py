@@ -36,9 +36,9 @@ user_states = {}
 
 WELCOME_TEXT_TEMPLATE = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 
-ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ʙᴏᴛ
+ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ADVERTISING ʙᴏᴛ
 
-<blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ɪɴ ɢʀᴏᴜᴘs
+<blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ADVERTISING ɪɴ ɢʀᴏᴜᴘs
 💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴛᴏ ᴅɪʀᴇᴄᴛ ᴍᴇssᴀɢᴇs
 🔗 ᴀᴜᴛᴏ ᴊᴏɪɴ ɢʀᴏᴜᴘs ᴠɪᴀ ʟɪɴᴋs
 📊 ᴅᴇᴛᴀɪʟᴇᴅ sᴛᴀᴛɪsᴛɪᴄs ᴛʀᴀᴄᴋɪɴɢ
@@ -469,7 +469,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["advertising_active"] = False
         await send_new_message(
             query,
-            "<b>⏹ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sᴛᴏᴘᴘᴇᴅ</b>\n\n✅ <i>ʙᴏᴜʀ ᴄᴀᴏᴘᴀɪɢɴ ʜᴀs ʙᴇᴇɴ sᴛᴏᴘᴘᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ.</i>",
+            "<b>⏹ ADVERTISING sᴛᴏᴘᴘᴇᴅ</b>\n\n✅ <i>ʙᴏᴜʀ ᴄᴀᴏᴘᴀɪɢɴ ʜᴀs ʙᴇᴇɴ sᴛᴏᴘᴘᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ.</i>",
             advertising_menu_keyboard()
         )
 
@@ -669,10 +669,10 @@ async def show_main_menu(query, context=None):
 
 async def show_advertising_menu(query):
     adv_text = """
-<b>◈ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ᴏᴇɴᴜ</b>
+<b>◈ ADVERTISING ᴏᴇɴᴜ</b>
 
-▶ <b>sᴛᴀʀᴛ</b> - ʙᴇɢɪɴ ᴀᴅᴠᴇʀᴛɪsɪɴɢ
-⏹ <b>sᴛᴏᴘ</b> - sᴛᴏᴘ ᴀᴅᴠᴇʀᴛɪsɪɴɢ
+▶ <b>sᴛᴀʀᴛ</b> - ʙᴇɢɪɴ ADVERTISING
+⏹ <b>sᴛᴏᴘ</b> - sᴛᴏᴘ ADVERTISING
 ⏱ <b>sᴇᴛ ᴛɪᴏᴇ</b> - ᴄʜᴀɴɢᴇ ɪɴᴛᴇʀᴠᴀʟ
 
 <i>sᴇʟᴇᴄᴛ ᴀɴ ᴏᴘᴛɪᴏɴ:</i>
@@ -704,7 +704,7 @@ async def show_support(query):
 • ɢᴇᴛᴛɪɴɢ sᴛᴀʀᴛᴇᴅ: ᴀᴅᴅ ʙᴏᴜʀ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴄᴄᴏᴜɴᴛ ғɪʀsᴛ
 • ᴀᴘɪ ᴄʀᴇᴅᴇɴᴛɪᴀʟs: ɢᴇᴛ ғʀᴏᴏ ᴏʙ.ᴛᴇʟᴇɢʀᴀᴍ.ᴏʀɢ
 • ᴀᴜᴛᴏ ʀᴇᴘʟʏ: ᴇɴᴀʙʟᴇ ɪɴ sᴇᴛᴛɪɴɢs ᴛᴏ ᴀᴜᴛᴏ-ʀᴇsᴘᴏɴᴅ
-• ᴀᴅᴠᴇʀᴛɪsɪɴɢ: sᴇᴛ ᴀᴅ ᴛᴇxᴛ, ᴛʜᴇɴ sᴛᴀʀᴛ ᴄᴀᴏᴘᴀɪɢɴ
+• ADVERTISING: sᴇᴛ AD TEXT, ᴛʜᴇɴ sᴛᴀʀᴛ ᴄᴀᴏᴘᴀɪɢɴ
 
 📞 <b>ᴄᴏɴᴛᴀᴄᴛ ᴏᴘᴛɪᴏɴs:</b>
 • ᴀᴅᴏɪɴ sᴜᴘᴘᴏʀᴛ: ᴅɪʀᴇᴄᴛ ʜᴇʟᴘ ғʀᴏᴏ ᴅᴇᴏ ᴇʟᴏᴘᴇʀ
@@ -726,9 +726,10 @@ async def show_settings(query, user_id):
     auto_reply = False
     auto_group_join = False
     if accounts:
-        s = db.get_account_settings(accounts[0]["id"])
-        use_forward = s.get("use_forward_mode", False) if s else False
-        auto_reply = s.get("auto_reply_enabled", False) if s else False
+        s = db.get_account_settings(accounts[0]["id"]) or {}
+        use_forward = s.get("use_forward_mode", False)
+        auto_reply = s.get("auto_reply_enabled", False)
+        auto_group_join = s.get("auto_group_join", False)
 
     mode_text = "💎💎 Multiple" if use_multiple else "💎 Single"
     forward_text = "📨 Forward" if use_forward else "📤 Send"
@@ -965,7 +966,7 @@ async def show_target_adv(query, user_id):
         target_mode = s.get("target_mode", "all")
 
     target_text = f"""
-<b>🎯 ᴛᴀʀɢᴇᴛ ᴀᴅᴠᴇʀᴛɪsɪɴɢ</b>
+<b>🎯 ᴛᴀʀɢᴇᴛ ADVERTISING</b>
 
 <b>📊 Current Mode:</b> <code>{target_mode.upper()}</code>
 
@@ -1239,10 +1240,10 @@ async def load_default_groups(query, user_id, context):
                 "<b>⚠️ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
                 "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀɴᴅ ᴠᴇʀɪғʏ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏʀᴇ ᴀᴜᴛᴏ-ᴊᴏɪɴɪɴɢ ɢʀᴏᴜᴘs.</blockquote>\n\n"
                 "<b>ʜᴏᴡ ᴛᴏ sᴇᴛ ᴜᴘ:</b>\n"
-                "1. ᴄʀᴇᴀᴛᴇ ᴀ ɴᴇᴡ ᴄʜᴀɴɴᴇʟ\n"
+                "1. CREATE A NEW CHANNEL\n"
                 "2. ᴀᴅᴅ ᴛʜɪs ʙᴏᴛ ᴀs ᴀᴅᴏɪɴ\n"
                 "3. ɢᴏ ᴛᴏ sᴇᴛᴛɪɴɢs → ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
-                "4. sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴀɴᴅ ᴠᴇʀɪғʏ.",
+                "4. SEND THE CHANNEL ID OR LINK.",
                 back_to_menu_keyboard()
             )
             return
@@ -1429,7 +1430,7 @@ async def show_ad_text_menu(query, user_id):
     ad_status = "✅ Set" if ad_text else "✅ Not Set"
 
     menu_text = f"""
-<b>📝 ᴀᴅ ᴛᴇxᴛ ᴏᴇɴᴜ</b>
+<b>📝 AD TEXT ᴏᴇɴᴜ</b>
 
 “ <b>Ad Text:</b> {ad_status}
 
@@ -1447,13 +1448,13 @@ async def show_saved_ad_text(query, user_id):
 
     if ad_text:
         display_text = f"""
-<b>📄 sᴀᴠᴇᴅ ᴀᴅ ᴛᴇxᴛ</b>
+<b>📄 sᴀᴠᴇᴅ AD TEXT</b>
 
 {ad_text[:500]}{'...' if len(ad_text) > 500 else ''}
 """
     else:
         display_text = """
-<b>📄 sᴀᴠᴇᴅ ᴀᴅ ᴛᴇxᴛ</b>
+<b>📄 sᴀᴠᴇᴅ AD TEXT</b>
 
 <i>No ad text saved.</i>
 """
@@ -1464,7 +1465,7 @@ async def prompt_ad_text(query, user_id):
     user_states[user_id] = {"state": "awaiting_ad_text", "data": {}}
 
     prompt_text = """
-<b>• ᴀᴅᴅ ᴀᴅ ᴛᴇxᴛ</b>
+<b>• ᴀᴅᴅ AD TEXT</b>
 
 <i>Send your ad text now:</i>
 
@@ -1483,7 +1484,7 @@ async def delete_ad_text(query, user_id):
         db.update_account_settings(accounts[0]["id"], ad_text=None)
 
     result_text = """
-<b>🗑️ ᴀᴅ ᴛᴇxᴛ ᴅᴇʟᴇᴛᴇᴅ</b>
+<b>🗑️ AD TEXT ᴅᴇʟᴇᴛᴇᴅ</b>
 
 ✅ Your ad text has been deleted.
 """
@@ -1559,10 +1560,10 @@ async def set_single_mode(query, user_id):
 
 💎 Using your only account for advertising.
 """
-        user = db.get_user(user_id)
-        use_forward = user.get('use_forward_mode', False) if user else False
-        auto_reply = user.get('auto_reply_enabled', False) if user else False
-        auto_group_join = user.get('auto_group_join_enabled', False) if user else False
+        s = db.get_account_settings(accounts[0]["id"]) or {}
+        use_forward = s.get('use_forward_mode', False)
+        auto_reply = s.get('auto_reply_enabled', False)
+        auto_group_join = s.get('auto_group_join', False)
 
         force_sub_settings = db.get_force_sub_settings()
         force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
@@ -1681,10 +1682,10 @@ async def select_single_account(query, user_id, account_id):
     account = db.get_account(account_id)
     display_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
 
-    user = db.get_user(user_id)
-    use_forward = user.get('use_forward_mode', False) if user else False
-    auto_reply = user.get('auto_reply_enabled', False) if user else False
-    auto_group_join = user.get('auto_group_join_enabled', False) if user else False
+    s = db.get_account_settings(account_id) or {}
+    use_forward = s.get('use_forward_mode', False)
+    auto_reply = s.get('auto_reply_enabled', False)
+    auto_group_join = s.get('auto_group_join', False)
 
     result_text = f"""
 <b>✅ ᴀᴄᴄᴏᴜɴᴛ sᴇʟᴇᴄᴛᴇᴅ</b>
@@ -1725,9 +1726,9 @@ async def start_advertising(query, user_id, context):
         await send_new_message(
             query,
             "<b>⚠️ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
-            "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏʀᴇ sᴛᴀʀᴛɪɴɢ ᴀᴅᴠᴇʀᴛɪsɪɴɢ.</blockquote>\n\n"
+            "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏʀᴇ sᴛᴀʀᴛɪɴɢ ADVERTISING.</blockquote>\n\n"
             "<b>ʜᴏᴡ ᴛᴏ sᴇᴛ ᴜᴘ:</b>\n"
-            "1. ᴄʀᴇᴀᴛᴇ ᴀ ɴᴇᴡ ᴄʜᴀɴɴᴇʟ\n"
+            "1. CREATE A NEW CHANNEL\n"
             "2. ᴀᴅᴅ ᴛʜɪs ʙᴏᴛ ᴀs ᴀᴅᴏɪɴ\n"
             "3. ɢᴏ ᴛᴏ sᴇᴛᴛɪɴɢs → ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
             "4. sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴏʀ ʟɪɴᴋ",
@@ -1795,7 +1796,7 @@ async def start_advertising(query, user_id, context):
     target_text = f"Selected ({len(target_groups) if target_mode == 'selected' else 0} groups)" if target_mode == "selected" else "All Groups"
 
     start_text = f"""
-<b>▶ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sᴛᴀʀᴛᴇᴅ</b>
+<b>▶ ADVERTISING sᴛᴀʀᴛᴇᴅ</b>
 
 💎 <b>Accounts:</b> <code>{len(active_accounts)}</code>
 📨 <b>Mode:</b> <code>{mode_text}</code>
@@ -2090,7 +2091,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             del user_states[user_id]
 
         await update.message.reply_text(
-            "<b>✅ ᴀᴅ ᴛᴇxᴛ sᴀᴠᴇᴅ</b>\n\n<i>Your ad text has been saved.</i>",
+            "<b>✅ AD TEXT sᴀᴠᴇᴅ</b>\n\n<i>Your ad text has been saved.</i>",
             parse_mode="HTML",
             reply_markup=ad_text_menu_keyboard()
         )
