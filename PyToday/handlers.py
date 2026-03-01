@@ -36,14 +36,14 @@ user_states = {}
 
 WELCOME_TEXT_TEMPLATE = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 
-ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ʙᴏᴛ
+ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ADVERTISING ʙᴏᴛ
 
-<blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ɪɴ ɢʀᴏᴜᴘs
-💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴛᴏ ᴅɪʀᴇᴄᴛ ᴍᴇssᴀɢᴇs
-🔗 ᴀᴜᴛᴏ ᴊᴏɪɴ ɢʀᴏᴜᴘs ᴠɪᴀ ʟɪɴᴋs
-📊 ᴅᴇᴛᴀɪʟᴇᴅ sᴛᴀᴛɪsᴛɪᴄs ᴛʀᴀᴄᴋɪɴɢ
-👤 ᴍᴜʟᴛɪᴘʟᴇ ᴀᴄᴄᴏᴜɴᴛ sᴜᴘᴘᴏʀᴛ
-⏰ sᴄʜᴇᴅᴜʟᴇᴅ ᴍᴇssᴀɢᴇ sᴇɴᴅɪɴɢ</blockquote>
+<blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ADVERTISING ɪɴ ɢʀᴏᴜᴘs
+💬 AUTO REPLY ᴛᴏ ᴅɪʀᴇᴄᴛ ᴍᴇssᴀɢᴇs
+🔗 AUTO JOIN ɢʀᴏᴜᴘs ᴠɪᴀ ʟɪɴᴋs
+📊 ᴅᴇᴛᴀɪʟᴇᴅ STATISTICS ᴛʀᴀᴄᴋɪɴɢ
+👤 MULTIPLE ᴀᴄᴄᴏᴜɴᴛ SUPPORT
+⏰ sᴄʜᴇᴅᴜʟᴇᴅ ᴍᴇssᴀɢᴇ SENDɪɴɢ</blockquote>
 {expiry_line}
 <i>ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ:</i>"""
 
@@ -463,7 +463,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["advertising_active"] = False
         await send_new_message(
             query,
-            "<b>⏹ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sᴛᴏᴘᴘᴇᴅ</b>\n\n✅ <i>ʙᴏᴜʀ ᴄᴀᴏᴘᴀɪɢɴ ʜᴀs ʙᴇᴇɴ sᴛᴏᴘᴘᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ.</i>",
+            "<b>⏹ ADVERTISING sᴛᴏᴘᴘᴇᴅ</b>\n\n✅ <i>ʙᴏᴜʀ ᴄᴀᴏᴘᴀɪɢɴ ʜᴀs ʙᴇᴇɴ sᴛᴏᴘᴘᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ.</i>",
             advertising_menu_keyboard()
         )
 
@@ -541,7 +541,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data == "owner_broadcast":
         if not db.is_owner(user_id):
-            await query.answer("👑 ᴏᴡɴᴇʀs ᴏɴʟʏ.", show_alert=True)
+            await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
             return
         await query.answer()
         try:
@@ -663,10 +663,10 @@ async def show_main_menu(query, context=None):
 
 async def show_advertising_menu(query):
     adv_text = """
-<b>◈ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ᴏᴇɴᴜ</b>
+<b>◈ ADVERTISING ᴏᴇɴᴜ</b>
 
-▶ <b>sᴛᴀʀᴛ</b> - ʙᴇɢɪɴ ᴀᴅᴠᴇʀᴛɪsɪɴɢ
-⏹ <b>sᴛᴏᴘ</b> - sᴛᴏᴘ ᴀᴅᴠᴇʀᴛɪsɪɴɢ
+▶ <b>sᴛᴀʀᴛ</b> - ʙᴇɢɪɴ ADVERTISING
+⏹ <b>sᴛᴏᴘ</b> - sᴛᴏᴘ ADVERTISING
 ⏱ <b>sᴇᴛ ᴛɪᴏᴇ</b> - ᴄʜᴀɴɢᴇ ɪɴᴛᴇʀᴠᴀʟ
 
 <i>sᴇʟᴇᴄᴛ ᴀɴ ᴏᴘᴛɪᴏɴ:</i>
@@ -697,8 +697,8 @@ async def show_support(query):
 📌 <b>ǫᴜɪᴄᴋ ʜᴇʟᴘ:</b>
 • ɢᴇᴛᴛɪɴɢ sᴛᴀʀᴛᴇᴅ: ᴀᴅᴅ ʙᴏᴜʀ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴄᴄᴏᴜɴᴛ ғɪʀsᴛ
 • ᴀᴘɪ ᴄʀᴇᴅᴇɴᴛɪᴀʟs: ɢᴇᴛ ғʀᴏᴏ ᴏʙ.ᴛᴇʟᴇɢʀᴀᴍ.ᴏʀɢ
-• ᴀᴜᴛᴏ ʀᴇᴘʟʏ: ᴇɴᴀʙʟᴇ ɪɴ sᴇᴛᴛɪɴɢs ᴛᴏ ᴀᴜᴛᴏ-ʀᴇsᴘᴏɴᴅ
-• ᴀᴅᴠᴇʀᴛɪsɪɴɢ: sᴇᴛ ᴀᴅ ᴛᴇxᴛ, ᴛʜᴇɴ sᴛᴀʀᴛ ᴄᴀᴏᴘᴀɪɢɴ
+• ᴀᴜᴛᴏ ʀᴇᴘʟʏ: ᴇɴᴀʙʟᴇ ɪɴ SETTINGS ᴛᴏ ᴀᴜᴛᴏ-ʀᴇsᴘᴏɴᴅ
+• ADVERTISING: SET AD TEXT, ᴛʜᴇɴ sᴛᴀʀᴛ ᴄᴀᴏᴘᴀɪɢɴ
 
 📞 <b>ᴄᴏɴᴛᴀᴄᴛ ᴏᴘᴛɪᴏɴs:</b>
 • ᴀᴅᴏɪɴ sᴜᴘᴘᴏʀᴛ: ᴅɪʀᴇᴄᴛ ʜᴇʟᴘ ғʀᴏᴏ ᴅᴇᴏ ᴇʟᴏᴘᴇʀ
@@ -730,7 +730,7 @@ async def show_settings(query, user_id):
     auto_join_text = "✅ ON" if auto_group_join else "⏸ OFF"
 
     settings_text = f"""
-<b>⚙️ sᴇᴛᴛɪɴɢs</b>
+<b>⚙️ SETTINGS</b>
 
 <b>📊 Current Configuration:</b>
 
@@ -766,7 +766,7 @@ async def toggle_forward_mode(query, user_id):
         description = "<i>Messages will be forwarded from Saved Messages</i>"
         icon = "✅"
     else:
-        mode_text = "<b>📤 sᴇɴᴅ ᴏᴏᴅᴇ</b>"
+        mode_text = "<b>📤 SEND ᴏᴏᴅᴇ</b>"
         description = "<i>Messages will be sent directly</i>"
         icon = "⏸"
 
@@ -792,7 +792,7 @@ async def show_auto_reply_menu(query, user_id):
     text_type = "Custom" if is_custom else "Default"
 
     menu_text = f"""
-<b>💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ sᴇᴛᴛɪɴɢs</b>
+<b>💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ SETTINGS</b>
 
 <b>📊 Current Configuration:</b>
 
@@ -959,7 +959,7 @@ async def show_target_adv(query, user_id):
         target_mode = s.get("target_mode", "all")
 
     target_text = f"""
-<b>🎯 ᴛᴀʀɢᴇᴛ ᴀᴅᴠᴇʀᴛɪsɪɴɢ</b>
+<b>🎯 ᴛᴀʀɢᴇᴛ ADVERTISING</b>
 
 <b>📊 Current Mode:</b> <code>{target_mode.upper()}</code>
 
@@ -1235,8 +1235,8 @@ async def load_default_groups(query, user_id, context):
                 "<b>ʜᴏᴡ ᴛᴏ sᴇᴛ ᴜᴘ:</b>\n"
                 "1. ᴄʀᴇᴀᴛᴇ ᴀ ɴᴇᴡ ᴄʜᴀɴɴᴇʟ\n"
                 "2. ᴀᴅᴅ ᴛʜɪs ʙᴏᴛ ᴀs ᴀᴅᴏɪɴ\n"
-                "3. ɢᴏ ᴛᴏ sᴇᴛᴛɪɴɢs → ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
-                "4. sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴀɴᴅ ᴠᴇʀɪғʏ.",
+                "3. ɢᴏ ᴛᴏ SETTINGS → ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
+                "4. SEND ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴀɴᴅ ᴠᴇʀɪғʏ.",
                 back_to_menu_keyboard()
             )
             return
@@ -1378,14 +1378,14 @@ async def show_statistics(query, user_id):
 
     if not accounts:
         stats_text = """
-<b>📊 sᴛᴀᴛɪsᴛɪᴄs</b>
+<b>📊 STATISTICS</b>
 
 <i>No accounts found. Add an account first.</i>
 """
         await send_new_message(query, stats_text, back_to_settings_keyboard())
         return
 
-    stats_text = "<b>📊 ʙᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ sᴛᴀᴛɪsᴛɪᴄs</b>\n\n"
+    stats_text = "<b>📊 ʙᴏᴜʀ ᴀᴄᴄᴏᴜɴᴛ STATISTICS</b>\n\n"
 
     for account in accounts:
         display_name = account.get('account_first_name') or account.get('phone', 'Unknown')
@@ -1719,12 +1719,12 @@ async def start_advertising(query, user_id, context):
         await send_new_message(
             query,
             "<b>⚠️ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
-            "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏʀᴇ sᴛᴀʀᴛɪɴɢ ᴀᴅᴠᴇʀᴛɪsɪɴɢ.</blockquote>\n\n"
+            "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏʀᴇ sᴛᴀʀᴛɪɴɢ ADVERTISING.</blockquote>\n\n"
             "<b>ʜᴏᴡ ᴛᴏ sᴇᴛ ᴜᴘ:</b>\n"
             "1. ᴄʀᴇᴀᴛᴇ ᴀ ɴᴇᴡ ᴄʜᴀɴɴᴇʟ\n"
             "2. ᴀᴅᴅ ᴛʜɪs ʙᴏᴛ ᴀs ᴀᴅᴏɪɴ\n"
-            "3. ɢᴏ ᴛᴏ sᴇᴛᴛɪɴɢs → ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
-            "4. sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴏʀ ʟɪɴᴋ",
+            "3. ɢᴏ ᴛᴏ SETTINGS → ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
+            "4. SEND ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴏʀ ʟɪɴᴋ",
             back_to_menu_keyboard()
         )
         return
@@ -1789,7 +1789,7 @@ async def start_advertising(query, user_id, context):
     target_text = f"Selected ({len(target_groups) if target_mode == 'selected' else 0} groups)" if target_mode == "selected" else "All Groups"
 
     start_text = f"""
-<b>▶ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sᴛᴀʀᴛᴇᴅ</b>
+<b>▶ ADVERTISING sᴛᴀʀᴛᴇᴅ</b>
 
 💎 <b>Accounts:</b> <code>{len(active_accounts)}</code>
 📨 <b>Mode:</b> <code>{mode_text}</code>
@@ -1814,7 +1814,7 @@ async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forwar
                 if not context.user_data.get("advertising_active", False):
                     break
 
-                account_id = str(account["_id"])
+                account_id = str(account["id"])
 
                 if target_mode == "selected":
                     target_groups = db.get_target_groups(user_id)
@@ -1890,7 +1890,7 @@ async def handle_otp_input(query, user_id, data, context):
             )
 
             db.update_account(
-                account["_id"],
+                account["id"],
                 session_string=encrypt_data(result["session_string"]),
                 is_logged_in=True
             )
@@ -1898,7 +1898,7 @@ async def handle_otp_input(query, user_id, data, context):
             info = await telethon_handler.get_account_info(api_id, api_hash, result["session_string"])
             if info["success"]:
                 db.update_account(
-                    account["_id"],
+                    account["id"],
                     account_first_name=info["first_name"],
                     account_last_name=info["last_name"],
                     account_username=info["username"]
@@ -2048,7 +2048,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
             db.update_account(
-                account["_id"],
+                account["id"],
                 session_string=encrypt_data(result["session_string"]),
                 is_logged_in=True
             )
@@ -2056,7 +2056,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             info = await telethon_handler.get_account_info(api_id, api_hash, result["session_string"])
             if info["success"]:
                 db.update_account(
-                    account["_id"],
+                    account["id"],
                     account_first_name=info["first_name"],
                     account_last_name=info["last_name"],
                     account_username=info["username"]
@@ -2386,14 +2386,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Force Sub Functions (Owner only)
 async def show_force_sub_menu(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("👑 ᴏᴡɴᴇʀs ᴏɴʟʏ.", show_alert=True)
+        await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
         return
 
     settings = db.get_force_sub_settings()
     enabled = settings.get('enabled', False) if settings else False
 
     menu_text = """
-<b>⚙️ ғᴏʀᴄᴇ sᴜʙ sᴇᴛᴛɪɴɢs</b>
+<b>⚙️ ғᴏʀᴄᴇ sᴜʙ SETTINGS</b>
 
 <i>Manage force subscription settings here.</i>
 
@@ -2407,7 +2407,7 @@ async def show_force_sub_menu(query, user_id):
 
 async def toggle_force_sub(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("👑 ᴏᴡɴᴇʀs ᴏɴʟʏ.", show_alert=True)
+        await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
         return
 
     settings = db.get_force_sub_settings()
@@ -2427,7 +2427,7 @@ Status: <b>{status}</b>
 
 async def prompt_set_force_channel(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("👑 ᴏᴡɴᴇʀs ᴏɴʟʏ.", show_alert=True)
+        await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
         return
 
     user_states[user_id] = {"state": "awaiting_force_channel"}
@@ -2450,7 +2450,7 @@ async def prompt_set_force_channel(query, user_id):
 
 async def prompt_set_force_group(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("👑 ᴏᴡɴᴇʀs ᴏɴʟʏ.", show_alert=True)
+        await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
         return
 
     user_states[user_id] = {"state": "awaiting_force_group"}
@@ -2473,7 +2473,7 @@ async def prompt_set_force_group(query, user_id):
 
 async def view_force_sub_settings(query, user_id):
     if not db.is_owner(user_id):
-        await query.answer("👑 ᴏᴡɴᴇʀs ᴏɴʟʏ.", show_alert=True)
+        await query.answer("👑 ᴏᴡɴᴇʀs ONʟʏ.", show_alert=True)
         return
 
     settings = db.get_force_sub_settings()
@@ -2493,7 +2493,7 @@ async def view_force_sub_settings(query, user_id):
     status = "✅ ON" if enabled else "⏸ OFF"
 
     view_text = f"""
-<b> ғᴏʀᴄᴇ sᴜʙ sᴇᴛᴛɪɴɢs</b>
+<b> ғᴏʀᴄᴇ sᴜʙ SETTINGS</b>
 
 <b>Status:</b> {status}
 <b>Channel ID:</b> <code>{channel_id}</code>
@@ -2526,7 +2526,7 @@ async def show_logs_channel_menu(query, user_id):
         verified = False
 
     menu_text = """
-<b>≡ ʟᴏɢs ᴄʜᴀɴɴᴇʟ sᴇᴛᴛɪɴɢs</b>
+<b>≡ ʟᴏɢs ᴄʜᴀɴɴᴇʟ SETTINGS</b>
 
 <i>Setup a channel to receive logs of all sent messages.</i>
 
@@ -2623,7 +2623,7 @@ async def show_force_join_menu(query, user_id):
     enabled = status.get('enabled', False)
 
     menu_text = """
-<b>⚙️ ғᴏʀᴄᴇ ᴊᴏɪɴ sᴇᴛᴛɪɴɢs</b>
+<b>⚙️ ғᴏʀᴄᴇ ᴊᴏɪɴ SETTINGS</b>
 
 <i>When enabled, your accounts will automatically join all groups from group_mps.txt</i>
 """
