@@ -1,285 +1,285 @@
 """
-new_handlers.py – Replacement & new handler logic.
-Provides: start_command, trial/referral callbacks, per-account auto-reply handlers.
-Import and register these in main.py alongside handlers.py.
+new_handlerS.py – Replacement & new handler logic.
+ProvideS: Start_command, trial/referral callbackS, per-account auto-reply handlerS.
+Import and regiSter theSe in main.py alongSide handlerS.py.
 """
 import logging
 from datetime import datetime, timezone
 from telegram import Update
-from telegram.ext import ContextTypes
-from telegram.error import BadRequest
+from telegram.eXt import ConteXtTypeS
+from telegram.error import BadRequeSt
 
-from PyToday import database as db, config
-from PyToday.middleware import ensure_user, not_banned
-from PyToday.keyboards import (
+from PyToday import databaSe aS db, config
+from PyToday.middleware import enSure_uSer, not_banned
+from PyToday.keyboardS import (
     main_menu_keyboard, get_non_premium_keyboard, referral_keyboard,
-    premium_benefits_keyboard, auto_reply_advanced_keyboard,
-    account_settings_keyboard, owner_panel_keyboard, back_to_menu_keyboard
+    premium_benefitS_keyboard, auto_reply_advanced_keyboard,
+    account_SettingS_keyboard, owner_panel_keyboard, back_to_menu_keyboard
 )
 
 logger = logging.getLogger(__name__)
 
 # ────────────────────────────────────────────────────────────────────────────
-# Helpers
+# HelperS
 # ────────────────────────────────────────────────────────────────────────────
 
 NON_PREMIUM_TEXT = (
-    "<b>⊘ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇss</b>\n\n"
-    "@{bot_username} ɪs ᴏɴʟʏ ғᴏʀ ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀs\n\n"
-    "ᴛᴏ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ, ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴏᴡɴᴇʀs:\n{owner_tags}"
+    "<b>⊘ PREMIUM ACCESS</b>\n\n"
+    "@{bot_uSername} IS ONLY ғOR PREMIUM MEMBERS\n\n"
+    "TO GET PREMIUM, CONTACT THE OWNERS:\n{owner_tagS}"
 )
 
-PREMIUM_SECTION_TEXT = """⭐️ ᴘʀᴇᴍɪᴜᴍ ━━━━━━━━━━━━━━━━━━━━━
+PREMIUM_SECTION_TEXT = """⭐️ PREMIUM ━━━━━━━━━━━━━━━━━━━━━
 
-ʙᴇɴᴇꜰɪᴛꜱ:
-• ɴᴏ ᴛᴀɢ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ
-• ᴘʀᴏꜰɪʟᴇ ꜱᴛᴀʏꜱ ᴜɴᴛᴏᴜᴄʜᴇᴅ
-• ᴜɴʟɪᴍɪᴛᴇᴅ ꜱᴀᴠᴇ ᴍꜱɢ
-• ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛ
-• ᴀʟʟ ᴀᴄᴄᴏᴜɴᴛꜱ ᴄᴏᴠᴇʀᴇᴅ
-• ɪɴꜱᴛᴀɴᴛ ᴀᴄᴛɪᴠᴀᴛɪᴏɴ
-• ᴘʀɪᴏʀɪᴛʏ ꜱᴜᴘᴘᴏʀᴛ"""
+BENEFITS:
+• NO TAG VERIFICATION
+• PROFILE STAYS UNTOUCHED
+• UNLIMITED SAVE MSG
+• UNLIMITED ACCOUNT
+• ALL ACCOUNTS COVERED
+• INSTANT ACTIVATION
+• PRIORITY SUPPORT"""
 
-WELCOME_TEXT = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
+WELCOME_TEXT = """<b>◈ TELEGRAM AD BOT ◈</b>
 
-ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ʙᴏᴛ
+HEY <code>{firSt_name}</code> WELCOME TO YOUR PERSONAL ADVERTISING BOT
 
-<blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ɪɴ ɢʀᴏᴜᴘs
-💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴛᴏ ᴅɪʀᴇᴄᴛ ᴍᴇssᴀɢᴇs
-🔗 ᴀᴜᴛᴏ ᴊᴏɪɴ ɢʀᴏᴜᴘs ᴠɪᴀ ʟɪɴᴋs
-📊 ᴅᴇᴛᴀɪʟᴇᴅ sᴛᴀᴛɪsᴛɪᴄs ᴛʀᴀᴄᴋɪɴɢ
-👤 ᴍᴜʟᴛɪᴘʟᴇ ᴀᴄᴄᴏᴜɴᴛ sᴜᴘᴘᴏʀᴛ
-⏰ sᴄʜᴇᴅᴜʟᴇᴅ ᴍᴇssᴀɢᴇ sᴇɴᴅɪɴɢ</blockquote>
-{expiry_line}
-<i>ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ:</i>"""
+<blockquote>📢 AUTOMATED ADVERTISING IN GROUPS
+💬 AUTO REPLY TO DIRECT MESSAGES
+🔗 AUTO JOIN GROUPS VIA LINKS
+📊 DETAILED STATISTICS TRACKING
+👤 MULTIPLE ACCOUNT SUPPORT
+⏰ SCHEDULED MESSAGE SENDING</blockquote>
+{eXpiry_line}
+<i>CHOOSE AN OPTION BELOW:</i>"""
 
 
-async def _build_owner_tags(bot=None) -> str:
-    owners = db.get_all_owners()
-    if not owners:
-        return "◈ @owneruserid"
-    tags = []
-    for o in owners:
-        uname = o.get("username")
-        fname = o.get("first_name")
+aSync def _build_owner_tagS(bot=None) -> Str:
+    ownerS = db.get_all_ownerS()
+    if not ownerS:
+        return "◈ @owneruSerid"
+    tagS = []
+    for o in ownerS:
+        uname = o.get("uSername")
+        fname = o.get("firSt_name")
         if not uname and bot:
-            # Try to fetch username from Telegram
+            # Try to fetch uSername from Telegram
             try:
-                chat = await bot.get_chat(o["user_id"])
-                uname = chat.username
-                fname = chat.first_name
-                # Cache it in DB for next time
+                chat = await bot.get_chat(o["uSer_id"])
+                uname = chat.uSername
+                fname = chat.firSt_name
+                # Cache it in DB for neXt time
                 if uname or fname:
-                    db.create_or_update_user(o["user_id"], first_name=fname, username=uname)
-            except Exception:
-                pass
+                    db.create_or_update_uSer(o["uSer_id"], firSt_name=fname, uSername=uname)
+            eXcept EXception:
+                paSS
                 
-        # Fallback to OWNER_USERNAME from env if this is the primary owner
-        if not uname and config.INITIAL_OWNER_IDS and o["user_id"] == config.INITIAL_OWNER_IDS[0]:
+        # Fallback to OWNER_USERNAME from env if thiS iS the primary owner
+        if not uname and config.INITIAL_OWNER_IDS and o["uSer_id"] == config.INITIAL_OWNER_IDS[0]:
             if config.OWNER_USERNAME:
                 uname = config.OWNER_USERNAME.replace("@", "")
                 
         if uname:
-            tags.append(f"◈ @{uname}")
+            tagS.append(f"◈ @{uname}")
         elif fname:
-            tags.append(f"◈ <a href='tg://user?id={o['user_id']}'>{fname}</a>")
-        else:
-            tags.append(f"◈ <a href='tg://user?id={o['user_id']}'>Admin (ID: {o['user_id']})</a>")
-    return " ".join(tags)
+            tagS.append(f"◈ <a href='tg://uSer?id={o['uSer_id']}'>{fname}</a>")
+        elSe:
+            tagS.append(f"◈ <a href='tg://uSer?id={o['uSer_id']}'>Admin (ID: {o['uSer_id']})</a>")
+    return " ".join(tagS)
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# /start  – entry point with referral tracking
+# /Start  – entry point with referral tracking
 # ────────────────────────────────────────────────────────────────────────────
 
 @not_banned
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
+aSync def Start_command(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
+    uSer = update.effective_uSer
 
-    # ── Check if this user is brand-new BEFORE we create them
-    is_new_user = db.get_user(user.id) is None
+    # ── Check if thiS uSer iS brand-new BEFORE we create them
+    iS_new_uSer = db.get_uSer(uSer.id) iS None
 
-    # Always create/update the user record
-    db.create_or_update_user(user.id, user.first_name, user.username)
+    # AlwayS create/update the uSer record
+    db.create_or_update_uSer(uSer.id, uSer.firSt_name, uSer.uSername)
 
-    # ── Referral tracking — ONLY works for first-time users
+    # ── Referral tracking — ONLY workS for firSt-time uSerS
     referral_notice = None
-    if context.args and is_new_user:
+    if conteXt.argS and iS_new_uSer:
         try:
-            arg = context.args[0]
-            # Support both plain ID "12345" and prefixed "ref_12345"
-            referrer_id = int(arg.replace("ref_", "").strip())
-            if referrer_id != user.id:
-                recorded, reward_info = db.record_referral(referrer_id, user.id)
+            arg = conteXt.argS[0]
+            # Support both plain ID "12345" and prefiXed "ref_12345"
+            referrer_id = int(arg.replace("ref_", "").Strip())
+            if referrer_id != uSer.id:
+                recorded, reward_info = db.record_referral(referrer_id, uSer.id)
                 if recorded:
                     # Notify the referrer
                     try:
                         if reward_info:
-                            # They just hit the milestone (e.g. 10 invites)
-                            days = reward_info["days"]
-                            invites = reward_info["invites"]
-                            expiry_str = reward_info["expiry"].strftime("%Y-%m-%d %H:%M UTC") if reward_info.get("expiry") else "Unknown"
+                            # They juSt hit the mileStone (e.g. 10 inviteS)
+                            dayS = reward_info["dayS"]
+                            inviteS = reward_info["inviteS"]
+                            eXpiry_Str = reward_info["eXpiry"].Strftime("%Y-%m-%d %H:%M UTC") if reward_info.get("eXpiry") elSe "Unknown"
                             
-                            await context.bot.send_message(
+                            await conteXt.bot.Send_meSSage(
                                 referrer_id,
-                                f"🎉 <b>{invites} Invites Consumed!</b>\n\n"
-                                f"Your {days} Days Premium has been activated.\n"
-                                f"⏳ <b>Expires on:</b> {expiry_str}",
-                                parse_mode="HTML",
+                                f"🎉 <b>{inviteS} InviteS ConSumed!</b>\n\n"
+                                f"Your {dayS} DayS Premium haS been activated.\n"
+                                f"⏳ <b>EXpireS on:</b> {eXpiry_Str}",
+                                parSe_mode="HTML",
                             )
-                        else:
+                        elSe:
                             # Normal referral, no reward yet
                             count = db.get_referral_count(referrer_id)
                             remaining = config.REFERRALS_REQUIRED - (count % config.REFERRALS_REQUIRED)
-                            await context.bot.send_message(
+                            await conteXt.bot.Send_meSSage(
                                 referrer_id,
                                 f"🎉 <b>New Referral!</b>\n\n"
-                                f"Someone joined using your link.\n"
-                                f"You need <b>{remaining}</b> more referral(s) for +14 days Premium!",
-                                parse_mode="HTML",
+                                f"Someone joined uSing your link.\n"
+                                f"You need <b>{remaining}</b> more referral(S) for +14 dayS Premium!",
+                                parSe_mode="HTML",
                             )
-                    except Exception:
-                        pass
-                    # Build notice for the new user
+                    eXcept EXception:
+                        paSS
+                    # Build notice for the new uSer
                     try:
-                        referrer_chat = await context.bot.get_chat(referrer_id)
-                        ref_name = f"@{referrer_chat.username}" if referrer_chat.username else f"<a href='tg://user?id={referrer_id}'>User</a>"
-                    except Exception:
+                        referrer_chat = await conteXt.bot.get_chat(referrer_id)
+                        ref_name = f"@{referrer_chat.uSername}" if referrer_chat.uSername elSe f"<a href='tg://uSer?id={referrer_id}'>USer</a>"
+                    eXcept EXception:
                         ref_name = f"<code>{referrer_id}</code>"
                     referral_notice = (
                         f"👥 <b>You were referred by {ref_name}!</b>\n"
-                        f"Your referral has been recorded. ✅"
+                        f"Your referral haS been recorded. ✅"
                     )
-        except (ValueError, TypeError):
-            pass
+        eXcept (ValueError, TypeError):
+            paSS
 
-    # Show referral notice first if it exists
+    # Show referral notice firSt if it eXiStS
     if referral_notice:
         try:
-            await update.message.reply_text(referral_notice, parse_mode="HTML")
-        except Exception:
-            pass
+            await update.meSSage.reply_teXt(referral_notice, parSe_mode="HTML")
+        eXcept EXception:
+            paSS
 
-    role = db.get_user_role(user.id)
+    role = db.get_uSer_role(uSer.id)
 
-    # ── Banned check is handled by @not_banned decorator
+    # ── Banned check iS handled by @not_banned decorator
 
-    # ── Non-premium / regular user → show upgrade screen
-    if role == "user":
-        ref_count = db.get_referral_count(user.id)
-        owner_tags = await _build_owner_tags(context.bot)
-        text = NON_PREMIUM_TEXT.format(
-            bot_username=config.BOT_USERNAME,
-            owner_tags=owner_tags
+    # ── Non-premium / regular uSer → Show upgrade Screen
+    if role == "uSer":
+        ref_count = db.get_referral_count(uSer.id)
+        owner_tagS = await _build_owner_tagS(conteXt.bot)
+        teXt = NON_PREMIUM_TEXT.format(
+            bot_uSername=config.BOT_USERNAME,
+            owner_tagS=owner_tagS
         )
-        kb = get_non_premium_keyboard(user.id, referral_count=ref_count,
-                                      referrals_required=config.REFERRALS_REQUIRED,
-                                      trial_used=db.has_used_trial(user.id))
+        kb = get_non_premium_keyboard(uSer.id, referral_count=ref_count,
+                                      referralS_required=config.REFERRALS_REQUIRED,
+                                      trial_uSed=db.haS_uSed_trial(uSer.id))
         try:
-            await update.message.reply_photo(
+            await update.meSSage.reply_photo(
                 photo=config.START_IMAGE_URL,
-                caption=text,
-                parse_mode="HTML",
+                caption=teXt,
+                parSe_mode="HTML",
                 reply_markup=kb,
             )
-        except Exception:
-            await update.message.reply_text(text, parse_mode="HTML", reply_markup=kb)
+        eXcept EXception:
+            await update.meSSage.reply_teXt(teXt, parSe_mode="HTML", reply_markup=kb)
         return
 
-    # ── Owner, Premium, Trial → main dashboard
-    # Compute live expiry line for display
-    expiry_line = ""
+    # ── Owner, Premium, Trial → main daShboard
+    # Compute live eXpiry line for diSplay
+    eXpiry_line = ""
     if role == "owner":
-        expiry_line = "\n👑 <b>Owner</b> - lifetime access\n"
+        eXpiry_line = "\n👑 <b>Owner</b> - lifetime acceSS\n"
     elif role in ("premium", "trial"):
-        expiry = db.get_premium_expiry(user.id)
-        if expiry:
-            expiry_str = expiry.strftime("%d %b %Y, %H:%M UTC")
-            icon = "🎁" if role == "trial" else "💎"
-            label = "Trial" if role == "trial" else "Premium"
-            expiry_line = f"\n{icon} <b>{label} active</b> - expires <b>{expiry_str}</b>\n"
-        else:
-            expiry_line = "\n⚠️ <i>Expiry date missing - contact support</i>\n"
+        eXpiry = db.get_premium_eXpiry(uSer.id)
+        if eXpiry:
+            eXpiry_Str = eXpiry.Strftime("%d %b %Y, %H:%M UTC")
+            icon = "🎁" if role == "trial" elSe "💎"
+            label = "Trial" if role == "trial" elSe "Premium"
+            eXpiry_line = f"\n{icon} <b>{label} active</b> - eXpireS <b>{eXpiry_Str}</b>\n"
+        elSe:
+            eXpiry_line = "\n⚠️ <i>EXpiry date miSSing - contact Support</i>\n"
 
-    welcome = WELCOME_TEXT.format(first_name=user.first_name, expiry_line=expiry_line)
+    welcome = WELCOME_TEXT.format(firSt_name=uSer.firSt_name, eXpiry_line=eXpiry_line)
     kb = main_menu_keyboard()
 
-    # Add owner panel shortcut for owners
-    if role == "owner" or db.is_owner(user.id):
+    # Add owner panel Shortcut for ownerS
+    if role == "owner" or db.iS_owner(uSer.id):
         from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-        existing_kb = list(main_menu_keyboard().inline_keyboard)
-        owner_row = [[InlineKeyboardButton("👑 ᴏᴡɴᴇʀ ᴘᴀɴᴇʟ", callback_data="owner_panel")]]
-        kb = InlineKeyboardMarkup(list(owner_row) + existing_kb)
+        eXiSting_kb = liSt(main_menu_keyboard().inline_keyboard)
+        owner_row = [[InlineKeyboardButton("👑 OWNER PANEL", callback_data="owner_panel")]]
+        kb = InlineKeyboardMarkup(liSt(owner_row) + eXiSting_kb)
 
 
     try:
-        await update.message.reply_photo(
+        await update.meSSage.reply_photo(
             photo=config.START_IMAGE_URL,
             caption=welcome,
-            parse_mode="HTML",
+            parSe_mode="HTML",
             reply_markup=kb,
         )
-    except Exception:
-        await update.message.reply_text(welcome, parse_mode="HTML", reply_markup=kb)
+    eXcept EXception:
+        await update.meSSage.reply_teXt(welcome, parSe_mode="HTML", reply_markup=kb)
 
 
 # ────────────────────────────────────────────────────────────────────────────
 # Callback: activate_trial
 # ────────────────────────────────────────────────────────────────────────────
 
-async def cb_activate_trial(query, user_id: int, context):
-    if db.has_used_trial(user_id):
-        await query.answer(
-            "🎁 You have already used your free trial.\nUpgrade to Premium to continue.",
-            show_alert=True,
+aSync def cb_activate_trial(query, uSer_id: int, conteXt):
+    if db.haS_uSed_trial(uSer_id):
+        await query.anSwer(
+            "🎁 You have already uSed your free trial.\nUpgrade to Premium to continue.",
+            Show_alert=True,
         )
         return
 
-    db.activate_trial(user_id)
-    expiry = db.get_premium_expiry(user_id)
-    expiry_str = expiry.strftime("%d %b %Y") if expiry else f"{config.TRIAL_DAYS} days from now"
+    db.activate_trial(uSer_id)
+    eXpiry = db.get_premium_eXpiry(uSer_id)
+    eXpiry_Str = eXpiry.Strftime("%d %b %Y") if eXpiry elSe f"{config.TRIAL_DAYS} dayS from now"
 
-    text = (
+    teXt = (
         "<b>🎁 Trial Activated!</b>\n\n"
-        f"✅ You now have <b>{config.TRIAL_DAYS} days</b> of free access.\n"
-        f"⏳ Expires: <b>{expiry_str}</b>\n\n"
-        "<b>Trial Limits:</b>\n"
-        "• Max 1 Telegram account\n"
+        f"✅ You now have <b>{config.TRIAL_DAYS} dayS</b> of free acceSS.\n"
+        f"⏳ EXpireS: <b>{eXpiry_Str}</b>\n\n"
+        "<b>Trial LimitS:</b>\n"
+        "• MaX 1 Telegram account\n"
         "• Profile name & bio will be watermarked\n\n"
-        "Upgrade to 💎 Premium to remove all restrictions!"
+        "Upgrade to 💎 Premium to remove all reStrictionS!"
     )
-    from PyToday.keyboards import premium_benefits_keyboard
+    from PyToday.keyboardS import premium_benefitS_keyboard
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
-                                         reply_markup=premium_benefits_keyboard())
-    except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
-                                      reply_markup=premium_benefits_keyboard())
+        await query.edit_meSSage_caption(caption=teXt, parSe_mode="HTML",
+                                         reply_markup=premium_benefitS_keyboard())
+    eXcept EXception:
+        await query.edit_meSSage_teXt(teXt, parSe_mode="HTML",
+                                      reply_markup=premium_benefitS_keyboard())
 
 
 # ────────────────────────────────────────────────────────────────────────────
 # Callback: buy_premium
 # ────────────────────────────────────────────────────────────────────────────
 
-async def cb_buy_premium(query, user_id: int, context):
-    owners = db.get_all_owners()
-    text = (
-        f"<b>⭐️ ᴘʀᴇᴍɪᴜᴍ</b>\n\n"
+aSync def cb_buy_premium(query, uSer_id: int, conteXt):
+    ownerS = db.get_all_ownerS()
+    teXt = (
+        f"<b>⭐️ PREMIUM</b>\n\n"
         f"{PREMIUM_SECTION_TEXT}\n\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴛᴏ ᴘᴜʀᴄʜᴀsᴇ, ᴄᴏɴᴛᴀᴄᴛ ᴀɴ ᴏᴡɴᴇʀ:\n"
+        f"TO PURCHASE, CONTACT AN OWNER:\n"
     )
-    for o in owners:
-        uname = o.get("username")
-        uid = o["user_id"]
-        link = f'<a href="tg://user?id={uid}">@{uname or "Owner"}</a>'
-        text += f"◈ {link}\n"
+    for o in ownerS:
+        uname = o.get("uSername")
+        uid = o["uSer_id"]
+        link = f'<a href="tg://uSer?id={uid}">@{uname or "Owner"}</a>'
+        teXt += f"◈ {link}\n"
 
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
+        await query.edit_meSSage_caption(caption=teXt, parSe_mode="HTML",
                                          reply_markup=back_to_menu_keyboard())
-    except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
+    eXcept EXception:
+        await query.edit_meSSage_teXt(teXt, parSe_mode="HTML",
                                       reply_markup=back_to_menu_keyboard())
 
 
@@ -287,31 +287,31 @@ async def cb_buy_premium(query, user_id: int, context):
 # Callback: referral_info
 # ────────────────────────────────────────────────────────────────────────────
 
-async def cb_referral_info(query, user_id: int, context):
-    count = db.get_referral_count(user_id)
-    next_milestone = config.REFERRALS_REQUIRED - (count % config.REFERRALS_REQUIRED)
-    progress_bar = "🟩" * min(count % config.REFERRALS_REQUIRED, 10) + "⬜" * max(0, 10 - (count % config.REFERRALS_REQUIRED))
+aSync def cb_referral_info(query, uSer_id: int, conteXt):
+    count = db.get_referral_count(uSer_id)
+    neXt_mileStone = config.REFERRALS_REQUIRED - (count % config.REFERRALS_REQUIRED)
+    progreSS_bar = "🟩" * min(count % config.REFERRALS_REQUIRED, 10) + "⬜" * maX(0, 10 - (count % config.REFERRALS_REQUIRED))
 
-    bot_info = await context.bot.get_me()
-    invite_link = f"https://t.me/{bot_info.username}?start={user_id}"
+    bot_info = await conteXt.bot.get_me()
+    invite_link = f"httpS://t.me/{bot_info.uSername}?Start={uSer_id}"
 
-    text = (
-        f"<b>🔥 ʀᴇғᴇʀʀᴀʟ ᴘʀᴏɢʀᴀᴍ</b>\n\n"
-        f"Invite <b>{config.REFERRALS_REQUIRED} friends</b> to earn <b>+14 days Premium</b>\n\n"
-        f"<b>Your Progress:</b>\n"
-        f"{progress_bar}\n"
-        f"<code>{count % config.REFERRALS_REQUIRED}/{config.REFERRALS_REQUIRED}</code> referrals\n"
-        f"Total Referrals: <b>{count}</b>\n"
-        f"Next reward in: <b>{next_milestone}</b> more invite(s)\n\n"
+    teXt = (
+        f"<b>🔥 REғERRAL PROGRAM</b>\n\n"
+        f"Invite <b>{config.REFERRALS_REQUIRED} friendS</b> to earn <b>+14 dayS Premium</b>\n\n"
+        f"<b>Your ProgreSS:</b>\n"
+        f"{progreSS_bar}\n"
+        f"<code>{count % config.REFERRALS_REQUIRED}/{config.REFERRALS_REQUIRED}</code> referralS\n"
+        f"Total ReferralS: <b>{count}</b>\n"
+        f"NeXt reward in: <b>{neXt_mileStone}</b> more invite(S)\n\n"
         f"<b>Your Invite Link:</b>\n"
         f"<code>{invite_link}</code>"
     )
 
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
+        await query.edit_meSSage_caption(caption=teXt, parSe_mode="HTML",
                                          reply_markup=referral_keyboard(invite_link))
-    except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
+    eXcept EXception:
+        await query.edit_meSSage_teXt(teXt, parSe_mode="HTML",
                                       reply_markup=referral_keyboard(invite_link))
 
 
@@ -319,199 +319,199 @@ async def cb_referral_info(query, user_id: int, context):
 # Callback: owner_panel
 # ────────────────────────────────────────────────────────────────────────────
 
-async def cb_owner_panel(query, user_id: int):
-    if not db.is_owner(user_id):
-        await query.answer("👑 Owners only.", show_alert=True)
+aSync def cb_owner_panel(query, uSer_id: int):
+    if not db.iS_owner(uSer_id):
+        await query.anSwer("👑 OwnerS only.", Show_alert=True)
         return
 
-    stats = db.get_global_stats()
-    text = (
-        f"<b>👑 ᴏᴡɴᴇʀ ᴘᴀɴᴇʟ</b>\n\n"
-        f"👥 Users: <b>{stats['total_users']}</b>\n"
-        f"💎 Premium: <b>{stats['premium']}</b>\n"
-        f"🎁 Trial: <b>{stats['trial']}</b>\n"
-        f"🚫 Banned: <b>{stats['banned']}</b>\n\n"
-        f"<i>Use commands or buttons below:</i>"
+    StatS = db.get_global_StatS()
+    teXt = (
+        f"<b>👑 OWNER PANEL</b>\n\n"
+        f"👥 USerS: <b>{StatS['total_uSerS']}</b>\n"
+        f"💎 Premium: <b>{StatS['premium']}</b>\n"
+        f"🎁 Trial: <b>{StatS['trial']}</b>\n"
+        f"🚫 Banned: <b>{StatS['banned']}</b>\n\n"
+        f"<i>USe commandS or buttonS below:</i>"
     )
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
+        await query.edit_meSSage_caption(caption=teXt, parSe_mode="HTML",
                                          reply_markup=owner_panel_keyboard())
-    except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
+    eXcept EXception:
+        await query.edit_meSSage_teXt(teXt, parSe_mode="HTML",
                                       reply_markup=owner_panel_keyboard())
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# Per-Account Settings Callbacks
+# Per-Account SettingS CallbackS
 # ────────────────────────────────────────────────────────────────────────────
 
-async def cb_account_settings(query, account_id: str, user_id: int):
+aSync def cb_account_SettingS(query, account_id: Str, uSer_id: int):
     account = db.get_account(account_id)
-    if not account or account.get("user_id") != user_id:
-        await query.answer("❌ Account not found.", show_alert=True)
+    if not account or account.get("uSer_id") != uSer_id:
+        await query.anSwer("❌ Account not found.", Show_alert=True)
         return
 
-    settings = db.get_account_settings(account_id)
-    name = account.get("account_first_name") or account.get("phone", "Account")
-    text = (
-        f"<b>⚙️ ᴀᴄᴄᴏᴜɴᴛ sᴇᴛᴛɪɴɢs</b>\n"
+    SettingS = db.get_account_SettingS(account_id)
+    name = account.get("account_firSt_name") or account.get("phone", "Account")
+    teXt = (
+        f"<b>⚙️ ACCOUNT SETTINGS</b>\n"
         f"<code>{name}</code>\n\n"
-        f"Configure settings for this account individually.\n"
-        f"Changes apply to THIS account only."
+        f"Configure SettingS for thiS account individually.\n"
+        f"ChangeS apply to THIS account only."
     )
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
-                                         reply_markup=account_settings_keyboard(account_id, settings))
-    except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
-                                      reply_markup=account_settings_keyboard(account_id, settings))
+        await query.edit_meSSage_caption(caption=teXt, parSe_mode="HTML",
+                                         reply_markup=account_SettingS_keyboard(account_id, SettingS))
+    eXcept EXception:
+        await query.edit_meSSage_teXt(teXt, parSe_mode="HTML",
+                                      reply_markup=account_SettingS_keyboard(account_id, SettingS))
 
 
-async def cb_accset_sleep(query, account_id: str, user_id: int):
-    settings = db.get_account_settings(account_id)
-    current = settings.get("auto_sleep", False)
-    db.update_account_settings(account_id, auto_sleep=not current)
-    await cb_account_settings(query, account_id, user_id)
+aSync def cb_accSet_Sleep(query, account_id: Str, uSer_id: int):
+    SettingS = db.get_account_SettingS(account_id)
+    current = SettingS.get("auto_Sleep", FalSe)
+    db.update_account_SettingS(account_id, auto_Sleep=not current)
+    await cb_account_SettingS(query, account_id, uSer_id)
 
 
-async def cb_accset_fwd(query, account_id: str, user_id: int):
-    settings = db.get_account_settings(account_id)
-    current = settings.get("use_forward_mode", False)
-    db.update_account_settings(account_id, use_forward_mode=not current)
-    await cb_account_settings(query, account_id, user_id)
+aSync def cb_accSet_fwd(query, account_id: Str, uSer_id: int):
+    SettingS = db.get_account_SettingS(account_id)
+    current = SettingS.get("uSe_forward_mode", FalSe)
+    db.update_account_SettingS(account_id, uSe_forward_mode=not current)
+    await cb_account_SettingS(query, account_id, uSer_id)
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# Per-Account Auto-Reply Callbacks
+# Per-Account Auto-Reply CallbackS
 # ────────────────────────────────────────────────────────────────────────────
 
-async def cb_acc_auto_reply(query, account_id: str, user_id: int):
+aSync def cb_acc_auto_reply(query, account_id: Str, uSer_id: int):
     account = db.get_account(account_id)
-    if not account or account.get("user_id") != user_id:
-        await query.answer("❌ Account not found.", show_alert=True)
+    if not account or account.get("uSer_id") != uSer_id:
+        await query.anSwer("❌ Account not found.", Show_alert=True)
         return
 
-    settings = db.get_account_settings(account_id)
-    enabled = settings.get("auto_reply_enabled", False) if settings else False
-    seq_replies = db.get_sequential_replies(account_id)
-    kw_replies = db.get_keyword_replies(account_id)
+    SettingS = db.get_account_SettingS(account_id)
+    enabled = SettingS.get("auto_reply_enabled", FalSe) if SettingS elSe FalSe
+    Seq_replieS = db.get_Sequential_replieS(account_id)
+    kw_replieS = db.get_keyword_replieS(account_id)
 
-    text = (
-        f"<b>⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ</b>\n\n"
-        f"Status: {'🟢 ON' if enabled else '🔴 OFF'}\n"
-        f"Sequential Replies: <b>{len(seq_replies)}</b>\n"
-        f"Keyword Replies: <b>{len(kw_replies)}</b>\n\n"
-        f"<i>Sequential replies fire in order for each DM.\n"
-        f"Keyword replies trigger on matching words.</i>"
+    teXt = (
+        f"<b>⟐ AUTO REPLY</b>\n\n"
+        f"StatuS: {'🟢 ON' if enabled elSe '🔴 OFF'}\n"
+        f"Sequential ReplieS: <b>{len(Seq_replieS)}</b>\n"
+        f"Keyword ReplieS: <b>{len(kw_replieS)}</b>\n\n"
+        f"<i>Sequential replieS fire in order for each DM.\n"
+        f"Keyword replieS trigger on matching wordS.</i>"
     )
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
+        await query.edit_meSSage_caption(caption=teXt, parSe_mode="HTML",
                                          reply_markup=auto_reply_advanced_keyboard(enabled, account_id))
-    except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
+    eXcept EXception:
+        await query.edit_meSSage_teXt(teXt, parSe_mode="HTML",
                                       reply_markup=auto_reply_advanced_keyboard(enabled, account_id))
 
 
-async def cb_toggle_auto_reply(query, account_id: str, user_id: int):
-    settings = db.get_account_settings(account_id)
-    current = settings.get("auto_reply_enabled", False) if settings else False
-    db.update_account_settings(account_id, auto_reply_enabled=not current)
-    await cb_acc_auto_reply(query, account_id, user_id)
+aSync def cb_toggle_auto_reply(query, account_id: Str, uSer_id: int):
+    SettingS = db.get_account_SettingS(account_id)
+    current = SettingS.get("auto_reply_enabled", FalSe) if SettingS elSe FalSe
+    db.update_account_SettingS(account_id, auto_reply_enabled=not current)
+    await cb_acc_auto_reply(query, account_id, uSer_id)
 
 
-async def cb_view_all_replies(query, account_id: str):
-    seq = db.get_sequential_replies(account_id)
-    kw = db.get_keyword_replies(account_id)
+aSync def cb_view_all_replieS(query, account_id: Str):
+    Seq = db.get_Sequential_replieS(account_id)
+    kw = db.get_keyword_replieS(account_id)
 
-    lines = ["<b>📋 ᴀᴜᴛᴏ ʀᴇᴘʟɪᴇs</b>\n"]
+    lineS = ["<b>📋 AUTO REPLIES</b>\n"]
 
-    if seq:
-        lines.append("<b>Sequential:</b>")
-        for i, r in enumerate(seq, 1):
-            preview = (r.get("message_text") or "[media]")[:50]
-            lines.append(f"  {i}. {preview}")
-    else:
-        lines.append("<b>Sequential:</b> None")
+    if Seq:
+        lineS.append("<b>Sequential:</b>")
+        for i, r in enumerate(Seq, 1):
+            preview = (r.get("meSSage_teXt") or "[media]")[:50]
+            lineS.append(f"  {i}. {preview}")
+    elSe:
+        lineS.append("<b>Sequential:</b> None")
 
-    lines.append("")
+    lineS.append("")
     if kw:
-        lines.append("<b>Keyword:</b>")
+        lineS.append("<b>Keyword:</b>")
         for r in kw:
             kword = r.get("trigger_keyword", "?")
-            preview = (r.get("message_text") or "[media]")[:40]
-            lines.append(f"  🔑 <code>{kword}</code> → {preview}")
-    else:
-        lines.append("<b>Keyword:</b> None")
+            preview = (r.get("meSSage_teXt") or "[media]")[:40]
+            lineS.append(f"  🔑 <code>{kword}</code> → {preview}")
+    elSe:
+        lineS.append("<b>Keyword:</b> None")
 
-    text = "\n".join(lines)
-    from PyToday.keyboards import back_to_auto_reply_keyboard
+    teXt = "\n".join(lineS)
+    from PyToday.keyboardS import back_to_auto_reply_keyboard
     try:
-        await query.edit_message_text(text, parse_mode="HTML",
+        await query.edit_meSSage_teXt(teXt, parSe_mode="HTML",
                                       reply_markup=back_to_auto_reply_keyboard())
-    except Exception:
-        pass
+    eXcept EXception:
+        paSS
 
 
-async def cb_clear_replies(query, account_id: str, user_id: int):
-    db.clear_replies(account_id)
-    await query.answer("✅ All replies cleared.", show_alert=False)
-    await cb_acc_auto_reply(query, account_id, user_id)
+aSync def cb_clear_replieS(query, account_id: Str, uSer_id: int):
+    db.clear_replieS(account_id)
+    await query.anSwer("✅ All replieS cleared.", Show_alert=FalSe)
+    await cb_acc_auto_reply(query, account_id, uSer_id)
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# Owner Panel Stats/Broadcast shortcuts via inline keyboard
+# Owner Panel StatS/BroadcaSt ShortcutS via inline keyboard
 # ────────────────────────────────────────────────────────────────────────────
 
-async def cb_owner_stats(query, user_id: int):
-    if not db.is_owner(user_id):
-        await query.answer("👑 Owners only.", show_alert=True)
+aSync def cb_owner_StatS(query, uSer_id: int):
+    if not db.iS_owner(uSer_id):
+        await query.anSwer("👑 OwnerS only.", Show_alert=True)
         return
-    stats = db.get_global_stats()
-    owners = db.get_all_owners()
-    owner_list = "\n".join([
-        f"  ◈ @{o.get('username') or 'N/A'} (<code>{o['user_id']}</code>)"
-        for o in owners
+    StatS = db.get_global_StatS()
+    ownerS = db.get_all_ownerS()
+    owner_liSt = "\n".join([
+        f"  ◈ @{o.get('uSername') or 'N/A'} (<code>{o['uSer_id']}</code>)"
+        for o in ownerS
     ]) or "  None"
-    text = (
-        f"<b>▤ ʙᴏᴛ sᴛᴀᴛɪsᴛɪᴄs</b>\n\n"
-        f"👥 Total: <b>{stats['total_users']}</b>\n"
-        f"👑 Owners: <b>{stats['owners']}</b>\n"
-        f"💎 Premium: <b>{stats['premium']}</b>\n"
-        f"🎁 Trial: <b>{stats['trial']}</b>\n"
-        f"👤 Regular: <b>{stats['regular']}</b>\n"
-        f"🚫 Banned: <b>{stats['banned']}</b>\n\n"
-        f"<b>Owners:</b>\n{owner_list}"
+    teXt = (
+        f"<b>▤ BOT STATISTICS</b>\n\n"
+        f"👥 Total: <b>{StatS['total_uSerS']}</b>\n"
+        f"👑 OwnerS: <b>{StatS['ownerS']}</b>\n"
+        f"💎 Premium: <b>{StatS['premium']}</b>\n"
+        f"🎁 Trial: <b>{StatS['trial']}</b>\n"
+        f"👤 Regular: <b>{StatS['regular']}</b>\n"
+        f"🚫 Banned: <b>{StatS['banned']}</b>\n\n"
+        f"<b>OwnerS:</b>\n{owner_liSt}"
     )
     try:
-        await query.edit_message_text(text, parse_mode="HTML", reply_markup=owner_panel_keyboard())
-    except Exception:
-        pass
+        await query.edit_meSSage_teXt(teXt, parSe_mode="HTML", reply_markup=owner_panel_keyboard())
+    eXcept EXception:
+        paSS
 
 
-async def cb_owner_addprem(query, user_id: int):
-    if not db.is_owner(user_id):
-        await query.answer("👑 Owners only.", show_alert=True)
+aSync def cb_owner_addprem(query, uSer_id: int):
+    if not db.iS_owner(uSer_id):
+        await query.anSwer("👑 OwnerS only.", Show_alert=True)
         return
-    await query.answer()
+    await query.anSwer()
     try:
-        await query.message.reply_text(
-            "💎 <b>Add Premium</b>\n\nSend: <code>/addprem user_id days</code>\n"
-            "Example: <code>/addprem 123456789 30</code>",
-            parse_mode="HTML"
+        await query.meSSage.reply_teXt(
+            "💎 <b>Add Premium</b>\n\nSend: <code>/addprem uSer_id dayS</code>\n"
+            "EXample: <code>/addprem 123456789 30</code>",
+            parSe_mode="HTML"
         )
-    except Exception:
-        pass
+    eXcept EXception:
+        paSS
 
 
-async def cb_owner_ban(query, user_id: int):
-    if not db.is_owner(user_id):
-        await query.answer("👑 Owners only.", show_alert=True)
+aSync def cb_owner_ban(query, uSer_id: int):
+    if not db.iS_owner(uSer_id):
+        await query.anSwer("👑 OwnerS only.", Show_alert=True)
         return
-    await query.answer()
+    await query.anSwer()
     try:
-        await query.message.reply_text(
-            "🚫 <b>Ban User</b>\n\nSend: <code>/ban user_id</code>",
-            parse_mode="HTML"
+        await query.meSSage.reply_teXt(
+            "🚫 <b>Ban USer</b>\n\nSend: <code>/ban uSer_id</code>",
+            parSe_mode="HTML"
         )
-    except Exception:
-        pass
+    eXcept EXception:
+        paSS
