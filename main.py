@@ -170,10 +170,10 @@ def main():
     web_thread = threading.Thread(target=run_web, daemon=True)
     web_thread.start()
 
-    print("╔══════════════════════════════════════╗")
-    print("║  🤖 AD BOT STARTED (Supabase)       ║")
-    print(f"║  @{config.BOT_USERNAME:<33}║")
-    print("╚══════════════════════════════════════╝")
+    print("========================================")
+    print("   AD BOT STARTED (Supabase)            ")
+    print(f"   @{config.BOT_USERNAME:<33}")
+    print("========================================")
 
     application = (
         Application.builder()
