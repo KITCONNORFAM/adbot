@@ -1,178 +1,178 @@
 """
-middleware.py - Role-baSed acceSS control decoratorS / helperS.
+middleware.py - Role-based access control decorators / helpers.
 
-USage in handlerS:
+Usage in handlers:
     from PyToday.middleware import owner_only, premium_only, not_banned
 
     @owner_only
-    aSync def my_handler(update, conteXt): ...
+    async def my_handler(update, context): ...
 """
 import logging
-from functoolS import wrapS
+from functools import wraps
 from telegram import Update
-from telegram.eXt import ConteXtTypeS
-from PyToday import databaSe aS db
+from telegram.ext import ContextTypes
+from PyToday import database as db
 
 logger = logging.getLogger(__name__)
 
 # ────────────────────────────────────────────────────────────────────────────
-# Core: enSure uSer record eXiStS
+# Core: ensure user record exists
 # ────────────────────────────────────────────────────────────────────────────
 
-aSync def enSure_uSer(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE):
-    """UpSert uSer record in DB. Call at the top of every handler."""
-    uSer = update.effective_uSer
-    if uSer:
-        db.create_or_update_uSer(uSer.id, uSer.firSt_name, uSer.uSername)
+async def ensure_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Upsert user record in DB. Call at the top of every handler."""
+    user = update.effective_user
+    if user:
+        db.create_or_update_user(user.id, user.first_name, user.username)
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# Check helperS (inline, non-decorator)
+# Check helpers (inline, non-decorator)
 # ────────────────────────────────────────────────────────────────────────────
 
-def check_banned(uSer_id: int) -> bool:
-    return db.iS_banned(uSer_id)
+def check_banned(user_id: int) -> bool:
+    return db.is_banned(user_id)
 
 
-def check_owner(uSer_id: int) -> bool:
-    return db.iS_owner(uSer_id)
+def check_owner(user_id: int) -> bool:
+    return db.is_owner(user_id)
 
 
-def check_premium_or_above(uSer_id: int) -> bool:
-    return db.iS_premium_or_above(uSer_id)
+def check_premium_or_above(user_id: int) -> bool:
+    return db.is_premium_or_above(user_id)
 
 
-def check_acceSS(uSer_id: int) -> bool:
-    """True if uSer haS any elevated acceSS (owner, premium, or trial)."""
-    role = db.get_uSer_role(uSer_id)
+def check_access(user_id: int) -> bool:
+    """True if user has any elevated access (owner, premium, or trial)."""
+    role = db.get_user_role(user_id)
     return role in ("owner", "premium", "trial")
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# DecoratorS
+# Decorators
 # ────────────────────────────────────────────────────────────────────────────
 
 def not_banned(func):
-    """RejectS banned uSerS before the handler fireS."""
-    @wrapS(func)
-    aSync def wrapper(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE, *argS, **kwargS):
-        uSer = update.effective_uSer
-        if not uSer:
+    """Rejects banned users before the handler fires."""
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        user = update.effective_user
+        if not user:
             return
-        await enSure_uSer(update, conteXt)
-        if db.iS_banned(uSer.id):
-            if update.meSSage:
-                await update.meSSage.reply_teXt("🚫 You are banned from uSing thiS bot.")
+        await ensure_user(update, context)
+        if db.is_banned(user.id):
+            if update.message:
+                await update.message.reply_text("🚫 You are banned from using this bot.")
             elif update.callback_query:
-                await update.callback_query.anSwer("🚫 You are banned.", Show_alert=True)
+                await update.callback_query.answer("🚫 You are banned.", show_alert=True)
             return
-        return await func(update, conteXt, *argS, **kwargS)
+        return await func(update, context, *args, **kwargs)
     return wrapper
 
 
 def owner_only(func):
-    """ReStrictS handler to OwnerS only."""
-    @wrapS(func)
-    aSync def wrapper(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE, *argS, **kwargS):
-        uSer = update.effective_uSer
-        if not uSer:
+    """Restricts handler to Owners only."""
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        user = update.effective_user
+        if not user:
             return
-        await enSure_uSer(update, conteXt)
-        if db.iS_banned(uSer.id):
-            if update.meSSage:
-                await update.meSSage.reply_teXt("🚫 You are banned.")
+        await ensure_user(update, context)
+        if db.is_banned(user.id):
+            if update.message:
+                await update.message.reply_text("🚫 You are banned.")
             return
-        if not db.iS_owner(uSer.id):
-            if update.meSSage:
-                await update.meSSage.reply_teXt("👑 ThiS command iS for OwnerS only.")
+        if not db.is_owner(user.id):
+            if update.message:
+                await update.message.reply_text("👑 This command is for Owners only.")
             elif update.callback_query:
-                await update.callback_query.anSwer("👑 OwnerS only.", Show_alert=True)
+                await update.callback_query.answer("👑 Owners only.", show_alert=True)
             return
-        return await func(update, conteXt, *argS, **kwargS)
+        return await func(update, context, *args, **kwargs)
     return wrapper
 
 
 def premium_only(func):
-    """ReStrictS handler to Premium uSerS and OwnerS."""
-    @wrapS(func)
-    aSync def wrapper(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE, *argS, **kwargS):
-        uSer = update.effective_uSer
-        if not uSer:
+    """Restricts handler to Premium users and Owners."""
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        user = update.effective_user
+        if not user:
             return
-        await enSure_uSer(update, conteXt)
-        if db.iS_banned(uSer.id):
-            if update.meSSage:
-                await update.meSSage.reply_teXt("🚫 You are banned.")
+        await ensure_user(update, context)
+        if db.is_banned(user.id):
+            if update.message:
+                await update.message.reply_text("🚫 You are banned.")
             return
-        if not db.iS_premium_or_above(uSer.id):
-            if update.meSSage:
-                await update.meSSage.reply_teXt(
-                    "💎 ThiS feature iS for Premium uSerS only.\n"
-                    "USe /Start to See upgrade optionS."
+        if not db.is_premium_or_above(user.id):
+            if update.message:
+                await update.message.reply_text(
+                    "💎 This feature is for Premium users only.\n"
+                    "Use /start to see upgrade options."
                 )
             elif update.callback_query:
-                await update.callback_query.anSwer("💎 Premium only.", Show_alert=True)
+                await update.callback_query.answer("💎 Premium only.", show_alert=True)
             return
-        return await func(update, conteXt, *argS, **kwargS)
+        return await func(update, context, *args, **kwargs)
     return wrapper
 
 
-def acceSS_required(func):
-    """RequireS at leaSt trial acceSS. PromptS /Start for new uSerS."""
-    @wrapS(func)
-    aSync def wrapper(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE, *argS, **kwargS):
-        uSer = update.effective_uSer
-        if not uSer:
+def access_required(func):
+    """Requires at least trial access. Prompts /start for new users."""
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        user = update.effective_user
+        if not user:
             return
-        await enSure_uSer(update, conteXt)
-        if db.iS_banned(uSer.id):
-            if update.meSSage:
-                await update.meSSage.reply_teXt("🚫 You are banned.")
+        await ensure_user(update, context)
+        if db.is_banned(user.id):
+            if update.message:
+                await update.message.reply_text("🚫 You are banned.")
             return
-        if not check_acceSS(uSer.id):
-            from PyToday import config aS _cfg
-            ownerS = db.get_all_ownerS()
-            owner_tagS = " ".join([f"◈ @{o['uSername']}" if o.get("uSername") elSe f"◈ ID:{o['uSer_id']}" for o in ownerS]) or "◈ @owneruSerid"
-            mSg = (
-                f"⊘ PREMIUM ACCESS @{_cfg.BOT_USERNAME} IS ONLY FOR PREMIUM MEMBERS "
-                f"TO GET PREMIUM, CONTACT THE OWNERS: {owner_tagS}"
+        if not check_access(user.id):
+            from PyToday import config as _cfg
+            owners = db.get_all_owners()
+            owner_tags = " ".join([f"◈ @{o['username']}" if o.get("username") else f"◈ ID:{o['user_id']}" for o in owners]) or "◈ @owneruserid"
+            msg = (
+                f"⊘ PREMIUM ACCESS @{_cfg.BOT_USERNAME} Is ONLY FOR PREMIUM MEMBERS "
+                f"TO GET PREMIUM, CONTACT THE OWNERS: {owner_tags}"
             )
-            if update.meSSage:
-                from PyToday.keyboardS import get_non_premium_keyboard
-                from PyToday import databaSe aS _db
-                await update.meSSage.reply_teXt(mSg, reply_markup=get_non_premium_keyboard(uSer.id, trial_uSed=_db.haS_uSed_trial(uSer.id)))
+            if update.message:
+                from PyToday.keyboards import get_non_premium_keyboard
+                from PyToday import database as _db
+                await update.message.reply_text(msg, reply_markup=get_non_premium_keyboard(user.id, trial_used=_db.has_used_trial(user.id)))
             elif update.callback_query:
-                await update.callback_query.anSwer("⊘ Premium acceSS required.", Show_alert=True)
+                await update.callback_query.answer("⊘ Premium access required.", show_alert=True)
             return
-        return await func(update, conteXt, *argS, **kwargS)
+        return await func(update, context, *args, **kwargs)
     return wrapper
 
 
-def trial_Single_account(func):
+def trial_single_account(func):
     """
-    Middleware for account add operationS.
-    BlockS trial uSerS who already have 1 logged-in account.
+    Middleware for account add operations.
+    Blocks trial users who already have 1 logged-in account.
     """
-    @wrapS(func)
-    aSync def wrapper(update: Update, conteXt: ConteXtTypeS.DEFAULT_TYPE, *argS, **kwargS):
-        uSer = update.effective_uSer
-        if not uSer:
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        user = update.effective_user
+        if not user:
             return
-        role = db.get_uSer_role(uSer.id)
+        role = db.get_user_role(user.id)
         if role == "trial":
-            count = db.count_accountS(uSer.id, logged_in_only=True)
+            count = db.count_accounts(user.id, logged_in_only=True)
             if count >= 1:
-                if update.meSSage:
-                    await update.meSSage.reply_teXt(
-                        "🔒 <b>Trial ReStriction</b>\n\n"
-                        "Trial uSerS can only have <b>1 Telegram account</b> linked.\n"
-                        "Upgrade to 💎 Premium to add unlimited accountS.",
-                        parSe_mode="HTML"
+                if update.message:
+                    await update.message.reply_text(
+                        "🔒 <b>Trial Restriction</b>\n\n"
+                        "Trial users can only have <b>1 Telegram account</b> linked.\n"
+                        "Upgrade to 💎 Premium to add unlimited accounts.",
+                        parse_mode="HTML"
                     )
                 elif update.callback_query:
-                    await update.callback_query.anSwer(
-                        "🔒 Trial: maX 1 account. Upgrade to Premium.", Show_alert=True
+                    await update.callback_query.answer(
+                        "🔒 Trial: max 1 account. Upgrade to Premium.", show_alert=True
                     )
                 return
-        return await func(update, conteXt, *argS, **kwargS)
+        return await func(update, context, *args, **kwargs)
     return wrapper

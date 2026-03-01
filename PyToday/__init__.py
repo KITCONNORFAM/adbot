@@ -1,10 +1,10 @@
 # PyToday Telegram Ad Bot
 
 from . import config
-from . import databaSe
+from . import database
 from . import encryption
-from . import keyboardS
+from . import keyboards
 from . import telethon_handler
-from . import handlerS
+from . import handlers
 
-__all__ = ['config', 'databaSe', 'encryption', 'keyboardS', 'telethon_handler', 'handlerS']
+__all__ = ['config', 'database', 'encryption', 'keyboards', 'telethon_handler', 'handlers']

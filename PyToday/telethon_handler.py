@@ -1,1782 +1,1782 @@
-import aSyncio
+import asyncio
 import logging
 import re
-from telethon import TelegramClient, eventS
-from telethon.SeSSionS import StringSeSSion
-from telethon.tl.functionS.account import UpdateProfileRequeSt
-from telethon.tl.functionS.meSSageS import ForwardMeSSageSRequeSt, ImportChatInviteRequeSt
-from telethon.tl.functionS.channelS import JoinChannelRequeSt
-from telethon.tl.typeS import Channel, Chat, InputPeerChannel, InputPeerSelf
-from telethon.errorS import SeSSionPaSSwordNeededError, PhoneCodeInvalidError, PhoneCodeEXpiredError, PaSSwordHaShInvalidError, USerAlreadyParticipantError, InviteHaShEXpiredError, InviteHaShInvalidError
+from telethon import TelegramClient, events
+from telethon.sessions import StringSession
+from telethon.tl.functions.account import UpdateProfileRequest
+from telethon.tl.functions.messages import ForwardMessagesRequest, ImportChatInviteRequest
+from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.types import Channel, Chat, InputPeerChannel, InputPeerSelf
+from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError, PhoneCodeExpiredError, PasswordHashInvalidError, UserAlreadyParticipantError, InviteHashExpiredError, InviteHashInvalidError
 from datetime import datetime
-from PyToday import databaSe aS db   # new SupabaSe DB
+from PyToday import database as db   # new Supabase DB
 from PyToday.encryption import encrypt_data, decrypt_data
 from PyToday import config
 
 logger = logging.getLogger(__name__)
-active_clientS = {}
+active_clients = {}
 
-aSync def create_client(api_id, api_haSh, SeSSion_String=None):
-    if SeSSion_String:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
-    elSe:
-        client = TelegramClient(StringSeSSion(), api_id, api_haSh)
+async def create_client(api_id, api_hash, session_string=None):
+    if session_string:
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
+    else:
+        client = TelegramClient(StringSession(), api_id, api_hash)
     return client
 
-aSync def Send_code(api_id, api_haSh, phone):
-    client = await create_client(api_id, api_haSh)
+async def send_code(api_id, api_hash, phone):
+    client = await create_client(api_id, api_hash)
     await client.connect()
     
     try:
-        reSult = await client.Send_code_requeSt(phone)
-        SeSSion_String = client.SeSSion.Save()
-        await client.diSconnect()
+        result = await client.send_code_request(phone)
+        session_string = client.session.save()
+        await client.disconnect()
         return {
-            "SucceSS": True,
-            "phone_code_haSh": reSult.phone_code_haSh,
-            "SeSSion_String": SeSSion_String
+            "success": True,
+            "phone_code_hash": result.phone_code_hash,
+            "session_string": session_string
         }
-    eXcept SeSSionPaSSwordNeededError:
-        temp_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+    except SessionPasswordNeededError:
+        temp_session = client.session.save()
+        await client.disconnect()
         return {
-            "SucceSS": FalSe,
+            "success": False,
             "error": "2FA_REQUIRED",
-            "requireS_2fa": True,
-            "SeSSion_String": temp_SeSSion
+            "requires_2fa": True,
+            "session_string": temp_session
         }
-    eXcept EXception aS e:
-        await client.diSconnect()
-        return {"SucceSS": FalSe, "error": Str(e)}
+    except Exception as e:
+        await client.disconnect()
+        return {"success": False, "error": str(e)}
 
-aSync def verify_code(api_id, api_haSh, phone, code, phone_code_haSh, SeSSion_String, uSer_id: int = None):
-    client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+async def verify_code(api_id, api_hash, phone, code, phone_code_hash, session_string, user_id: int = None):
+    client = TelegramClient(StringSession(session_string), api_id, api_hash)
     await client.connect()
 
     try:
-        await client.Sign_in(phone, code, phone_code_haSh=phone_code_haSh)
-        new_SeSSion = client.SeSSion.Save()
+        await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
+        new_session = client.session.save()
 
-        # Apply branding ONLY for trial uSerS
-        if uSer_id and db.get_uSer_role(uSer_id) == "trial":
+        # Apply branding ONLY for trial users
+        if user_id and db.get_user_role(user_id) == "trial":
             try:
                 me = await client.get_me()
-                current_name = me.firSt_name or ""
-                SuffiX = config.ACCOUNT_NAME_SUFFIX
-                if SuffiX and SuffiX not in current_name:
-                    await client(UpdateProfileRequeSt(firSt_name=f"{current_name} {SuffiX}"))
-                await aSyncio.Sleep(0.5)
-                await client(UpdateProfileRequeSt(about=config.ACCOUNT_BIO_TEMPLATE))
-                logger.info(f"Trial branding applied for uSer {uSer_id} after OTP login")
-                new_SeSSion = client.SeSSion.Save()
-            eXcept EXception aS brand_err:
+                current_name = me.first_name or ""
+                suffix = config.ACCOUNT_NAME_SUFFIX
+                if suffix and suffix not in current_name:
+                    await client(UpdateProfileRequest(first_name=f"{current_name} {suffix}"))
+                await asyncio.sleep(0.5)
+                await client(UpdateProfileRequest(about=config.ACCOUNT_BIO_TEMPLATE))
+                logger.info(f"Trial branding applied for user {user_id} after OTP login")
+                new_session = client.session.save()
+            except Exception as brand_err:
                 logger.warning(f"Trial branding failed: {brand_err}")
 
-        await client.diSconnect()
-        return {"SucceSS": True, "SeSSion_String": new_SeSSion}
-    eXcept PhoneCodeInvalidError:
-        await client.diSconnect()
-        return {"SucceSS": FalSe, "error": "Invalid OTP code. PleaSe try again."}
-    eXcept PhoneCodeEXpiredError:
-        await client.diSconnect()
-        return {"SucceSS": FalSe, "error": "OTP code eXpired. PleaSe requeSt a new code."}
-    eXcept SeSSionPaSSwordNeededError:
-        temp_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+        await client.disconnect()
+        return {"success": True, "session_string": new_session}
+    except PhoneCodeInvalidError:
+        await client.disconnect()
+        return {"success": False, "error": "Invalid OTP code. Please try again."}
+    except PhoneCodeExpiredError:
+        await client.disconnect()
+        return {"success": False, "error": "OTP code expired. Please request a new code."}
+    except SessionPasswordNeededError:
+        temp_session = client.session.save()
+        await client.disconnect()
         return {
-            "SucceSS": FalSe,
+            "success": False,
             "error": "2FA_REQUIRED",
-            "requireS_2fa": True,
-            "SeSSion_String": temp_SeSSion
+            "requires_2fa": True,
+            "session_string": temp_session
         }
-    eXcept EXception aS e:
-        await client.diSconnect()
-        return {"SucceSS": FalSe, "error": Str(e)}
+    except Exception as e:
+        await client.disconnect()
+        return {"success": False, "error": str(e)}
 
-aSync def verify_2fa_paSSword(api_id, api_haSh, paSSword, SeSSion_String, uSer_id: int = None):
-    client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+async def verify_2fa_password(api_id, api_hash, password, session_string, user_id: int = None):
+    client = TelegramClient(StringSession(session_string), api_id, api_hash)
     await client.connect()
 
     try:
-        await client.Sign_in(paSSword=paSSword)
-        new_SeSSion = client.SeSSion.Save()
+        await client.sign_in(password=password)
+        new_session = client.session.save()
 
-        # Apply branding ONLY for trial uSerS
-        if uSer_id and db.get_uSer_role(uSer_id) == "trial":
+        # Apply branding ONLY for trial users
+        if user_id and db.get_user_role(user_id) == "trial":
             try:
                 me = await client.get_me()
-                current_name = me.firSt_name or ""
-                SuffiX = config.ACCOUNT_NAME_SUFFIX
-                if SuffiX and SuffiX not in current_name:
-                    await client(UpdateProfileRequeSt(firSt_name=f"{current_name} {SuffiX}"))
-                await aSyncio.Sleep(0.5)
-                await client(UpdateProfileRequeSt(about=config.ACCOUNT_BIO_TEMPLATE))
-                logger.info(f"Trial branding applied for uSer {uSer_id} after 2FA")
-                new_SeSSion = client.SeSSion.Save()
-            eXcept EXception aS brand_err:
+                current_name = me.first_name or ""
+                suffix = config.ACCOUNT_NAME_SUFFIX
+                if suffix and suffix not in current_name:
+                    await client(UpdateProfileRequest(first_name=f"{current_name} {suffix}"))
+                await asyncio.sleep(0.5)
+                await client(UpdateProfileRequest(about=config.ACCOUNT_BIO_TEMPLATE))
+                logger.info(f"Trial branding applied for user {user_id} after 2FA")
+                new_session = client.session.save()
+            except Exception as brand_err:
                 logger.warning(f"Trial branding failed: {brand_err}")
 
-        await client.diSconnect()
-        return {"SucceSS": True, "SeSSion_String": new_SeSSion}
-    eXcept PaSSwordHaShInvalidError:
-        await client.diSconnect()
-        return {"SucceSS": FalSe, "error": "Invalid 2FA Cloud PaSSword. Telegram completely rejected the paSSword you typed. PleaSe double-check your eXact Spelling and capitalization (it iS caSe-SenSitive), and enSure you aren't accidentally typing your uSername."}
-    eXcept EXception aS e:
-        await client.diSconnect()
-        return {"SucceSS": FalSe, "error": Str(e)}
+        await client.disconnect()
+        return {"success": True, "session_string": new_session}
+    except PasswordHashInvalidError:
+        await client.disconnect()
+        return {"success": False, "error": "Invalid 2FA Cloud Password. Telegram completely rejected the password you typed. Please double-check your exact spelling and capitalization (it is case-sensitive), and ensure you aren't accidentally typing your username."}
+    except Exception as e:
+        await client.disconnect()
+        return {"success": False, "error": str(e)}
 
-aSync def get_groupS_and_marketplaceS(account_id):
+async def get_groups_and_marketplaces(account_id):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired. PleaSe login again."}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired. Please login again."}
         
-        groupS = []
-        marketplaceS = []
+        groups = []
+        marketplaces = []
         
-        dialogS = await client.get_dialogS(limit=500)
+        dialogs = await client.get_dialogs(limit=500)
         
-        for dialog in dialogS:
+        for dialog in dialogs:
             entity = dialog.entity
             
-            if iSinStance(entity, Channel):
-                if entity.broadcaSt:
+            if isinstance(entity, Channel):
+                if entity.broadcast:
                     continue
                 if not entity.megagroup:
                     continue
             
-            if iSinStance(entity, (Channel, Chat)):
-                iS_marketplace = FalSe
+            if isinstance(entity, (Channel, Chat)):
+                is_marketplace = False
                 title = dialog.title or "Unknown"
                 title_lower = title.lower()
                 
-                marketplace_keywordS = ['market', 'Shop', 'Store', 'Sell', 'buy', 'trade', 'deal', 'bazaar', 'mall', 'marketplace', 'bazar', 'Selling', 'buying']
-                for keyword in marketplace_keywordS:
+                marketplace_keywords = ['market', 'shop', 'store', 'sell', 'buy', 'trade', 'deal', 'bazaar', 'mall', 'marketplace', 'bazar', 'selling', 'buying']
+                for keyword in marketplace_keywords:
                     if keyword in title_lower:
-                        iS_marketplace = True
+                        is_marketplace = True
                         break
                 
-                acceSS_haSh = getattr(entity, 'acceSS_haSh', None)
+                access_hash = getattr(entity, 'access_hash', None)
                 
                 item = {
                     'id': entity.id,
                     'title': title,
-                    'iS_marketplace': iS_marketplace,
-                    'memberS': getattr(entity, 'participantS_count', 0) or 0,
-                    'acceSS_haSh': acceSS_haSh
+                    'is_marketplace': is_marketplace,
+                    'members': getattr(entity, 'participants_count', 0) or 0,
+                    'access_hash': access_hash
                 }
                 
-                if iS_marketplace:
-                    marketplaceS.append(item)
-                elSe:
-                    groupS.append(item)
+                if is_marketplace:
+                    marketplaces.append(item)
+                else:
+                    groups.append(item)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        await databaSe.create_or_update_StatS(
+        await database.create_or_update_stats(
             account_id,
-            groupS_count=len(groupS),
-            marketplaceS_count=len(marketplaceS)
+            groups_count=len(groups),
+            marketplaces_count=len(marketplaces)
         )
         
         return {
-            "SucceSS": True,
-            "groupS": groupS,
-            "marketplaceS": marketplaceS,
-            "total": len(groupS) + len(marketplaceS)
+            "success": True,
+            "groups": groups,
+            "marketplaces": marketplaces,
+            "total": len(groups) + len(marketplaces)
         }
-    eXcept EXception aS e:
-        logger.error(f"Error getting groupS: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+    except Exception as e:
+        logger.error(f"Error getting groups: {e}")
+        return {"success": False, "error": str(e)}
 
-aSync def get_Saved_meSSage_id(account_id):
+async def get_saved_message_id(account_id):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
             return None
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
+        if not await client.is_user_authorized():
+            await client.disconnect()
             return None
         
         me = await client.get_me()
-        meSSageS = await client.get_meSSageS(me, limit=1)
+        messages = await client.get_messages(me, limit=1)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        if meSSageS and len(meSSageS) > 0:
-            return meSSageS[0].id
+        if messages and len(messages) > 0:
+            return messages[0].id
         return None
-    eXcept EXception aS e:
-        logger.error(f"Error getting Saved meSSage: {e}")
+    except Exception as e:
+        logger.error(f"Error getting saved message: {e}")
         return None
 
-aSync def forward_from_Saved_meSSageS(account_id, chat_id, acceSS_haSh=None):
+async def forward_from_saved_messages(account_id, chat_id, access_hash=None):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
         me = await client.get_me()
-        meSSageS = await client.get_meSSageS(me, limit=1)
+        messages = await client.get_messages(me, limit=1)
         
-        if not meSSageS or len(meSSageS) == 0:
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "No meSSage in Saved meSSageS. PleaSe add a meSSage to your Saved MeSSageS firSt."}
+        if not messages or len(messages) == 0:
+            await client.disconnect()
+            return {"success": False, "error": "No message in saved messages. Please add a message to your Saved Messages first."}
         
-        Source_meSSage = meSSageS[0]
+        source_message = messages[0]
         
         try:
             entity = await client.get_entity(chat_id)
-        eXcept ValueError:
-            if acceSS_haSh iS not None:
-                entity = InputPeerChannel(channel_id=chat_id, acceSS_haSh=acceSS_haSh)
-            elSe:
+        except ValueError:
+            if access_hash is not None:
+                entity = InputPeerChannel(channel_id=chat_id, access_hash=access_hash)
+            else:
                 entity = chat_id
         
-        await client.forward_meSSageS(entity, Source_meSSage.id, me)
+        await client.forward_messages(entity, source_message.id, me)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        await databaSe.update_account(account_id, laSt_uSed=datetime.utcnow())
-        await databaSe.increment_StatS(account_id, "meSSageS_Sent")
+        await database.update_account(account_id, last_used=datetime.utcnow())
+        await database.increment_stats(account_id, "messages_sent")
         
-        return {"SucceSS": True}
-    eXcept EXception aS e:
-        logger.error(f"Error forwarding from Saved: {e}")
-        await databaSe.increment_StatS(account_id, "meSSageS_failed")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True}
+    except Exception as e:
+        logger.error(f"Error forwarding from saved: {e}")
+        await database.increment_stats(account_id, "messages_failed")
+        return {"success": False, "error": str(e)}
 
-aSync def Send_meSSage_to_chat(account_id, chat_id, meSSage, acceSS_haSh=None, uSe_forward=FalSe):
+async def send_message_to_chat(account_id, chat_id, message, access_hash=None, use_forward=False):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
         try:
             entity = await client.get_entity(chat_id)
-        eXcept ValueError:
-            if acceSS_haSh iS not None:
-                entity = InputPeerChannel(channel_id=chat_id, acceSS_haSh=acceSS_haSh)
-            elSe:
+        except ValueError:
+            if access_hash is not None:
+                entity = InputPeerChannel(channel_id=chat_id, access_hash=access_hash)
+            else:
                 entity = chat_id
         
-        if uSe_forward:
+        if use_forward:
             me = await client.get_me()
-            meSSageS = await client.get_meSSageS(me, limit=1)
+            messages = await client.get_messages(me, limit=1)
             
-            if meSSageS and len(meSSageS) > 0:
-                await client.forward_meSSageS(entity, meSSageS[0].id, me)
-            elSe:
-                await client.Send_meSSage(entity, meSSage)
-        elSe:
-            await client.Send_meSSage(entity, meSSage)
+            if messages and len(messages) > 0:
+                await client.forward_messages(entity, messages[0].id, me)
+            else:
+                await client.send_message(entity, message)
+        else:
+            await client.send_message(entity, message)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        await databaSe.update_account(account_id, laSt_uSed=datetime.utcnow())
-        await databaSe.increment_StatS(account_id, "meSSageS_Sent")
+        await database.update_account(account_id, last_used=datetime.utcnow())
+        await database.increment_stats(account_id, "messages_sent")
         
-        return {"SucceSS": True}
-    eXcept EXception aS e:
-        await databaSe.increment_StatS(account_id, "meSSageS_failed")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True}
+    except Exception as e:
+        await database.increment_stats(account_id, "messages_failed")
+        return {"success": False, "error": str(e)}
 
-aSync def Save_meSSage_to_Saved(account_id, meSSage):
+async def save_message_to_saved(account_id, message):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
         me = await client.get_me()
-        Sent_mSg = await client.Send_meSSage(me, meSSage)
+        sent_msg = await client.send_message(me, message)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        return {"SucceSS": True, "meSSage_id": Sent_mSg.id}
-    eXcept EXception aS e:
-        logger.error(f"Error Saving meSSage: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True, "message_id": sent_msg.id}
+    except Exception as e:
+        logger.error(f"Error saving message: {e}")
+        return {"success": False, "error": str(e)}
 
-aSync def forward_meSSage_to_chat(account_id, chat_id, from_peer, meSSage_id, acceSS_haSh=None):
+async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, access_hash=None):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
         try:
             entity = await client.get_entity(chat_id)
-        eXcept ValueError:
-            if acceSS_haSh iS not None:
-                entity = InputPeerChannel(channel_id=chat_id, acceSS_haSh=acceSS_haSh)
-            elSe:
+        except ValueError:
+            if access_hash is not None:
+                entity = InputPeerChannel(channel_id=chat_id, access_hash=access_hash)
+            else:
                 entity = chat_id
         
-        await client.forward_meSSageS(entity, meSSage_id, from_peer)
+        await client.forward_messages(entity, message_id, from_peer)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        await databaSe.update_account(account_id, laSt_uSed=datetime.utcnow())
-        await databaSe.increment_StatS(account_id, "meSSageS_Sent")
+        await database.update_account(account_id, last_used=datetime.utcnow())
+        await database.increment_stats(account_id, "messages_sent")
         
-        return {"SucceSS": True}
-    eXcept EXception aS e:
-        await databaSe.increment_StatS(account_id, "meSSageS_failed")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True}
+    except Exception as e:
+        await database.increment_stats(account_id, "messages_failed")
+        return {"success": False, "error": str(e)}
 
-aSync def broadcaSt_to_target_groupS(account_id, target_groupS, meSSage, delay=60, uSe_forward=FalSe, logS_channel_id=None):
-    """BroadcaSt meSSage to target groupS with uSer-Specific logS"""
-    Sent = 0
+async def broadcast_to_target_groups(account_id, target_groups, message, delay=60, use_forward=False, logs_channel_id=None):
+    """Broadcast message to target groups with user-specific logs"""
+    sent = 0
     failed = 0
     
-    if iSinStance(account_id, Str):
+    if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await databaSe.get_account(account_id)
-    account_name = account.get('account_firSt_name', 'Unknown') if account elSe 'Unknown'
+    account = await database.get_account(account_id)
+    account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
-    for group in target_groupS:
+    for group in target_groups:
         try:
             group_id = group.get('group_id') or group.get('id')
-            acceSS_haSh = group.get('acceSS_haSh')
+            access_hash = group.get('access_hash')
             group_title = group.get('group_title') or group.get('title', 'Unknown')
             
-            if uSe_forward:
-                reSult = await forward_from_Saved_meSSageS(account_id, group_id, acceSS_haSh)
-            elSe:
-                reSult = await Send_meSSage_to_chat(account_id, group_id, meSSage, acceSS_haSh, uSe_forward=FalSe)
+            if use_forward:
+                result = await forward_from_saved_messages(account_id, group_id, access_hash)
+            else:
+                result = await send_message_to_chat(account_id, group_id, message, access_hash, use_forward=False)
             
-            if reSult["SucceSS"]:
-                Sent += 1
-                # Log SucceSSful meSSage to uSer'S logS channel only
-                if logS_channel_id:
-                    await log_meSSage_to_channel(logS_channel_id, account_name, group_title, group_id, True)
-            elSe:
+            if result["success"]:
+                sent += 1
+                # Log successful message to user's logs channel only
+                if logs_channel_id:
+                    await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, True)
+            else:
                 failed += 1
-                logger.error(f"Failed to Send to group {group_id}: {reSult.get('error')}")
-                # Log failed meSSage to uSer'S logS channel only
-                if logS_channel_id:
-                    await log_meSSage_to_channel(logS_channel_id, account_name, group_title, group_id, FalSe, reSult.get('error'))
+                logger.error(f"Failed to send to group {group_id}: {result.get('error')}")
+                # Log failed message to user's logs channel only
+                if logs_channel_id:
+                    await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, False, result.get('error'))
             
-            await aSyncio.Sleep(delay)
-        eXcept EXception aS e:
-            logger.error(f"BroadcaSt error for group: {e}")
+            await asyncio.sleep(delay)
+        except Exception as e:
+            logger.error(f"Broadcast error for group: {e}")
             failed += 1
-            if logS_channel_id:
-                await log_meSSage_to_channel(logS_channel_id, account_name, group_title, group_id, FalSe, Str(e))
+            if logs_channel_id:
+                await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, False, str(e))
     
-    await databaSe.create_or_update_StatS(account_id, laSt_broadcaSt=datetime.utcnow())
+    await database.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
     
     return {
-        "SucceSS": True,
-        "Sent": Sent,
+        "success": True,
+        "sent": sent,
         "failed": failed,
-        "total": len(target_groupS)
+        "total": len(target_groups)
     }
 
-aSync def broadcaSt_meSSage(account_id, meSSage, delay=60, uSe_forward=FalSe, logS_channel_id=None):
-    """BroadcaSt meSSage to all groupS with uSer-Specific logS"""
-    reSult = await get_groupS_and_marketplaceS(account_id)
-    if not reSult["SucceSS"]:
-        return reSult
+async def broadcast_message(account_id, message, delay=60, use_forward=False, logs_channel_id=None):
+    """Broadcast message to all groups with user-specific logs"""
+    result = await get_groups_and_marketplaces(account_id)
+    if not result["success"]:
+        return result
     
-    all_chatS = reSult["groupS"] + reSult["marketplaceS"]
-    Sent = 0
+    all_chats = result["groups"] + result["marketplaces"]
+    sent = 0
     failed = 0
     
-    if iSinStance(account_id, Str):
+    if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await databaSe.get_account(account_id)
-    account_name = account.get('account_firSt_name', 'Unknown') if account elSe 'Unknown'
+    account = await database.get_account(account_id)
+    account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
-    for chat in all_chatS:
+    for chat in all_chats:
         try:
-            if uSe_forward:
-                Send_reSult = await forward_from_Saved_meSSageS(account_id, chat["id"], chat.get("acceSS_haSh"))
-            elSe:
-                Send_reSult = await Send_meSSage_to_chat(account_id, chat["id"], meSSage, chat.get("acceSS_haSh"))
+            if use_forward:
+                send_result = await forward_from_saved_messages(account_id, chat["id"], chat.get("access_hash"))
+            else:
+                send_result = await send_message_to_chat(account_id, chat["id"], message, chat.get("access_hash"))
             
-            if Send_reSult["SucceSS"]:
-                Sent += 1
-                # Log SucceSSful meSSage to uSer'S logS channel only
-                if logS_channel_id:
-                    await log_meSSage_to_channel(logS_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], True)
-            elSe:
+            if send_result["success"]:
+                sent += 1
+                # Log successful message to user's logs channel only
+                if logs_channel_id:
+                    await log_message_to_channel(logs_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], True)
+            else:
                 failed += 1
-                # Log failed meSSage to uSer'S logS channel only
-                if logS_channel_id:
-                    await log_meSSage_to_channel(logS_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], FalSe, Send_reSult.get('error'))
+                # Log failed message to user's logs channel only
+                if logs_channel_id:
+                    await log_message_to_channel(logs_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], False, send_result.get('error'))
             
-            await aSyncio.Sleep(delay)
-        eXcept EXception aS e:
-            logger.error(f"BroadcaSt error: {e}")
+            await asyncio.sleep(delay)
+        except Exception as e:
+            logger.error(f"Broadcast error: {e}")
             failed += 1
-            if logS_channel_id:
-                await log_meSSage_to_channel(logS_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], FalSe, Str(e))
+            if logs_channel_id:
+                await log_message_to_channel(logs_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], False, str(e))
     
-    if iSinStance(account_id, Str):
+    if isinstance(account_id, str):
         account_id = int(account_id)
-    await databaSe.create_or_update_StatS(account_id, laSt_broadcaSt=datetime.utcnow())
+    await database.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
     
     return {
-        "SucceSS": True,
-        "Sent": Sent,
+        "success": True,
+        "sent": sent,
         "failed": failed,
-        "total": len(all_chatS)
+        "total": len(all_chats)
     }
 
-aSync def log_meSSage_to_channel(logS_channel_id, account_name, group_title, group_id, SucceSS, error=None):
-    """Log meSSage Send StatuS to uSer'S logS channel only"""
+async def log_message_to_channel(logs_channel_id, account_name, group_title, group_id, success, error=None):
+    """Log message send status to user's logs channel only"""
     try:
         from telegram import Bot
         bot = Bot(token=config.BOT_TOKEN)
         
-        if SucceSS:
-            log_teXt = f"""
+        if success:
+            log_text = f"""
 <b>✅ MESSAGE SENT</b>
 
 <b>ACCOUNT:</b> <code>{account_name}</code>
 <b>GROUP:</b> <code>{group_title}</code>
 <b>GROUP ID:</b> <code>{group_id}</code>
-<b>TIME:</b> <code>{datetime.utcnow().Strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
-        elSe:
-            log_teXt = f"""
+        else:
+            log_text = f"""
 <b>❌ MESSAGE FAILED</b>
 
 <b>ACCOUNT:</b> <code>{account_name}</code>
 <b>GROUP:</b> <code>{group_title}</code>
 <b>GROUP ID:</b> <code>{group_id}</code>
 <b>ERROR:</b> <code>{error or 'Unknown error'}</code>
-<b>TIME:</b> <code>{datetime.utcnow().Strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         
-        await bot.Send_meSSage(int(logS_channel_id), log_teXt, parSe_mode="HTML")
-    eXcept EXception aS e:
+        await bot.send_message(int(logs_channel_id), log_text, parse_mode="HTML")
+    except Exception as e:
         logger.error(f"Error logging to channel: {e}")
 
-aSync def get_account_info(api_id, api_haSh, SeSSion_String):
+async def get_account_info(api_id, api_hash, session_string):
     try:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Not authorized"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Not authorized"}
         
         me = await client.get_me()
-        await client.diSconnect()
+        await client.disconnect()
         
         return {
-            "SucceSS": True,
-            "firSt_name": me.firSt_name or "",
-            "laSt_name": me.laSt_name or "",
-            "uSername": me.uSername or "",
+            "success": True,
+            "first_name": me.first_name or "",
+            "last_name": me.last_name or "",
+            "username": me.username or "",
             "phone": me.phone or ""
         }
-    eXcept EXception aS e:
+    except Exception as e:
         logger.error(f"Error getting account info: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
-aSync def update_account_profile(api_id, api_haSh, SeSSion_String, firSt_name=None, laSt_name=None, about=None):
+async def update_account_profile(api_id, api_hash, session_string, first_name=None, last_name=None, about=None):
     try:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Not authorized"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Not authorized"}
         
-        await client(UpdateProfileRequeSt(
-            firSt_name=firSt_name,
-            laSt_name=laSt_name,
+        await client(UpdateProfileRequest(
+            first_name=first_name,
+            last_name=last_name,
             about=about
         ))
         
-        new_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+        new_session = client.session.save()
+        await client.disconnect()
         
-        return {"SucceSS": True, "SeSSion_String": new_SeSSion}
-    eXcept EXception aS e:
+        return {"success": True, "session_string": new_session}
+    except Exception as e:
         logger.error(f"Error updating profile: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
-aSync def update_account_bio(api_id, api_haSh, SeSSion_String, bio):
+async def update_account_bio(api_id, api_hash, session_string, bio):
     try:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Not authorized"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Not authorized"}
         
-        await client(UpdateProfileRequeSt(about=bio))
+        await client(UpdateProfileRequest(about=bio))
         
-        new_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+        new_session = client.session.save()
+        await client.disconnect()
         
-        return {"SucceSS": True, "SeSSion_String": new_SeSSion}
-    eXcept EXception aS e:
+        return {"success": True, "session_string": new_session}
+    except Exception as e:
         logger.error(f"Error updating bio: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
-aSync def update_account_name(api_id, api_haSh, SeSSion_String, firSt_name, laSt_name=None):
+async def update_account_name(api_id, api_hash, session_string, first_name, last_name=None):
     try:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Not authorized"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Not authorized"}
         
-        await client(UpdateProfileRequeSt(
-            firSt_name=firSt_name,
-            laSt_name=laSt_name if laSt_name elSe ""
+        await client(UpdateProfileRequest(
+            first_name=first_name,
+            last_name=last_name if last_name else ""
         ))
         
-        new_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+        new_session = client.session.save()
+        await client.disconnect()
         
-        return {"SucceSS": True, "SeSSion_String": new_SeSSion}
-    eXcept EXception aS e:
+        return {"success": True, "session_string": new_session}
+    except Exception as e:
         logger.error(f"Error updating name: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
-aSync def join_group_by_link(account_id, invite_link):
-    """Join a group by invite link or uSername"""
+async def join_group_by_link(account_id, invite_link):
+    """Join a group by invite link or username"""
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
-        haSh_pattern = re.compile(r'(?:httpS?://)?(?:t\.me|telegram\.me)/(?:joinchat/|\+)([a-zA-Z0-9_-]+)')
-        uSername_pattern = re.compile(r'(?:httpS?://)?(?:t\.me|telegram\.me)/([a-zA-Z][a-zA-Z0-9_]{4,})')
+        hash_pattern = re.compile(r'(?:https?://)?(?:t\.me|telegram\.me)/(?:joinchat/|\+)([a-zA-Z0-9_-]+)')
+        username_pattern = re.compile(r'(?:https?://)?(?:t\.me|telegram\.me)/([a-zA-Z][a-zA-Z0-9_]{4,})')
         
-        haSh_match = haSh_pattern.Search(invite_link)
-        uSername_match = uSername_pattern.Search(invite_link)
+        hash_match = hash_pattern.search(invite_link)
+        username_match = username_pattern.search(invite_link)
         
         group_title = None
         group_id = None
         
-        if haSh_match:
-            invite_haSh = haSh_match.group(1)
+        if hash_match:
+            invite_hash = hash_match.group(1)
             try:
-                reSult = await client(ImportChatInviteRequeSt(invite_haSh))
-                if haSattr(reSult, 'chatS') and reSult.chatS:
-                    chat = reSult.chatS[0]
+                result = await client(ImportChatInviteRequest(invite_hash))
+                if hasattr(result, 'chats') and result.chats:
+                    chat = result.chats[0]
                     group_title = getattr(chat, 'title', None)
                     group_id = chat.id
-            eXcept USerAlreadyParticipantError:
-                await client.diSconnect()
-                return {"SucceSS": FalSe, "error": "Already a member of thiS group"}
-            eXcept (InviteHaShEXpiredError, InviteHaShInvalidError):
-                await client.diSconnect()
-                return {"SucceSS": FalSe, "error": "Invalid or eXpired invite link"}
-        elif uSername_match:
-            uSername = uSername_match.group(1)
+            except UserAlreadyParticipantError:
+                await client.disconnect()
+                return {"success": False, "error": "Already a member of this group"}
+            except (InviteHashExpiredError, InviteHashInvalidError):
+                await client.disconnect()
+                return {"success": False, "error": "Invalid or expired invite link"}
+        elif username_match:
+            username = username_match.group(1)
             try:
-                entity = await client.get_entity(uSername)
-                await client(JoinChannelRequeSt(entity))
+                entity = await client.get_entity(username)
+                await client(JoinChannelRequest(entity))
                 group_title = getattr(entity, 'title', None)
                 group_id = entity.id
-            eXcept USerAlreadyParticipantError:
-                await client.diSconnect()
-                return {"SucceSS": FalSe, "error": "Already a member of thiS group"}
-        elSe:
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Invalid invite link format"}
+            except UserAlreadyParticipantError:
+                await client.disconnect()
+                return {"success": False, "error": "Already a member of this group"}
+        else:
+            await client.disconnect()
+            return {"success": False, "error": "Invalid invite link format"}
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        await databaSe.log_group_join(account_id, group_id, group_title, invite_link)
-        await databaSe.increment_StatS(account_id, "groupS_joined")
+        await database.log_group_join(account_id, group_id, group_title, invite_link)
+        await database.increment_stats(account_id, "groups_joined")
         
-        return {"SucceSS": True, "group_title": group_title, "group_id": group_id}
-    eXcept EXception aS e:
+        return {"success": True, "group_title": group_title, "group_id": group_id}
+    except Exception as e:
         logger.error(f"Error joining group: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
-aSync def Send_auto_reply(account_id, to_uSer_id, reply_teXt):
+async def send_auto_reply(account_id, to_user_id, reply_text):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
         
-        already_replied = await databaSe.haS_replied_to_uSer(account_id, to_uSer_id)
+        already_replied = await database.has_replied_to_user(account_id, to_user_id)
         if already_replied:
-            return {"SucceSS": FalSe, "error": "Already replied to thiS uSer"}
+            return {"success": False, "error": "Already replied to this user"}
         
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
-        await client.Send_meSSage(to_uSer_id, reply_teXt)
-        await client.diSconnect()
+        await client.send_message(to_user_id, reply_text)
+        await client.disconnect()
         
-        await databaSe.mark_uSer_replied(account_id, to_uSer_id)
-        await databaSe.increment_StatS(account_id, "auto_replieS_Sent")
+        await database.mark_user_replied(account_id, to_user_id)
+        await database.increment_stats(account_id, "auto_replies_sent")
         
-        return {"SucceSS": True}
-    eXcept EXception aS e:
-        logger.error(f"Error Sending auto reply: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True}
+    except Exception as e:
+        logger.error(f"Error sending auto reply: {e}")
+        return {"success": False, "error": str(e)}
 
-aSync def apply_profile_changeS(api_id, api_haSh, SeSSion_String):
+async def apply_profile_changes(api_id, api_hash, session_string):
     try:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
 
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Not authorized"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Not authorized"}
 
         me = await client.get_me()
-        current_name = me.firSt_name or ""
+        current_name = me.first_name or ""
 
-        new_firSt_name = current_name
+        new_first_name = current_name
         if config.ACCOUNT_NAME_SUFFIX and config.ACCOUNT_NAME_SUFFIX not in current_name:
-            new_firSt_name = f"{current_name} {config.ACCOUNT_NAME_SUFFIX}"
+            new_first_name = f"{current_name} {config.ACCOUNT_NAME_SUFFIX}"
 
-        await client(UpdateProfileRequeSt(
-            firSt_name=new_firSt_name,
+        await client(UpdateProfileRequest(
+            first_name=new_first_name,
             about=config.ACCOUNT_BIO_TEMPLATE
         ))
 
-        new_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+        new_session = client.session.save()
+        await client.disconnect()
 
-        return {"SucceSS": True, "SeSSion_String": new_SeSSion, "firSt_name": new_firSt_name}
-    eXcept EXception aS e:
-        logger.error(f"Error applying profile changeS: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True, "session_string": new_session, "first_name": new_first_name}
+    except Exception as e:
+        logger.error(f"Error applying profile changes: {e}")
+        return {"success": False, "error": str(e)}
 
 
-aSync def apply_trial_branding(account_id):
+async def apply_trial_branding(account_id):
     """
-    ApplieS bot uSername watermark to Name and Bio of the linked Telegram account.
-    Called only for Trial uSerS.
-    Premium accountS are NEVER touched.
+    Applies bot username watermark to Name and Bio of the linked Telegram account.
+    Called only for Trial users.
+    Premium accounts are NEVER touched.
     """
     try:
         account = db.get_account(account_id)
         if not account:
-            return {"SucceSS": FalSe, "error": "Account not found"}
+            return {"success": False, "error": "Account not found"}
 
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
 
-        client = TelegramClient(StringSeSSion(SeSSion_String), int(api_id), api_haSh)
+        client = TelegramClient(StringSession(session_string), int(api_id), api_hash)
         await client.connect()
 
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
 
         me = await client.get_me()
-        current_name = me.firSt_name or ""
-        SuffiX = config.ACCOUNT_NAME_SUFFIX  # "| @cat_adbot"
-        bio = config.ACCOUNT_BIO_TEMPLATE    # "ThiS meSSage repeated by @cat_adbot"
+        current_name = me.first_name or ""
+        suffix = config.ACCOUNT_NAME_SUFFIX  # "| @cat_adbot"
+        bio = config.ACCOUNT_BIO_TEMPLATE    # "This message repeated by @cat_adbot"
 
-        new_name = f"{current_name} {SuffiX}" if SuffiX not in current_name elSe current_name
-        await client(UpdateProfileRequeSt(firSt_name=new_name, about=bio))
-        new_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+        new_name = f"{current_name} {suffix}" if suffix not in current_name else current_name
+        await client(UpdateProfileRequest(first_name=new_name, about=bio))
+        new_session = client.session.save()
+        await client.disconnect()
 
         logger.info(f"Trial branding applied to account {account_id}: {new_name}")
-        return {"SucceSS": True, "new_name": new_name}
-    eXcept EXception aS e:
+        return {"success": True, "new_name": new_name}
+    except Exception as e:
         logger.error(f"Trial branding failed for account {account_id}: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
 
-aSync def Start_auto_reply_liStener_advanced(account_id, uSer_id: int):
+async def start_auto_reply_listener_advanced(account_id, user_id: int):
     """
-    Advanced auto-reply liStener with Sequential + keyword reply Support.
-    USeS per-account reply config from SupabaSe.
+    Advanced auto-reply listener with sequential + keyword reply support.
+    Uses per-account reply config from Supabase.
     """
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
 
         account = db.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            logger.warning(f"Cannot Start advanced auto-reply for account {account_id}: not logged in")
-            return FalSe
+        if not account or not account.get('is_logged_in'):
+            logger.warning(f"Cannot start advanced auto-reply for account {account_id}: not logged in")
+            return False
 
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
 
         client_key = f"adv_{account_id}"
-        if client_key in active_clientS:
+        if client_key in active_clients:
             return True
 
-        client = TelegramClient(StringSeSSion(SeSSion_String), int(api_id), api_haSh)
+        client = TelegramClient(StringSession(session_string), int(api_id), api_hash)
         await client.connect()
 
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return FalSe
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return False
 
-        @client.on(eventS.NewMeSSage(incoming=True))
-        aSync def handle_dm(event):
+        @client.on(events.NewMessage(incoming=True))
+        async def handle_dm(event):
             try:
-                if not (event.iS_private and not event.meSSage.out):
+                if not (event.is_private and not event.message.out):
                     return
-                Sender = await event.get_Sender()
-                if not Sender or Sender.bot:
+                sender = await event.get_sender()
+                if not sender or sender.bot:
                     return
 
-                from_id = Sender.id
-                teXt = event.meSSage.teXt or ""
+                from_id = sender.id
+                text = event.message.text or ""
 
-                # Keyword reply takeS priority
-                kw_reply = db.find_keyword_reply(account_id, teXt)
+                # Keyword reply takes priority
+                kw_reply = db.find_keyword_reply(account_id, text)
                 if kw_reply:
                     if kw_reply.get("media_file_id"):
-                        await event.reSpond(file=kw_reply["media_file_id"],
-                                            meSSage=kw_reply.get("meSSage_teXt") or "")
-                    elSe:
-                        await event.reSpond(kw_reply["meSSage_teXt"])
-                    db.increment_Stat(account_id, "replieS_triggered")
+                        await event.respond(file=kw_reply["media_file_id"],
+                                            message=kw_reply.get("message_text") or "")
+                    else:
+                        await event.respond(kw_reply["message_text"])
+                    db.increment_stat(account_id, "replies_triggered")
                     return
 
                 # Sequential reply
-                Seq_reply = db.get_neXt_Sequential_reply(account_id, from_id)
-                if Seq_reply:
-                    if Seq_reply.get("media_file_id"):
-                        await event.reSpond(file=Seq_reply["media_file_id"],
-                                            meSSage=Seq_reply.get("meSSage_teXt") or "")
-                    elSe:
-                        await event.reSpond(Seq_reply.get("meSSage_teXt") or "")
-                    db.increment_Stat(account_id, "replieS_triggered")
+                seq_reply = db.get_next_sequential_reply(account_id, from_id)
+                if seq_reply:
+                    if seq_reply.get("media_file_id"):
+                        await event.respond(file=seq_reply["media_file_id"],
+                                            message=seq_reply.get("message_text") or "")
+                    else:
+                        await event.respond(seq_reply.get("message_text") or "")
+                    db.increment_stat(account_id, "replies_triggered")
 
-            eXcept EXception aS e:
+            except Exception as e:
                 logger.error(f"Advanced auto-reply handler error: {e}")
 
-        active_clientS[client_key] = client
-        aSyncio.get_event_loop().create_taSk(client.run_until_diSconnected())
-        logger.info(f"Advanced auto-reply liStener Started for account {account_id}")
+        active_clients[client_key] = client
+        asyncio.get_event_loop().create_task(client.run_until_disconnected())
+        logger.info(f"Advanced auto-reply listener started for account {account_id}")
         return True
-    eXcept EXception aS e:
-        logger.error(f"Error Starting advanced auto-reply liStener: {e}")
-        return FalSe
+    except Exception as e:
+        logger.error(f"Error starting advanced auto-reply listener: {e}")
+        return False
 
-aSync def Start_auto_reply_liStener(account_id, uSer_id, reply_teXt):
+async def start_auto_reply_listener(account_id, user_id, reply_text):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
         
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            logger.warning(f"Cannot Start auto-reply for account {account_id}: not logged in")
-            return FalSe
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            logger.warning(f"Cannot start auto-reply for account {account_id}: not logged in")
+            return False
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client_key = Str(account_id)
+        client_key = str(account_id)
         
-        if client_key in active_clientS:
-            logger.info(f"Auto-reply liStener already running for account {account_id}")
+        if client_key in active_clients:
+            logger.info(f"Auto-reply listener already running for account {account_id}")
             return True
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), int(api_id), api_haSh)
+        client = TelegramClient(StringSession(session_string), int(api_id), api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            logger.warning(f"SeSSion eXpired for account {account_id}")
-            return FalSe
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            logger.warning(f"Session expired for account {account_id}")
+            return False
         
-        @client.on(eventS.NewMeSSage(incoming=True))
-        aSync def handle_new_meSSage(event):
+        @client.on(events.NewMessage(incoming=True))
+        async def handle_new_message(event):
             try:
-                if event.iS_private and not event.meSSage.out:
-                    Sender = await event.get_Sender()
-                    if Sender and not Sender.bot:
-                        Sender_id = Sender.id
-                        Sender_uSername = Sender.uSername
+                if event.is_private and not event.message.out:
+                    sender = await event.get_sender()
+                    if sender and not sender.bot:
+                        sender_id = sender.id
+                        sender_username = sender.username
                         
-                        already_replied = await databaSe.haS_replied_to_uSer(account_id, Sender_id)
+                        already_replied = await database.has_replied_to_user(account_id, sender_id)
                         if not already_replied:
-                            await event.reSpond(reply_teXt)
-                            await databaSe.mark_uSer_replied(account_id, Sender_id, Sender_uSername)
-                            await databaSe.log_auto_reply(account_id, Sender_id, Sender_uSername)
-                            await databaSe.increment_StatS(account_id, "auto_replieS_Sent")
-                            logger.info(f"Auto-replied to uSer {Sender_id} from account {account_id}")
-            eXcept EXception aS e:
+                            await event.respond(reply_text)
+                            await database.mark_user_replied(account_id, sender_id, sender_username)
+                            await database.log_auto_reply(account_id, sender_id, sender_username)
+                            await database.increment_stats(account_id, "auto_replies_sent")
+                            logger.info(f"Auto-replied to user {sender_id} from account {account_id}")
+            except Exception as e:
                 logger.error(f"Error in auto-reply handler: {e}")
         
-        active_clientS[client_key] = {
+        active_clients[client_key] = {
             "client": client,
-            "uSer_id": uSer_id,
+            "user_id": user_id,
             "account_id": account_id
         }
         
-        aSyncio.create_taSk(client.run_until_diSconnected())
-        logger.info(f"Started auto-reply liStener for account {account_id}")
+        asyncio.create_task(client.run_until_disconnected())
+        logger.info(f"Started auto-reply listener for account {account_id}")
         return True
         
-    eXcept EXception aS e:
-        logger.error(f"Error Starting auto-reply liStener: {e}")
-        return FalSe
+    except Exception as e:
+        logger.error(f"Error starting auto-reply listener: {e}")
+        return False
 
-aSync def Stop_auto_reply_liStener(account_id):
+async def stop_auto_reply_listener(account_id):
     try:
-        client_key = Str(account_id)
+        client_key = str(account_id)
         
-        if client_key in active_clientS:
-            client_data = active_clientS[client_key]
+        if client_key in active_clients:
+            client_data = active_clients[client_key]
             client = client_data["client"]
-            await client.diSconnect()
-            del active_clientS[client_key]
-            logger.info(f"Stopped auto-reply liStener for account {account_id}")
+            await client.disconnect()
+            del active_clients[client_key]
+            logger.info(f"Stopped auto-reply listener for account {account_id}")
             return True
-        return FalSe
-    eXcept EXception aS e:
-        logger.error(f"Error Stopping auto-reply liStener: {e}")
-        return FalSe
+        return False
+    except Exception as e:
+        logger.error(f"Error stopping auto-reply listener: {e}")
+        return False
 
-aSync def Start_all_auto_reply_liStenerS(uSer_id, reply_teXt):
+async def start_all_auto_reply_listeners(user_id, reply_text):
     try:
-        accountS = await databaSe.get_accountS(uSer_id, logged_in_only=True)
-        Started = 0
+        accounts = await database.get_accounts(user_id, logged_in_only=True)
+        started = 0
         
-        for account in accountS:
-            account_id = account["_id"]
-            SucceSS = await Start_auto_reply_liStener(account_id, uSer_id, reply_teXt)
-            if SucceSS:
-                Started += 1
+        for account in accounts:
+            account_id = account["id"]
+            success = await start_auto_reply_listener(account_id, user_id, reply_text)
+            if success:
+                started += 1
         
-        logger.info(f"Started auto-reply for {Started}/{len(accountS)} accountS for uSer {uSer_id}")
-        return Started
-    eXcept EXception aS e:
-        logger.error(f"Error Starting all auto-reply liStenerS: {e}")
+        logger.info(f"Started auto-reply for {started}/{len(accounts)} accounts for user {user_id}")
+        return started
+    except Exception as e:
+        logger.error(f"Error starting all auto-reply listeners: {e}")
         return 0
 
-aSync def Stop_all_auto_reply_liStenerS(uSer_id):
+async def stop_all_auto_reply_listeners(user_id):
     try:
-        Stopped = 0
+        stopped = 0
         to_remove = []
         
-        for client_key, client_data in active_clientS.itemS():
-            if client_data.get("uSer_id") == uSer_id:
+        for client_key, client_data in active_clients.items():
+            if client_data.get("user_id") == user_id:
                 to_remove.append(client_key)
         
         for client_key in to_remove:
-            client_data = active_clientS[client_key]
+            client_data = active_clients[client_key]
             client = client_data["client"]
-            await client.diSconnect()
-            del active_clientS[client_key]
-            Stopped += 1
+            await client.disconnect()
+            del active_clients[client_key]
+            stopped += 1
         
-        logger.info(f"Stopped auto-reply for {Stopped} accountS for uSer {uSer_id}")
-        return Stopped
-    eXcept EXception aS e:
-        logger.error(f"Error Stopping all auto-reply liStenerS: {e}")
+        logger.info(f"Stopped auto-reply for {stopped} accounts for user {user_id}")
+        return stopped
+    except Exception as e:
+        logger.error(f"Error stopping all auto-reply listeners: {e}")
         return 0
 
-# Auto Join GroupS from File
-aSync def auto_join_groupS_from_file(account_id, group_linkS, logS_channel_id=None, uSer_id=None):
-    """Auto join multiple groupS from a liSt of linkS with uSer-Specific logS"""
+# Auto Join Groups from File
+async def auto_join_groups_from_file(account_id, group_links, logs_channel_id=None, user_id=None):
+    """Auto join multiple groups from a list of links with user-specific logs"""
     joined = 0
     failed = 0
     already_member = 0
     
-    if iSinStance(account_id, Str):
+    if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await databaSe.get_account(account_id)
-    account_name = account.get('account_firSt_name', 'Unknown') if account elSe 'Unknown'
+    account = await database.get_account(account_id)
+    account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
-    for link in group_linkS:
+    for link in group_links:
         try:
-            reSult = await join_group_by_link(account_id, link)
-            if reSult["SucceSS"]:
+            result = await join_group_by_link(account_id, link)
+            if result["success"]:
                 joined += 1
-                # Log to uSer'S logS channel only
-                if logS_channel_id:
-                    await log_auto_join_to_channel(logS_channel_id, account_name, reSult.get('group_title', 'Unknown'), link, True)
-            elif "Already a member" in reSult.get('error', ''):
+                # Log to user's logs channel only
+                if logs_channel_id:
+                    await log_auto_join_to_channel(logs_channel_id, account_name, result.get('group_title', 'Unknown'), link, True)
+            elif "Already a member" in result.get('error', ''):
                 already_member += 1
-            elSe:
+            else:
                 failed += 1
-                # Log to uSer'S logS channel only
-                if logS_channel_id:
-                    await log_auto_join_to_channel(logS_channel_id, account_name, 'Unknown', link, FalSe, reSult.get('error'))
+                # Log to user's logs channel only
+                if logs_channel_id:
+                    await log_auto_join_to_channel(logs_channel_id, account_name, 'Unknown', link, False, result.get('error'))
             
-            await aSyncio.Sleep(3)  # Delay between joinS
-        eXcept EXception aS e:
+            await asyncio.sleep(3)  # Delay between joins
+        except Exception as e:
             logger.error(f"Error auto-joining group: {e}")
             failed += 1
-            if logS_channel_id:
-                await log_auto_join_to_channel(logS_channel_id, account_name, 'Unknown', link, FalSe, Str(e))
+            if logs_channel_id:
+                await log_auto_join_to_channel(logs_channel_id, account_name, 'Unknown', link, False, str(e))
     
     return {
-        "SucceSS": True,
+        "success": True,
         "joined": joined,
         "already_member": already_member,
         "failed": failed,
-        "total": len(group_linkS)
+        "total": len(group_links)
     }
 
-aSync def log_auto_join_to_channel(logS_channel_id, account_name, group_title, link, SucceSS, error=None):
-    """Log auto-join StatuS to uSer'S logS channel only"""
+async def log_auto_join_to_channel(logs_channel_id, account_name, group_title, link, success, error=None):
+    """Log auto-join status to user's logs channel only"""
     try:
         from telegram import Bot
         bot = Bot(token=config.BOT_TOKEN)
         
-        if SucceSS:
-            log_teXt = f"""
+        if success:
+            log_text = f"""
 <b>✅ GROUP JOINED</b>
 
 <b>ACCOUNT:</b> <code>{account_name}</code>
 <b>GROUP:</b> <code>{group_title}</code>
 <b>LINK:</b> <code>{link}</code>
-<b>TIME:</b> <code>{datetime.utcnow().Strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
-        elSe:
-            log_teXt = f"""
+        else:
+            log_text = f"""
 <b>❌ GROUP JOIN FAILED</b>
 
 <b>ACCOUNT:</b> <code>{account_name}</code>
 <b>LINK:</b> <code>{link}</code>
 <b>ERROR:</b> <code>{error or 'Unknown error'}</code>
-<b>TIME:</b> <code>{datetime.utcnow().Strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         
-        await bot.Send_meSSage(int(logS_channel_id), log_teXt, parSe_mode="HTML")
-    eXcept EXception aS e:
+        await bot.send_message(int(logs_channel_id), log_text, parse_mode="HTML")
+    except Exception as e:
         logger.error(f"Error logging auto-join to channel: {e}")
 
 
-aSync def get_Saved_meSSage_id(account_id):
+async def get_saved_message_id(account_id):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
             return None
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
+        if not await client.is_user_authorized():
+            await client.disconnect()
             return None
         
         me = await client.get_me()
-        meSSageS = await client.get_meSSageS(me, limit=1)
+        messages = await client.get_messages(me, limit=1)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        if meSSageS and len(meSSageS) > 0:
-            return meSSageS[0].id
+        if messages and len(messages) > 0:
+            return messages[0].id
         return None
-    eXcept EXception aS e:
-        logger.error(f"Error getting Saved meSSage: {e}")
+    except Exception as e:
+        logger.error(f"Error getting saved message: {e}")
         return None
 
-aSync def forward_from_Saved_meSSageS(account_id, chat_id, acceSS_haSh=None):
+async def forward_from_saved_messages(account_id, chat_id, access_hash=None):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
         me = await client.get_me()
-        meSSageS = await client.get_meSSageS(me, limit=1)
+        messages = await client.get_messages(me, limit=1)
         
-        if not meSSageS or len(meSSageS) == 0:
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "No meSSage in Saved meSSageS. PleaSe add a meSSage to your Saved MeSSageS firSt."}
+        if not messages or len(messages) == 0:
+            await client.disconnect()
+            return {"success": False, "error": "No message in saved messages. Please add a message to your Saved Messages first."}
         
-        Source_meSSage = meSSageS[0]
+        source_message = messages[0]
         
         try:
             entity = await client.get_entity(chat_id)
-        eXcept ValueError:
-            if acceSS_haSh iS not None:
-                entity = InputPeerChannel(channel_id=chat_id, acceSS_haSh=acceSS_haSh)
-            elSe:
+        except ValueError:
+            if access_hash is not None:
+                entity = InputPeerChannel(channel_id=chat_id, access_hash=access_hash)
+            else:
                 entity = chat_id
         
-        await client.forward_meSSageS(entity, Source_meSSage.id, me)
+        await client.forward_messages(entity, source_message.id, me)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        await databaSe.update_account(account_id, laSt_uSed=datetime.utcnow())
-        await databaSe.increment_StatS(account_id, "meSSageS_Sent")
+        await database.update_account(account_id, last_used=datetime.utcnow())
+        await database.increment_stats(account_id, "messages_sent")
         
-        return {"SucceSS": True}
-    eXcept EXception aS e:
-        logger.error(f"Error forwarding from Saved: {e}")
-        await databaSe.increment_StatS(account_id, "meSSageS_failed")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True}
+    except Exception as e:
+        logger.error(f"Error forwarding from saved: {e}")
+        await database.increment_stats(account_id, "messages_failed")
+        return {"success": False, "error": str(e)}
 
-aSync def Send_meSSage_to_chat(account_id, chat_id, meSSage, acceSS_haSh=None, uSe_forward=FalSe):
+async def send_message_to_chat(account_id, chat_id, message, access_hash=None, use_forward=False):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
         try:
             entity = await client.get_entity(chat_id)
-        eXcept ValueError:
-            if acceSS_haSh iS not None:
-                entity = InputPeerChannel(channel_id=chat_id, acceSS_haSh=acceSS_haSh)
-            elSe:
+        except ValueError:
+            if access_hash is not None:
+                entity = InputPeerChannel(channel_id=chat_id, access_hash=access_hash)
+            else:
                 entity = chat_id
         
-        if uSe_forward:
+        if use_forward:
             me = await client.get_me()
-            meSSageS = await client.get_meSSageS(me, limit=1)
+            messages = await client.get_messages(me, limit=1)
             
-            if meSSageS and len(meSSageS) > 0:
-                await client.forward_meSSageS(entity, meSSageS[0].id, me)
-            elSe:
-                await client.Send_meSSage(entity, meSSage)
-        elSe:
-            await client.Send_meSSage(entity, meSSage)
+            if messages and len(messages) > 0:
+                await client.forward_messages(entity, messages[0].id, me)
+            else:
+                await client.send_message(entity, message)
+        else:
+            await client.send_message(entity, message)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        await databaSe.update_account(account_id, laSt_uSed=datetime.utcnow())
-        await databaSe.increment_StatS(account_id, "meSSageS_Sent")
+        await database.update_account(account_id, last_used=datetime.utcnow())
+        await database.increment_stats(account_id, "messages_sent")
         
-        return {"SucceSS": True}
-    eXcept EXception aS e:
-        await databaSe.increment_StatS(account_id, "meSSageS_failed")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True}
+    except Exception as e:
+        await database.increment_stats(account_id, "messages_failed")
+        return {"success": False, "error": str(e)}
 
-aSync def Save_meSSage_to_Saved(account_id, meSSage):
+async def save_message_to_saved(account_id, message):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
         me = await client.get_me()
-        Sent_mSg = await client.Send_meSSage(me, meSSage)
+        sent_msg = await client.send_message(me, message)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        return {"SucceSS": True, "meSSage_id": Sent_mSg.id}
-    eXcept EXception aS e:
-        logger.error(f"Error Saving meSSage: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True, "message_id": sent_msg.id}
+    except Exception as e:
+        logger.error(f"Error saving message: {e}")
+        return {"success": False, "error": str(e)}
 
-aSync def forward_meSSage_to_chat(account_id, chat_id, from_peer, meSSage_id, acceSS_haSh=None):
+async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, access_hash=None):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
         try:
             entity = await client.get_entity(chat_id)
-        eXcept ValueError:
-            if acceSS_haSh iS not None:
-                entity = InputPeerChannel(channel_id=chat_id, acceSS_haSh=acceSS_haSh)
-            elSe:
+        except ValueError:
+            if access_hash is not None:
+                entity = InputPeerChannel(channel_id=chat_id, access_hash=access_hash)
+            else:
                 entity = chat_id
         
-        await client.forward_meSSageS(entity, meSSage_id, from_peer)
+        await client.forward_messages(entity, message_id, from_peer)
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        await databaSe.update_account(account_id, laSt_uSed=datetime.utcnow())
-        await databaSe.increment_StatS(account_id, "meSSageS_Sent")
+        await database.update_account(account_id, last_used=datetime.utcnow())
+        await database.increment_stats(account_id, "messages_sent")
         
-        return {"SucceSS": True}
-    eXcept EXception aS e:
-        await databaSe.increment_StatS(account_id, "meSSageS_failed")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True}
+    except Exception as e:
+        await database.increment_stats(account_id, "messages_failed")
+        return {"success": False, "error": str(e)}
 
-aSync def broadcaSt_to_target_groupS(account_id, target_groupS, meSSage, delay=60, uSe_forward=FalSe, logS_channel_id=None):
-    Sent = 0
+async def broadcast_to_target_groups(account_id, target_groups, message, delay=60, use_forward=False, logs_channel_id=None):
+    sent = 0
     failed = 0
     
-    if iSinStance(account_id, Str):
+    if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await databaSe.get_account(account_id)
-    account_name = account.get('account_firSt_name', 'Unknown') if account elSe 'Unknown'
+    account = await database.get_account(account_id)
+    account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
-    for group in target_groupS:
+    for group in target_groups:
         try:
             group_id = group.get('group_id') or group.get('id')
-            acceSS_haSh = group.get('acceSS_haSh')
+            access_hash = group.get('access_hash')
             group_title = group.get('group_title') or group.get('title', 'Unknown')
             
-            if uSe_forward:
-                reSult = await forward_from_Saved_meSSageS(account_id, group_id, acceSS_haSh)
-            elSe:
-                reSult = await Send_meSSage_to_chat(account_id, group_id, meSSage, acceSS_haSh, uSe_forward=FalSe)
+            if use_forward:
+                result = await forward_from_saved_messages(account_id, group_id, access_hash)
+            else:
+                result = await send_message_to_chat(account_id, group_id, message, access_hash, use_forward=False)
             
-            if reSult["SucceSS"]:
-                Sent += 1
-                # Log SucceSSful meSSage
-                if logS_channel_id:
-                    await log_meSSage_to_channel(logS_channel_id, account_name, group_title, group_id, True)
-            elSe:
+            if result["success"]:
+                sent += 1
+                # Log successful message
+                if logs_channel_id:
+                    await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, True)
+            else:
                 failed += 1
-                logger.error(f"Failed to Send to group {group_id}: {reSult.get('error')}")
-                # Log failed meSSage
-                if logS_channel_id:
-                    await log_meSSage_to_channel(logS_channel_id, account_name, group_title, group_id, FalSe, reSult.get('error'))
+                logger.error(f"Failed to send to group {group_id}: {result.get('error')}")
+                # Log failed message
+                if logs_channel_id:
+                    await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, False, result.get('error'))
             
-            await aSyncio.Sleep(delay)
-        eXcept EXception aS e:
-            logger.error(f"BroadcaSt error for group: {e}")
+            await asyncio.sleep(delay)
+        except Exception as e:
+            logger.error(f"Broadcast error for group: {e}")
             failed += 1
-            if logS_channel_id:
-                await log_meSSage_to_channel(logS_channel_id, account_name, group_title, group_id, FalSe, Str(e))
+            if logs_channel_id:
+                await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, False, str(e))
     
-    await databaSe.create_or_update_StatS(account_id, laSt_broadcaSt=datetime.utcnow())
+    await database.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
     
     return {
-        "SucceSS": True,
-        "Sent": Sent,
+        "success": True,
+        "sent": sent,
         "failed": failed,
-        "total": len(target_groupS)
+        "total": len(target_groups)
     }
 
-aSync def broadcaSt_meSSage(account_id, meSSage, delay=60, uSe_forward=FalSe, logS_channel_id=None):
-    reSult = await get_groupS_and_marketplaceS(account_id)
-    if not reSult["SucceSS"]:
-        return reSult
+async def broadcast_message(account_id, message, delay=60, use_forward=False, logs_channel_id=None):
+    result = await get_groups_and_marketplaces(account_id)
+    if not result["success"]:
+        return result
     
-    all_chatS = reSult["groupS"] + reSult["marketplaceS"]
-    Sent = 0
+    all_chats = result["groups"] + result["marketplaces"]
+    sent = 0
     failed = 0
     
-    if iSinStance(account_id, Str):
+    if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await databaSe.get_account(account_id)
-    account_name = account.get('account_firSt_name', 'Unknown') if account elSe 'Unknown'
+    account = await database.get_account(account_id)
+    account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
-    for chat in all_chatS:
+    for chat in all_chats:
         try:
-            if uSe_forward:
-                Send_reSult = await forward_from_Saved_meSSageS(account_id, chat["id"], chat.get("acceSS_haSh"))
-            elSe:
-                Send_reSult = await Send_meSSage_to_chat(account_id, chat["id"], meSSage, chat.get("acceSS_haSh"))
+            if use_forward:
+                send_result = await forward_from_saved_messages(account_id, chat["id"], chat.get("access_hash"))
+            else:
+                send_result = await send_message_to_chat(account_id, chat["id"], message, chat.get("access_hash"))
             
-            if Send_reSult["SucceSS"]:
-                Sent += 1
-                # Log SucceSSful meSSage
-                if logS_channel_id:
-                    await log_meSSage_to_channel(logS_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], True)
-            elSe:
+            if send_result["success"]:
+                sent += 1
+                # Log successful message
+                if logs_channel_id:
+                    await log_message_to_channel(logs_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], True)
+            else:
                 failed += 1
-                # Log failed meSSage
-                if logS_channel_id:
-                    await log_meSSage_to_channel(logS_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], FalSe, Send_reSult.get('error'))
+                # Log failed message
+                if logs_channel_id:
+                    await log_message_to_channel(logs_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], False, send_result.get('error'))
             
-            await aSyncio.Sleep(delay)
-        eXcept EXception aS e:
-            logger.error(f"BroadcaSt error: {e}")
+            await asyncio.sleep(delay)
+        except Exception as e:
+            logger.error(f"Broadcast error: {e}")
             failed += 1
-            if logS_channel_id:
-                await log_meSSage_to_channel(logS_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], FalSe, Str(e))
+            if logs_channel_id:
+                await log_message_to_channel(logs_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], False, str(e))
     
-    if iSinStance(account_id, Str):
+    if isinstance(account_id, str):
         account_id = int(account_id)
-    await databaSe.create_or_update_StatS(account_id, laSt_broadcaSt=datetime.utcnow())
+    await database.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
     
     return {
-        "SucceSS": True,
-        "Sent": Sent,
+        "success": True,
+        "sent": sent,
         "failed": failed,
-        "total": len(all_chatS)
+        "total": len(all_chats)
     }
 
-aSync def log_meSSage_to_channel(logS_channel_id, account_name, group_title, group_id, SucceSS, error=None):
-    """Log meSSage Send StatuS to logS channel"""
+async def log_message_to_channel(logs_channel_id, account_name, group_title, group_id, success, error=None):
+    """Log message send status to logs channel"""
     try:
         from telegram import Bot
         bot = Bot(token=config.BOT_TOKEN)
         
-        if SucceSS:
-            log_teXt = f"""
+        if success:
+            log_text = f"""
 <b>✅ MESSAGE SENT</b>
 
 <b>ACCOUNT:</b> <code>{account_name}</code>
 <b>GROUP:</b> <code>{group_title}</code>
 <b>GROUP ID:</b> <code>{group_id}</code>
-<b>TIME:</b> <code>{datetime.utcnow().Strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
-        elSe:
-            log_teXt = f"""
+        else:
+            log_text = f"""
 <b>❌ MESSAGE FAILED</b>
 
 <b>ACCOUNT:</b> <code>{account_name}</code>
 <b>GROUP:</b> <code>{group_title}</code>
 <b>GROUP ID:</b> <code>{group_id}</code>
 <b>ERROR:</b> <code>{error or 'Unknown error'}</code>
-<b>TIME:</b> <code>{datetime.utcnow().Strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         
-        await bot.Send_meSSage(int(logS_channel_id), log_teXt, parSe_mode="HTML")
-    eXcept EXception aS e:
+        await bot.send_message(int(logs_channel_id), log_text, parse_mode="HTML")
+    except Exception as e:
         logger.error(f"Error logging to channel: {e}")
 
-aSync def get_account_info(api_id, api_haSh, SeSSion_String):
+async def get_account_info(api_id, api_hash, session_string):
     try:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Not authorized"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Not authorized"}
         
         me = await client.get_me()
-        await client.diSconnect()
+        await client.disconnect()
         
         return {
-            "SucceSS": True,
-            "firSt_name": me.firSt_name or "",
-            "laSt_name": me.laSt_name or "",
-            "uSername": me.uSername or "",
+            "success": True,
+            "first_name": me.first_name or "",
+            "last_name": me.last_name or "",
+            "username": me.username or "",
             "phone": me.phone or ""
         }
-    eXcept EXception aS e:
+    except Exception as e:
         logger.error(f"Error getting account info: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
-aSync def update_account_profile(api_id, api_haSh, SeSSion_String, firSt_name=None, laSt_name=None, about=None):
+async def update_account_profile(api_id, api_hash, session_string, first_name=None, last_name=None, about=None):
     try:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Not authorized"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Not authorized"}
         
-        await client(UpdateProfileRequeSt(
-            firSt_name=firSt_name,
-            laSt_name=laSt_name,
+        await client(UpdateProfileRequest(
+            first_name=first_name,
+            last_name=last_name,
             about=about
         ))
         
-        new_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+        new_session = client.session.save()
+        await client.disconnect()
         
-        return {"SucceSS": True, "SeSSion_String": new_SeSSion}
-    eXcept EXception aS e:
+        return {"success": True, "session_string": new_session}
+    except Exception as e:
         logger.error(f"Error updating profile: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
-aSync def update_account_bio(api_id, api_haSh, SeSSion_String, bio):
+async def update_account_bio(api_id, api_hash, session_string, bio):
     try:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Not authorized"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Not authorized"}
         
-        await client(UpdateProfileRequeSt(about=bio))
+        await client(UpdateProfileRequest(about=bio))
         
-        new_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+        new_session = client.session.save()
+        await client.disconnect()
         
-        return {"SucceSS": True, "SeSSion_String": new_SeSSion}
-    eXcept EXception aS e:
+        return {"success": True, "session_string": new_session}
+    except Exception as e:
         logger.error(f"Error updating bio: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
-aSync def update_account_name(api_id, api_haSh, SeSSion_String, firSt_name, laSt_name=None):
+async def update_account_name(api_id, api_hash, session_string, first_name, last_name=None):
     try:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Not authorized"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Not authorized"}
         
-        await client(UpdateProfileRequeSt(
-            firSt_name=firSt_name,
-            laSt_name=laSt_name if laSt_name elSe ""
+        await client(UpdateProfileRequest(
+            first_name=first_name,
+            last_name=last_name if last_name else ""
         ))
         
-        new_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+        new_session = client.session.save()
+        await client.disconnect()
         
-        return {"SucceSS": True, "SeSSion_String": new_SeSSion}
-    eXcept EXception aS e:
+        return {"success": True, "session_string": new_session}
+    except Exception as e:
         logger.error(f"Error updating name: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
-aSync def join_group_by_link(account_id, invite_link):
+async def join_group_by_link(account_id, invite_link):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
-        haSh_pattern = re.compile(r'(?:httpS?://)?(?:t\.me|telegram\.me)/(?:joinchat/|\+)([a-zA-Z0-9_-]+)')
-        uSername_pattern = re.compile(r'(?:httpS?://)?(?:t\.me|telegram\.me)/([a-zA-Z][a-zA-Z0-9_]{4,})')
+        hash_pattern = re.compile(r'(?:https?://)?(?:t\.me|telegram\.me)/(?:joinchat/|\+)([a-zA-Z0-9_-]+)')
+        username_pattern = re.compile(r'(?:https?://)?(?:t\.me|telegram\.me)/([a-zA-Z][a-zA-Z0-9_]{4,})')
         
-        haSh_match = haSh_pattern.Search(invite_link)
-        uSername_match = uSername_pattern.Search(invite_link)
+        hash_match = hash_pattern.search(invite_link)
+        username_match = username_pattern.search(invite_link)
         
         group_title = None
         group_id = None
         
-        if haSh_match:
-            invite_haSh = haSh_match.group(1)
+        if hash_match:
+            invite_hash = hash_match.group(1)
             try:
-                reSult = await client(ImportChatInviteRequeSt(invite_haSh))
-                if haSattr(reSult, 'chatS') and reSult.chatS:
-                    chat = reSult.chatS[0]
+                result = await client(ImportChatInviteRequest(invite_hash))
+                if hasattr(result, 'chats') and result.chats:
+                    chat = result.chats[0]
                     group_title = getattr(chat, 'title', None)
                     group_id = chat.id
-            eXcept USerAlreadyParticipantError:
-                await client.diSconnect()
-                return {"SucceSS": FalSe, "error": "Already a member of thiS group"}
-            eXcept (InviteHaShEXpiredError, InviteHaShInvalidError):
-                await client.diSconnect()
-                return {"SucceSS": FalSe, "error": "Invalid or eXpired invite link"}
-        elif uSername_match:
-            uSername = uSername_match.group(1)
+            except UserAlreadyParticipantError:
+                await client.disconnect()
+                return {"success": False, "error": "Already a member of this group"}
+            except (InviteHashExpiredError, InviteHashInvalidError):
+                await client.disconnect()
+                return {"success": False, "error": "Invalid or expired invite link"}
+        elif username_match:
+            username = username_match.group(1)
             try:
-                entity = await client.get_entity(uSername)
-                await client(JoinChannelRequeSt(entity))
+                entity = await client.get_entity(username)
+                await client(JoinChannelRequest(entity))
                 group_title = getattr(entity, 'title', None)
                 group_id = entity.id
-            eXcept USerAlreadyParticipantError:
-                await client.diSconnect()
-                return {"SucceSS": FalSe, "error": "Already a member of thiS group"}
-        elSe:
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Invalid invite link format"}
+            except UserAlreadyParticipantError:
+                await client.disconnect()
+                return {"success": False, "error": "Already a member of this group"}
+        else:
+            await client.disconnect()
+            return {"success": False, "error": "Invalid invite link format"}
         
-        await client.diSconnect()
+        await client.disconnect()
         
-        await databaSe.log_group_join(account_id, group_id, group_title, invite_link)
-        await databaSe.increment_StatS(account_id, "groupS_joined")
+        await database.log_group_join(account_id, group_id, group_title, invite_link)
+        await database.increment_stats(account_id, "groups_joined")
         
-        return {"SucceSS": True, "group_title": group_title, "group_id": group_id}
-    eXcept EXception aS e:
+        return {"success": True, "group_title": group_title, "group_id": group_id}
+    except Exception as e:
         logger.error(f"Error joining group: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": False, "error": str(e)}
 
-aSync def Send_auto_reply(account_id, to_uSer_id, reply_teXt):
+async def send_auto_reply(account_id, to_user_id, reply_text):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
         
-        already_replied = await databaSe.haS_replied_to_uSer(account_id, to_uSer_id)
+        already_replied = await database.has_replied_to_user(account_id, to_user_id)
         if already_replied:
-            return {"SucceSS": FalSe, "error": "Already replied to thiS uSer"}
+            return {"success": False, "error": "Already replied to this user"}
         
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            return {"SucceSS": FalSe, "error": "Account not logged in"}
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            return {"success": False, "error": "Account not logged in"}
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "SeSSion eXpired"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Session expired"}
         
-        await client.Send_meSSage(to_uSer_id, reply_teXt)
-        await client.diSconnect()
+        await client.send_message(to_user_id, reply_text)
+        await client.disconnect()
         
-        await databaSe.mark_uSer_replied(account_id, to_uSer_id)
-        await databaSe.increment_StatS(account_id, "auto_replieS_Sent")
+        await database.mark_user_replied(account_id, to_user_id)
+        await database.increment_stats(account_id, "auto_replies_sent")
         
-        return {"SucceSS": True}
-    eXcept EXception aS e:
-        logger.error(f"Error Sending auto reply: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True}
+    except Exception as e:
+        logger.error(f"Error sending auto reply: {e}")
+        return {"success": False, "error": str(e)}
 
-aSync def apply_profile_changeS(api_id, api_haSh, SeSSion_String):
+async def apply_profile_changes(api_id, api_hash, session_string):
     try:
-        client = TelegramClient(StringSeSSion(SeSSion_String), api_id, api_haSh)
+        client = TelegramClient(StringSession(session_string), api_id, api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            return {"SucceSS": FalSe, "error": "Not authorized"}
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            return {"success": False, "error": "Not authorized"}
         
         me = await client.get_me()
-        current_name = me.firSt_name or ""
+        current_name = me.first_name or ""
         
-        new_firSt_name = current_name
+        new_first_name = current_name
         if config.ACCOUNT_NAME_SUFFIX and config.ACCOUNT_NAME_SUFFIX not in current_name:
-            new_firSt_name = f"{current_name} {config.ACCOUNT_NAME_SUFFIX}"
+            new_first_name = f"{current_name} {config.ACCOUNT_NAME_SUFFIX}"
         
-        await client(UpdateProfileRequeSt(
-            firSt_name=new_firSt_name,
+        await client(UpdateProfileRequest(
+            first_name=new_first_name,
             about=config.ACCOUNT_BIO_TEMPLATE
         ))
         
-        new_SeSSion = client.SeSSion.Save()
-        await client.diSconnect()
+        new_session = client.session.save()
+        await client.disconnect()
         
-        return {"SucceSS": True, "SeSSion_String": new_SeSSion, "firSt_name": new_firSt_name}
-    eXcept EXception aS e:
-        logger.error(f"Error applying profile changeS: {e}")
-        return {"SucceSS": FalSe, "error": Str(e)}
+        return {"success": True, "session_string": new_session, "first_name": new_first_name}
+    except Exception as e:
+        logger.error(f"Error applying profile changes: {e}")
+        return {"success": False, "error": str(e)}
 
-aSync def Start_auto_reply_liStener(account_id, uSer_id, reply_teXt):
+async def start_auto_reply_listener(account_id, user_id, reply_text):
     try:
-        if iSinStance(account_id, Str):
+        if isinstance(account_id, str):
             account_id = int(account_id)
         
-        account = await databaSe.get_account(account_id)
-        if not account or not account.get('iS_logged_in'):
-            logger.warning(f"Cannot Start auto-reply for account {account_id}: not logged in")
-            return FalSe
+        account = await database.get_account(account_id)
+        if not account or not account.get('is_logged_in'):
+            logger.warning(f"Cannot start auto-reply for account {account_id}: not logged in")
+            return False
         
         api_id = decrypt_data(account.get('api_id', ''))
-        api_haSh = decrypt_data(account.get('api_haSh', ''))
-        SeSSion_String = decrypt_data(account.get('SeSSion_String', ''))
+        api_hash = decrypt_data(account.get('api_hash', ''))
+        session_string = decrypt_data(account.get('session_string', ''))
         
-        client_key = Str(account_id)
+        client_key = str(account_id)
         
-        if client_key in active_clientS:
-            logger.info(f"Auto-reply liStener already running for account {account_id}")
+        if client_key in active_clients:
+            logger.info(f"Auto-reply listener already running for account {account_id}")
             return True
         
-        client = TelegramClient(StringSeSSion(SeSSion_String), int(api_id), api_haSh)
+        client = TelegramClient(StringSession(session_string), int(api_id), api_hash)
         await client.connect()
         
-        if not await client.iS_uSer_authorized():
-            await client.diSconnect()
-            logger.warning(f"SeSSion eXpired for account {account_id}")
-            return FalSe
+        if not await client.is_user_authorized():
+            await client.disconnect()
+            logger.warning(f"Session expired for account {account_id}")
+            return False
         
-        @client.on(eventS.NewMeSSage(incoming=True))
-        aSync def handle_new_meSSage(event):
+        @client.on(events.NewMessage(incoming=True))
+        async def handle_new_message(event):
             try:
-                if event.iS_private and not event.meSSage.out:
-                    Sender = await event.get_Sender()
-                    if Sender and not Sender.bot:
-                        Sender_id = Sender.id
-                        Sender_uSername = Sender.uSername
+                if event.is_private and not event.message.out:
+                    sender = await event.get_sender()
+                    if sender and not sender.bot:
+                        sender_id = sender.id
+                        sender_username = sender.username
                         
-                        already_replied = await databaSe.haS_replied_to_uSer(account_id, Sender_id)
+                        already_replied = await database.has_replied_to_user(account_id, sender_id)
                         if not already_replied:
-                            await event.reSpond(reply_teXt)
-                            await databaSe.mark_uSer_replied(account_id, Sender_id, Sender_uSername)
-                            await databaSe.log_auto_reply(account_id, Sender_id, Sender_uSername)
-                            await databaSe.increment_StatS(account_id, "auto_replieS_Sent")
-                            logger.info(f"Auto-replied to uSer {Sender_id} from account {account_id}")
-            eXcept EXception aS e:
+                            await event.respond(reply_text)
+                            await database.mark_user_replied(account_id, sender_id, sender_username)
+                            await database.log_auto_reply(account_id, sender_id, sender_username)
+                            await database.increment_stats(account_id, "auto_replies_sent")
+                            logger.info(f"Auto-replied to user {sender_id} from account {account_id}")
+            except Exception as e:
                 logger.error(f"Error in auto-reply handler: {e}")
         
-        active_clientS[client_key] = {
+        active_clients[client_key] = {
             "client": client,
-            "uSer_id": uSer_id,
+            "user_id": user_id,
             "account_id": account_id
         }
         
-        aSyncio.create_taSk(client.run_until_diSconnected())
-        logger.info(f"Started auto-reply liStener for account {account_id}")
+        asyncio.create_task(client.run_until_disconnected())
+        logger.info(f"Started auto-reply listener for account {account_id}")
         return True
         
-    eXcept EXception aS e:
-        logger.error(f"Error Starting auto-reply liStener: {e}")
-        return FalSe
+    except Exception as e:
+        logger.error(f"Error starting auto-reply listener: {e}")
+        return False
 
-aSync def Stop_auto_reply_liStener(account_id):
+async def stop_auto_reply_listener(account_id):
     try:
-        client_key = Str(account_id)
+        client_key = str(account_id)
         
-        if client_key in active_clientS:
-            client_data = active_clientS[client_key]
+        if client_key in active_clients:
+            client_data = active_clients[client_key]
             client = client_data["client"]
-            await client.diSconnect()
-            del active_clientS[client_key]
-            logger.info(f"Stopped auto-reply liStener for account {account_id}")
+            await client.disconnect()
+            del active_clients[client_key]
+            logger.info(f"Stopped auto-reply listener for account {account_id}")
             return True
-        return FalSe
-    eXcept EXception aS e:
-        logger.error(f"Error Stopping auto-reply liStener: {e}")
-        return FalSe
+        return False
+    except Exception as e:
+        logger.error(f"Error stopping auto-reply listener: {e}")
+        return False
 
-aSync def Start_all_auto_reply_liStenerS(uSer_id, reply_teXt):
+async def start_all_auto_reply_listeners(user_id, reply_text):
     try:
-        accountS = await databaSe.get_accountS(uSer_id, logged_in_only=True)
-        Started = 0
+        accounts = await database.get_accounts(user_id, logged_in_only=True)
+        started = 0
         
-        for account in accountS:
-            account_id = account["_id"]
-            SucceSS = await Start_auto_reply_liStener(account_id, uSer_id, reply_teXt)
-            if SucceSS:
-                Started += 1
+        for account in accounts:
+            account_id = account["id"]
+            success = await start_auto_reply_listener(account_id, user_id, reply_text)
+            if success:
+                started += 1
         
-        logger.info(f"Started auto-reply for {Started}/{len(accountS)} accountS for uSer {uSer_id}")
-        return Started
-    eXcept EXception aS e:
-        logger.error(f"Error Starting all auto-reply liStenerS: {e}")
+        logger.info(f"Started auto-reply for {started}/{len(accounts)} accounts for user {user_id}")
+        return started
+    except Exception as e:
+        logger.error(f"Error starting all auto-reply listeners: {e}")
         return 0
 
-aSync def Stop_all_auto_reply_liStenerS(uSer_id):
+async def stop_all_auto_reply_listeners(user_id):
     try:
-        Stopped = 0
+        stopped = 0
         to_remove = []
         
-        for client_key, client_data in active_clientS.itemS():
-            if client_data.get("uSer_id") == uSer_id:
+        for client_key, client_data in active_clients.items():
+            if client_data.get("user_id") == user_id:
                 to_remove.append(client_key)
         
         for client_key in to_remove:
-            client_data = active_clientS[client_key]
+            client_data = active_clients[client_key]
             client = client_data["client"]
-            await client.diSconnect()
-            del active_clientS[client_key]
-            Stopped += 1
+            await client.disconnect()
+            del active_clients[client_key]
+            stopped += 1
         
-        logger.info(f"Stopped auto-reply for {Stopped} accountS for uSer {uSer_id}")
-        return Stopped
-    eXcept EXception aS e:
-        logger.error(f"Error Stopping all auto-reply liStenerS: {e}")
+        logger.info(f"Stopped auto-reply for {stopped} accounts for user {user_id}")
+        return stopped
+    except Exception as e:
+        logger.error(f"Error stopping all auto-reply listeners: {e}")
         return 0
 
-# Auto Join GroupS from File
-aSync def auto_join_groupS_from_file(account_id, group_linkS, logS_channel_id=None):
-    """Auto join multiple groupS from a liSt of linkS"""
+# Auto Join Groups from File
+async def auto_join_groups_from_file(account_id, group_links, logs_channel_id=None):
+    """Auto join multiple groups from a list of links"""
     joined = 0
     failed = 0
     already_member = 0
     
-    if iSinStance(account_id, Str):
+    if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await databaSe.get_account(account_id)
-    account_name = account.get('account_firSt_name', 'Unknown') if account elSe 'Unknown'
+    account = await database.get_account(account_id)
+    account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
-    for link in group_linkS:
+    for link in group_links:
         try:
-            reSult = await join_group_by_link(account_id, link)
-            if reSult["SucceSS"]:
+            result = await join_group_by_link(account_id, link)
+            if result["success"]:
                 joined += 1
-                if logS_channel_id:
-                    await log_auto_join_to_channel(logS_channel_id, account_name, reSult.get('group_title', 'Unknown'), link, True)
-            elif "Already a member" in reSult.get('error', ''):
+                if logs_channel_id:
+                    await log_auto_join_to_channel(logs_channel_id, account_name, result.get('group_title', 'Unknown'), link, True)
+            elif "Already a member" in result.get('error', ''):
                 already_member += 1
-            elSe:
+            else:
                 failed += 1
-                if logS_channel_id:
-                    await log_auto_join_to_channel(logS_channel_id, account_name, 'Unknown', link, FalSe, reSult.get('error'))
+                if logs_channel_id:
+                    await log_auto_join_to_channel(logs_channel_id, account_name, 'Unknown', link, False, result.get('error'))
             
-            await aSyncio.Sleep(3)  # Delay between joinS
-        eXcept EXception aS e:
+            await asyncio.sleep(3)  # Delay between joins
+        except Exception as e:
             logger.error(f"Error auto-joining group: {e}")
             failed += 1
-            if logS_channel_id:
-                await log_auto_join_to_channel(logS_channel_id, account_name, 'Unknown', link, FalSe, Str(e))
+            if logs_channel_id:
+                await log_auto_join_to_channel(logs_channel_id, account_name, 'Unknown', link, False, str(e))
     
     return {
-        "SucceSS": True,
+        "success": True,
         "joined": joined,
         "already_member": already_member,
         "failed": failed,
-        "total": len(group_linkS)
+        "total": len(group_links)
     }
 
-aSync def log_auto_join_to_channel(logS_channel_id, account_name, group_title, link, SucceSS, error=None):
-    """Log auto-join StatuS to logS channel"""
+async def log_auto_join_to_channel(logs_channel_id, account_name, group_title, link, success, error=None):
+    """Log auto-join status to logs channel"""
     try:
         from telegram import Bot
         bot = Bot(token=config.BOT_TOKEN)
         
-        if SucceSS:
-            log_teXt = f"""
+        if success:
+            log_text = f"""
 <b>✅ GROUP JOINED</b>
 
 <b>ACCOUNT:</b> <code>{account_name}</code>
 <b>GROUP:</b> <code>{group_title}</code>
 <b>LINK:</b> <code>{link}</code>
-<b>TIME:</b> <code>{datetime.utcnow().Strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
-        elSe:
-            log_teXt = f"""
+        else:
+            log_text = f"""
 <b>❌ GROUP JOIN FAILED</b>
 
 <b>ACCOUNT:</b> <code>{account_name}</code>
 <b>LINK:</b> <code>{link}</code>
 <b>ERROR:</b> <code>{error or 'Unknown error'}</code>
-<b>TIME:</b> <code>{datetime.utcnow().Strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
+<b>TIME:</b> <code>{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC</code>
 """
         
-        await bot.Send_meSSage(int(logS_channel_id), log_teXt, parSe_mode="HTML")
-    eXcept EXception aS e:
+        await bot.send_message(int(logs_channel_id), log_text, parse_mode="HTML")
+    except Exception as e:
         logger.error(f"Error logging auto-join to channel: {e}")
