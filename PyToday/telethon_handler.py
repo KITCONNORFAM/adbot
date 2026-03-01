@@ -129,7 +129,7 @@ async def get_groups_and_marketplaces(account_id):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -186,7 +186,7 @@ async def get_groups_and_marketplaces(account_id):
         
         await client.disconnect()
         
-        await db.create_or_update_stats(
+        db.create_or_update_stats(
             account_id,
             groups_count=len(groups),
             marketplaces_count=len(marketplaces)
@@ -206,7 +206,7 @@ async def get_saved_message_id(account_id):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return None
         
@@ -237,7 +237,7 @@ async def forward_from_saved_messages(account_id, chat_id, access_hash=None):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -273,20 +273,20 @@ async def forward_from_saved_messages(account_id, chat_id, access_hash=None):
         
         await client.disconnect()
         
-        await db.update_account(account_id, last_used=datetime.utcnow())
-        await db.increment_stats(account_id, "messages_sent")
+        db.update_account(account_id, last_used=datetime.utcnow())
+        db.increment_stats(account_id, "messages_sent")
         
         return {"success": True}
     except Exception as e:
         logger.error(f"Error forwarding from saved: {e}")
-        await db.increment_stats(account_id, "messages_failed")
+        db.increment_stats(account_id, "messages_failed")
         return {"success": False, "error": str(e)}
 
 async def send_message_to_chat(account_id, chat_id, message, access_hash=None, use_forward=False):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -322,19 +322,19 @@ async def send_message_to_chat(account_id, chat_id, message, access_hash=None, u
         
         await client.disconnect()
         
-        await db.update_account(account_id, last_used=datetime.utcnow())
-        await db.increment_stats(account_id, "messages_sent")
+        db.update_account(account_id, last_used=datetime.utcnow())
+        db.increment_stats(account_id, "messages_sent")
         
         return {"success": True}
     except Exception as e:
-        await db.increment_stats(account_id, "messages_failed")
+        db.increment_stats(account_id, "messages_failed")
         return {"success": False, "error": str(e)}
 
 async def save_message_to_saved(account_id, message):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -363,7 +363,7 @@ async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, ac
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -390,12 +390,12 @@ async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, ac
         
         await client.disconnect()
         
-        await db.update_account(account_id, last_used=datetime.utcnow())
-        await db.increment_stats(account_id, "messages_sent")
+        db.update_account(account_id, last_used=datetime.utcnow())
+        db.increment_stats(account_id, "messages_sent")
         
         return {"success": True}
     except Exception as e:
-        await db.increment_stats(account_id, "messages_failed")
+        db.increment_stats(account_id, "messages_failed")
         return {"success": False, "error": str(e)}
 
 async def broadcast_to_target_groups(account_id, target_groups, message, delay=60, use_forward=False, logs_channel_id=None):
@@ -406,7 +406,7 @@ async def broadcast_to_target_groups(account_id, target_groups, message, delay=6
     if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await db.get_account(account_id)
+    account = db.get_account(account_id)
     account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
     for group in target_groups:
@@ -439,7 +439,7 @@ async def broadcast_to_target_groups(account_id, target_groups, message, delay=6
             if logs_channel_id:
                 await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, False, str(e))
     
-    await db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
+    db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
     
     return {
         "success": True,
@@ -461,7 +461,7 @@ async def broadcast_message(account_id, message, delay=60, use_forward=False, lo
     if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await db.get_account(account_id)
+    account = db.get_account(account_id)
     account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
     for chat in all_chats:
@@ -491,7 +491,7 @@ async def broadcast_message(account_id, message, delay=60, use_forward=False, lo
     
     if isinstance(account_id, str):
         account_id = int(account_id)
-    await db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
+    db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
     
     return {
         "success": True,
@@ -622,7 +622,7 @@ async def join_group_by_link(account_id, invite_link):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -676,8 +676,8 @@ async def join_group_by_link(account_id, invite_link):
         
         await client.disconnect()
         
-        await db.log_group_join(account_id, group_id, group_title, invite_link)
-        await db.increment_stats(account_id, "groups_joined")
+        db.log_group_join(account_id, group_id, group_title, invite_link)
+        db.increment_stats(account_id, "groups_joined")
         
         return {"success": True, "group_title": group_title, "group_id": group_id}
     except Exception as e:
@@ -689,11 +689,11 @@ async def send_auto_reply(account_id, to_user_id, reply_text):
         if isinstance(account_id, str):
             account_id = int(account_id)
         
-        already_replied = await db.has_replied_to_user(account_id, to_user_id)
+        already_replied = db.has_replied_to_user(account_id, to_user_id)
         if already_replied:
             return {"success": False, "error": "Already replied to this user"}
         
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -711,8 +711,8 @@ async def send_auto_reply(account_id, to_user_id, reply_text):
         await client.send_message(to_user_id, reply_text)
         await client.disconnect()
         
-        await db.mark_user_replied(account_id, to_user_id)
-        await db.increment_stats(account_id, "auto_replies_sent")
+        db.mark_user_replied(account_id, to_user_id)
+        db.increment_stats(account_id, "auto_replies_sent")
         
         return {"success": True}
     except Exception as e:
@@ -866,7 +866,7 @@ async def start_auto_reply_listener(account_id, user_id, reply_text):
         if isinstance(account_id, str):
             account_id = int(account_id)
         
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             logger.warning(f"Cannot start auto-reply for account {account_id}: not logged in")
             return False
@@ -898,12 +898,12 @@ async def start_auto_reply_listener(account_id, user_id, reply_text):
                         sender_id = sender.id
                         sender_username = sender.username
                         
-                        already_replied = await db.has_replied_to_user(account_id, sender_id)
+                        already_replied = db.has_replied_to_user(account_id, sender_id)
                         if not already_replied:
                             await event.respond(reply_text)
-                            await db.mark_user_replied(account_id, sender_id, sender_username)
-                            await db.log_auto_reply(account_id, sender_id, sender_username)
-                            await db.increment_stats(account_id, "auto_replies_sent")
+                            db.mark_user_replied(account_id, sender_id, sender_username)
+                            db.log_auto_reply(account_id, sender_id, sender_username)
+                            db.increment_stats(account_id, "auto_replies_sent")
                             logger.info(f"Auto-replied to user {sender_id} from account {account_id}")
             except Exception as e:
                 logger.error(f"Error in auto-reply handler: {e}")
@@ -940,7 +940,7 @@ async def stop_auto_reply_listener(account_id):
 
 async def start_all_auto_reply_listeners(user_id, reply_text):
     try:
-        accounts = await db.get_accounts(user_id, logged_in_only=True)
+        accounts = db.get_accounts(user_id, logged_in_only=True)
         started = 0
         
         for account in accounts:
@@ -987,7 +987,7 @@ async def auto_join_groups_from_file(account_id, group_links, logs_channel_id=No
     if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await db.get_account(account_id)
+    account = db.get_account(account_id)
     account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
     for link in group_links:
@@ -1055,7 +1055,7 @@ async def get_saved_message_id(account_id):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return None
         
@@ -1086,7 +1086,7 @@ async def forward_from_saved_messages(account_id, chat_id, access_hash=None):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -1122,20 +1122,20 @@ async def forward_from_saved_messages(account_id, chat_id, access_hash=None):
         
         await client.disconnect()
         
-        await db.update_account(account_id, last_used=datetime.utcnow())
-        await db.increment_stats(account_id, "messages_sent")
+        db.update_account(account_id, last_used=datetime.utcnow())
+        db.increment_stats(account_id, "messages_sent")
         
         return {"success": True}
     except Exception as e:
         logger.error(f"Error forwarding from saved: {e}")
-        await db.increment_stats(account_id, "messages_failed")
+        db.increment_stats(account_id, "messages_failed")
         return {"success": False, "error": str(e)}
 
 async def send_message_to_chat(account_id, chat_id, message, access_hash=None, use_forward=False):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -1171,19 +1171,19 @@ async def send_message_to_chat(account_id, chat_id, message, access_hash=None, u
         
         await client.disconnect()
         
-        await db.update_account(account_id, last_used=datetime.utcnow())
-        await db.increment_stats(account_id, "messages_sent")
+        db.update_account(account_id, last_used=datetime.utcnow())
+        db.increment_stats(account_id, "messages_sent")
         
         return {"success": True}
     except Exception as e:
-        await db.increment_stats(account_id, "messages_failed")
+        db.increment_stats(account_id, "messages_failed")
         return {"success": False, "error": str(e)}
 
 async def save_message_to_saved(account_id, message):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -1212,7 +1212,7 @@ async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, ac
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -1239,12 +1239,12 @@ async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, ac
         
         await client.disconnect()
         
-        await db.update_account(account_id, last_used=datetime.utcnow())
-        await db.increment_stats(account_id, "messages_sent")
+        db.update_account(account_id, last_used=datetime.utcnow())
+        db.increment_stats(account_id, "messages_sent")
         
         return {"success": True}
     except Exception as e:
-        await db.increment_stats(account_id, "messages_failed")
+        db.increment_stats(account_id, "messages_failed")
         return {"success": False, "error": str(e)}
 
 async def broadcast_to_target_groups(account_id, target_groups, message, delay=60, use_forward=False, logs_channel_id=None):
@@ -1254,7 +1254,7 @@ async def broadcast_to_target_groups(account_id, target_groups, message, delay=6
     if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await db.get_account(account_id)
+    account = db.get_account(account_id)
     account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
     for group in target_groups:
@@ -1287,7 +1287,7 @@ async def broadcast_to_target_groups(account_id, target_groups, message, delay=6
             if logs_channel_id:
                 await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, False, str(e))
     
-    await db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
+    db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
     
     return {
         "success": True,
@@ -1308,7 +1308,7 @@ async def broadcast_message(account_id, message, delay=60, use_forward=False, lo
     if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await db.get_account(account_id)
+    account = db.get_account(account_id)
     account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
     for chat in all_chats:
@@ -1338,7 +1338,7 @@ async def broadcast_message(account_id, message, delay=60, use_forward=False, lo
     
     if isinstance(account_id, str):
         account_id = int(account_id)
-    await db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
+    db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
     
     return {
         "success": True,
@@ -1468,7 +1468,7 @@ async def join_group_by_link(account_id, invite_link):
     try:
         if isinstance(account_id, str):
             account_id = int(account_id)
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -1522,8 +1522,8 @@ async def join_group_by_link(account_id, invite_link):
         
         await client.disconnect()
         
-        await db.log_group_join(account_id, group_id, group_title, invite_link)
-        await db.increment_stats(account_id, "groups_joined")
+        db.log_group_join(account_id, group_id, group_title, invite_link)
+        db.increment_stats(account_id, "groups_joined")
         
         return {"success": True, "group_title": group_title, "group_id": group_id}
     except Exception as e:
@@ -1535,11 +1535,11 @@ async def send_auto_reply(account_id, to_user_id, reply_text):
         if isinstance(account_id, str):
             account_id = int(account_id)
         
-        already_replied = await db.has_replied_to_user(account_id, to_user_id)
+        already_replied = db.has_replied_to_user(account_id, to_user_id)
         if already_replied:
             return {"success": False, "error": "Already replied to this user"}
         
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             return {"success": False, "error": "Account not logged in"}
         
@@ -1557,8 +1557,8 @@ async def send_auto_reply(account_id, to_user_id, reply_text):
         await client.send_message(to_user_id, reply_text)
         await client.disconnect()
         
-        await db.mark_user_replied(account_id, to_user_id)
-        await db.increment_stats(account_id, "auto_replies_sent")
+        db.mark_user_replied(account_id, to_user_id)
+        db.increment_stats(account_id, "auto_replies_sent")
         
         return {"success": True}
     except Exception as e:
@@ -1599,7 +1599,7 @@ async def start_auto_reply_listener(account_id, user_id, reply_text):
         if isinstance(account_id, str):
             account_id = int(account_id)
         
-        account = await db.get_account(account_id)
+        account = db.get_account(account_id)
         if not account or not account.get('is_logged_in'):
             logger.warning(f"Cannot start auto-reply for account {account_id}: not logged in")
             return False
@@ -1631,12 +1631,12 @@ async def start_auto_reply_listener(account_id, user_id, reply_text):
                         sender_id = sender.id
                         sender_username = sender.username
                         
-                        already_replied = await db.has_replied_to_user(account_id, sender_id)
+                        already_replied = db.has_replied_to_user(account_id, sender_id)
                         if not already_replied:
                             await event.respond(reply_text)
-                            await db.mark_user_replied(account_id, sender_id, sender_username)
-                            await db.log_auto_reply(account_id, sender_id, sender_username)
-                            await db.increment_stats(account_id, "auto_replies_sent")
+                            db.mark_user_replied(account_id, sender_id, sender_username)
+                            db.log_auto_reply(account_id, sender_id, sender_username)
+                            db.increment_stats(account_id, "auto_replies_sent")
                             logger.info(f"Auto-replied to user {sender_id} from account {account_id}")
             except Exception as e:
                 logger.error(f"Error in auto-reply handler: {e}")
@@ -1673,7 +1673,7 @@ async def stop_auto_reply_listener(account_id):
 
 async def start_all_auto_reply_listeners(user_id, reply_text):
     try:
-        accounts = await db.get_accounts(user_id, logged_in_only=True)
+        accounts = db.get_accounts(user_id, logged_in_only=True)
         started = 0
         
         for account in accounts:
@@ -1720,7 +1720,7 @@ async def auto_join_groups_from_file(account_id, group_links, logs_channel_id=No
     if isinstance(account_id, str):
         account_id = int(account_id)
     
-    account = await db.get_account(account_id)
+    account = db.get_account(account_id)
     account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
     for link in group_links:

@@ -413,7 +413,7 @@ def logs_channel_keyboard(has_channel=False, verified=False):
 # Load Groups Options Keyboard
 def load_groups_options_keyboard():
     keyboard = [
-        [InlineKeyboardButton("◈ ʟᴏᴀᴅ ᴍʏ ɢʀᴏᴜᴘs", callback_data="load_my_groups")],
+        [InlineKeyboardButton("◈ LOAD MY GROUPS", callback_data="load_my_groups")],
         [InlineKeyboardButton("◉ ʟᴏᴀᴅ ᴅᴇғᴀᴜʟᴛ ɢʀᴏᴜᴘs", callback_data="load_default_groups")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
