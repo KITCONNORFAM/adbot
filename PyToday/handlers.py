@@ -2007,7 +2007,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         else:
             await update.message.reply_text(
-                f"<b>✅ Error:</b> {result.get('error', 'Unknown error')}",
+                f"<b>❌ Error:</b> {result.get('error', 'Unknown error')}",
                 parse_mode="HTML",
                 reply_markup=main_menu_keyboard()
             )
@@ -2015,7 +2015,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 del user_states[user_id]
 
     elif current_state == "awaiting_2fa":
-        password = text
+        password = text.strip()
 
         await update.message.reply_text(
             "<b>⏳ Verifying 2FA...</b>",
@@ -2063,7 +2063,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         else:
             await update.message.reply_text(
-                f"<b>✅ Error:</b> {result.get('error', 'Unknown error')}",
+                f"<b>❌ Error:</b> {result.get('error', 'Unknown error')}",
                 parse_mode="HTML",
                 reply_markup=twofa_keyboard()
             )
