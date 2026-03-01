@@ -95,17 +95,23 @@ async def send_new_message(query, text, reply_markup=None):
                 logger.warning(f"Caption edit failed: {e}")
                 return
 
+        # Replace text-only messages with a brand new photo message
         try:
-            await query.edit_message_text(text, parse_mode="HTML", reply_markup=reply_markup)
-        except BadRequest as e:
-            if "Message is not modified" not in str(e):
-                raise e
-    except Exception as e:
-        logger.error(f"Failed to edit message: {e}")
+            await query.message.delete()
+        except Exception:
+            pass
+            
         try:
-            await query.message.reply_text(text, parse_mode="HTML", reply_markup=reply_markup)
+            await query.message.reply_photo(
+                photo=config.BOT_IMAGE,
+                caption=text,
+                parse_mode="HTML",
+                reply_markup=reply_markup
+            )
         except Exception as ex:
-            logger.error(f"Failed to send reply: {ex}")
+            logger.error(f"Failed to send photo reply: {ex}")
+    except Exception as e:
+        logger.error(f"Failed to process generic send_new_message: {e}")
 
 
 async def check_force_sub_required(user_id: int, context: ContextTypes.DEFAULT_TYPE):
