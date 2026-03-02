@@ -574,6 +574,17 @@ def get_account(account_id) -> Optional[Dict]:
 
 def create_account(user_id: int, phone: str, api_id: str, api_hash: str) -> Dict:
     db = get_client()
+    
+    # Check if this phone number already exists for this user to avoid duplicate accounts and wiped settings
+    existing_result = db.table("telegram_accounts").select("*").eq("user_id", user_id).eq("phone", phone).execute()
+    if existing_result.data:
+        acct = existing_result.data[0]
+        db.table("telegram_accounts").update({
+            "api_id": api_id,
+            "api_hash": api_hash
+        }).eq("id", acct["id"]).execute()
+        return acct
+
     result = db.table("telegram_accounts").insert({
         "user_id": user_id,
         "phone": phone,
@@ -582,9 +593,14 @@ def create_account(user_id: int, phone: str, api_id: str, api_hash: str) -> Dict
         "created_at": _now_iso()
     }).execute()
     acct = result.data[0]
-    # Init settings and stats rows
-    db.table("account_settings").insert({"account_id": acct["id"]}).execute()
-    db.table("account_stats").insert({"account_id": acct["id"]}).execute()
+    
+    # Init settings and stats rows only for brand new accounts
+    try:
+        db.table("account_settings").insert({"account_id": acct["id"]}).execute()
+        db.table("account_stats").insert({"account_id": acct["id"]}).execute()
+    except Exception as e:
+        logger.warning(f"Error initializing stats/settings (may already exist): {e}")
+        
     return acct
 
 
