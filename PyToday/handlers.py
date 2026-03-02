@@ -993,10 +993,11 @@ async def set_target_all_groups(query, user_id):
 
 async def show_selected_groups_menu(query, user_id):
     accounts = db.get_accounts(user_id, logged_in_only=True)
-    if accounts:
-        db.update_account_settings(accounts[0]["id"], target_mode="selected")
+    if not accounts: return
+    account_id = accounts[0]["id"]
+    db.update_account_settings(account_id, target_mode="selected")
 
-    target_groups = db.get_target_groups(user_id)
+    target_groups = db.get_target_groups(account_id)
 
     menu_text = f"""
 <b>🕐¯ sᴇʟᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs</b>
@@ -1026,7 +1027,9 @@ Forward a message from the group to @userinfobot
 
 
 async def remove_target_group(query, user_id, group_id):
-    removed = db.remove_target_group(user_id, group_id)
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    if not accounts: return
+    removed = db.remove_target_group(accounts[0]["id"], group_id)
 
     if removed:
         result_text = f"""
@@ -1044,7 +1047,8 @@ Group <code>{group_id}</code> not found.
 
 
 async def show_remove_target_groups(query, user_id, page=0):
-    target_groups = db.get_target_groups(user_id)
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    target_groups = db.get_target_groups(accounts[0]["id"]) if accounts else []
 
     if not target_groups:
         await send_new_message(
@@ -1061,8 +1065,10 @@ async def show_remove_target_groups(query, user_id, page=0):
     )
 
 
-async def clear_all_target_groups(query, user_id):
-    count = db.clear_target_groups(user_id)
+async def clear_target_groups(query, user_id):
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    if not accounts: return
+    count = db.clear_target_groups(accounts[0]["id"])
 
     result_text = f"""
 <b>🗑️ ɢʀᴏᴜᴘs ᴄʟᴇᴀʀᴇᴅ</b>
@@ -1073,7 +1079,8 @@ async def clear_all_target_groups(query, user_id):
 
 
 async def view_target_groups(query, user_id, page=0):
-    target_groups = db.get_target_groups(user_id)
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    target_groups = db.get_target_groups(accounts[0]["id"]) if accounts else []
 
     if not target_groups:
         await send_new_message(
@@ -1540,7 +1547,7 @@ async def set_time_interval(query, user_id, time_val):
 
 
 async def set_single_mode(query, user_id):
-    db.update_user(user_id, use_multiple_accounts=False)
+    pass  # use_multiple_accounts removed from schema
 
     accounts = db.get_accounts(user_id, logged_in_only=True)
 
@@ -1639,7 +1646,7 @@ async def confirm_account_selection(query, user_id, context):
         )
         return
 
-    db.update_user(user_id, use_multiple_accounts=True, selected_accounts=selected)
+    pass  # use_multiple_accounts removed from schema
 
     user = db.get_user(user_id)
     use_forward = user.get('use_forward_mode', False) if user else False
@@ -1677,7 +1684,7 @@ async def show_my_accounts(query, user_id, page=0):
 
 
 async def select_single_account(query, user_id, account_id):
-    db.update_user(user_id, use_multiple_accounts=False, selected_single_account=account_id)
+    pass  # use_multiple_accounts removed from schema
 
     account = db.get_account(account_id)
     display_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
@@ -1781,7 +1788,8 @@ async def start_advertising(query, user_id, context):
         return
 
     if target_mode == "selected":
-        target_groups = db.get_target_groups(user_id)
+        accounts = db.get_accounts(user_id, logged_in_only=True)
+        target_groups = db.get_target_groups(accounts[0]["id"]) if accounts else []
         if not target_groups:
             await send_new_message(
                 query,
@@ -1824,7 +1832,8 @@ async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forwar
                 account_id = str(account["id"])
 
                 if target_mode == "selected":
-                    target_groups = db.get_target_groups(user_id)
+                    accounts = db.get_accounts(user_id, logged_in_only=True)
+                    target_groups = db.get_target_groups(accounts[0]["id"]) if accounts else []
                     result = await telethon_handler.broadcast_to_target_groups(
                         account_id, target_groups, ad_text, delay, use_forward, logs_channel_id
                     )
@@ -2085,7 +2094,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
     elif current_state == "awaiting_ad_text":
-        db.update_user(user_id, ad_text=text)
+        accounts = db.get_accounts(user_id, logged_in_only=True)
+        if accounts:
+            db.update_account_settings(accounts[0]["id"], ad_text=text)
 
         if user_id in user_states:
             del user_states[user_id]
@@ -2097,7 +2108,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     elif current_state == "awaiting_reply_text":
-        db.update_user(user_id, auto_reply_text=text)
+        accounts = db.get_accounts(user_id, logged_in_only=True)
+        if accounts:
+            db.update_account_settings(accounts[0]["id"], auto_reply_text=text)
 
         user = db.get_user(user_id)
         auto_reply = user.get('auto_reply_enabled', False) if user else False
@@ -2183,7 +2196,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             group_id = int(text.strip().replace("-100", "-100"))
 
-            added = db.add_target_group(user_id, group_id, f"Group {group_id}")
+            accounts = db.get_accounts(user_id, logged_in_only=True)
+            if not accounts: return
+            added = db.add_target_group(accounts[0]["id"], group_id, f"Group {group_id}")
 
             if user_id in user_states:
                 del user_states[user_id]
