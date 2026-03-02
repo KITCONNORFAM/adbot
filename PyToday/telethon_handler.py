@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import asyncio
 import logging
 import re
@@ -157,6 +158,9 @@ async def get_groups_and_marketplaces(account_id):
                     continue
                 if not entity.megagroup:
                     continue
+            
+            if getattr(entity, 'left', False) or getattr(entity, 'kicked', False):
+                continue
             
             if isinstance(entity, (Channel, Chat)):
                 is_marketplace = False
@@ -418,7 +422,7 @@ async def broadcast_to_target_groups(account_id, target_groups, message, delay=6
             if use_forward:
                 result = await forward_from_saved_messages(account_id, group_id, access_hash)
             else:
-                result = await send_message_to_chat(account_id, group_id, message, access_hash, use_forward=False)
+                result = await send_message_to_chat(account_id, group_id, message, access_hash)
             
             if result["success"]:
                 sent += 1
