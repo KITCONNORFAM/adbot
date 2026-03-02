@@ -1743,26 +1743,29 @@ async def start_advertising(query, user_id, context):
         )
         return
 
-    ad_text = user.get('ad_text')
-    use_forward = user.get('use_forward_mode', False)
-    use_multiple = user.get('use_multiple_accounts', False)
-    time_interval = user.get('time_interval', 60)
-    target_mode = user.get('target_mode', 'all')
-
     accounts = db.get_accounts(user_id, logged_in_only=True)
 
     if not accounts:
         await send_new_message(
             query,
-            "<b>✅ No logged in accounts</b>\n\n<i>Please add and login to an account first.</i>",
+            "<b> ✅ No logged in accounts</b>\n\n<i>Please add and login to an account first.</i>",
             advertising_menu_keyboard()
         )
         return
 
+    # Use first active account's settings for initial validation
+    s = db.get_account_settings(accounts[0]["id"]) or {}
+    ad_text = s.get('ad_text')
+    use_forward = s.get('use_forward_mode', False)
+    
+    use_multiple = user.get('use_multiple_accounts', False)
+    time_interval = user.get('time_interval', 60)
+    target_mode = user.get('target_mode', 'all')
+
     if not use_forward and not ad_text:
         await send_new_message(
             query,
-            "<b>✅ No ad text set</b>\n\n<i>Please set your ad text first or enable forward mode to forward from Saved Messages.</i>",
+            "<b> ✅ No ad text set</b>\n\n<i>Please set your ad text first or enable forward mode to forward from Saved Messages.</i>",
             advertising_menu_keyboard()
         )
         return
@@ -1830,16 +1833,23 @@ async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forwar
                     break
 
                 account_id = str(account["id"])
+                
+                # Fetch fresh settings precisely for this specific account
+                s = db.get_account_settings(account_id) or {}
+                acc_ad_text = s.get('ad_text') or ad_text
+                acc_use_forward = s.get('use_forward_mode', use_forward)
+                
+                if not acc_use_forward and not acc_ad_text:
+                    continue # Skip this account if no ad text or forward mode is set
 
                 if target_mode == "selected":
-                    accounts = db.get_accounts(user_id, logged_in_only=True)
-                    target_groups = db.get_target_groups(accounts[0]["id"]) if accounts else []
+                    target_groups = db.get_target_groups(account_id)
                     result = await telethon_handler.broadcast_to_target_groups(
-                        account_id, target_groups, ad_text, delay, use_forward, logs_channel_id
+                        account_id, target_groups, acc_ad_text, delay, acc_use_forward, logs_channel_id
                     )
                 else:
                     result = await telethon_handler.broadcast_message(
-                        account_id, ad_text, delay, use_forward, logs_channel_id
+                        account_id, acc_ad_text, delay, acc_use_forward, logs_channel_id
                     )
 
                 if not context.user_data.get("advertising_active", False):
