@@ -1244,13 +1244,13 @@ async def load_default_groups(query, user_id, context):
         if not logs_channel or not logs_channel.get('verified'):
             await send_new_message(
                 query,
-                "<b>⚠️ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
-                "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀɴᴅ ᴠᴇʀɪғʏ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏʀᴇ ᴀᴜᴛᴏ-ᴊᴏɪɴɪɴɢ ɢʀᴏᴜᴘs.</blockquote>\n\n"
-                "<b>ʜᴏᴡ ᴛᴏ sᴇᴛ ᴜᴘ:</b>\n"
+                "<b>⚠️  ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
+                "<blockquote>ʏ ᴏ ᴜ ᴍ ᴜsᴛ sᴇᴛ ᴜᴘ ᴀɴᴅ ᴠᴇʀɪғʏ  ᴀ ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏ ʀᴇ ᴀᴜᴛᴏ -ᴊᴏ ɪɴɪɴɢ ɢʀᴏ ᴜᴘs.</blockquote>\n\n"
+                "<b>ʜᴏ ᴡ ᴛᴏ  sᴇᴛ ᴜᴘ:</b>\n"
                 "1. CREATE A NEW CHANNEL\n"
-                "2. ᴀᴅᴅ ᴛʜɪs ʙᴏᴛ ᴀs ᴀᴅᴏɪɴ\n"
-                "3. ɢᴏ ᴛᴏ sᴇᴛᴛɪɴɢs → ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
-                "4. SEND THE CHANNEL ID OR LINK.",
+                "2. ᴀᴅᴅ ᴛʜɪs ʙᴏ ᴛ ᴀs ᴀᴅᴍ ɪɴ\n"
+                "3. ɢᴏ  ᴛᴏ  sᴇᴛᴛɪɴɢs → ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ\n"
+                "4. SEND THE CHANNEL ID OR LINK .",
                 back_to_menu_keyboard()
             )
             return
@@ -1563,7 +1563,7 @@ async def set_single_mode(query, user_id):
 
     if len(accounts) == 1:
         result_text = """
-<b>✅ sɪɴɢʟᴇ ᴏᴏᴅᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ</b>
+<b>✅ sɪɴɢʟᴇ ᴏ ᴏ ᴅᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ</b>
 
 💎 Using your only account for advertising.
 """
@@ -1654,7 +1654,7 @@ async def confirm_account_selection(query, user_id, context):
     auto_group_join = user.get('auto_group_join_enabled', False) if user else False
 
     result_text = f"""
-<b>✅ ᴏᴜʟᴛɪᴘʟᴇ ᴏᴏᴅᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ</b>
+<b>✅ ᴏ ᴜʟᴛɪᴘʟᴇ ᴏ ᴏ ᴅᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ</b>
 
 💎💎 Using <b>{len(selected)}</b> accounts for advertising.
 """
@@ -1695,7 +1695,7 @@ async def select_single_account(query, user_id, account_id):
     auto_group_join = s.get('auto_group_join', False)
 
     result_text = f"""
-<b>✅ ᴀᴄᴄᴏᴜɴᴛ sᴇʟᴇᴄᴛᴇᴅ</b>
+<b>✅ ᴀᴄᴄᴏ ᴜɴᴛ sᴇʟᴇᴄᴛᴇᴅ</b>
 
 💎 Using: <b>{display_name}</b>
 """
@@ -1732,13 +1732,13 @@ async def start_advertising(query, user_id, context):
     if not logs_channel or not logs_channel.get('verified'):
         await send_new_message(
             query,
-            "<b>⚠️ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
-            "<blockquote>ʙᴏᴜ ᴏᴜsᴛ sᴇᴛ ᴜᴘ ᴀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏʀᴇ sᴛᴀʀᴛɪɴɢ ADVERTISING.</blockquote>\n\n"
-            "<b>ʜᴏᴡ ᴛᴏ sᴇᴛ ᴜᴘ:</b>\n"
+            "<b>⚠️  ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
+            "<blockquote>ʏ ᴏ ᴜ ᴍ ᴜsᴛ sᴇᴛ ᴜᴘ ᴀ ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏ ʀᴇ sᴛᴀʀᴛɪɴɢ ADVERTISING.</blockquote>\n\n"
+            "<b>ʜᴏ ᴡ ᴛᴏ  sᴇᴛ ᴜᴘ:</b>\n"
             "1. CREATE A NEW CHANNEL\n"
-            "2. ᴀᴅᴅ ᴛʜɪs ʙᴏᴛ ᴀs ᴀᴅᴏɪɴ\n"
-            "3. ɢᴏ ᴛᴏ sᴇᴛᴛɪɴɢs → ʟᴏɢs ᴄʜᴀɴɴᴇʟ\n"
-            "4. sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴏʀ ʟɪɴᴋ",
+            "2. ᴀᴅᴅ ᴛʜɪs ʙᴏ ᴛ ᴀs ᴀᴅᴍ ɪɴ\n"
+            "3. ɢᴏ  ᴛᴏ  sᴇᴛᴛɪɴɢs → ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ\n"
+            "4. sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴏ ʀ ʟɪɴᴋ",
             back_to_menu_keyboard()
         )
         return
