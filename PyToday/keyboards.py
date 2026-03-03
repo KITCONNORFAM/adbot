@@ -30,10 +30,8 @@ def accounts_menu_keyboard():
     return InlineKeyboardMarkup(keyboard)
 
 def support_keyboard():
-    from PyToday import config as _cfg
     keyboard = [
-        [InlineKeyboardButton("◈ ADMIN", url=f"https://t.me/{_cfg.BOT_USERNAME}")],
-        [InlineKeyboardButton("◉ HOW TO USE", url=f"https://t.me/{_cfg.BOT_USERNAME}")],
+        [InlineKeyboardButton("◈ ADMIN", url="https://t.me/Dev_X_0")],
         [InlineKeyboardButton("« BACK", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
