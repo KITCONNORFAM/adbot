@@ -278,12 +278,12 @@ async def forward_from_saved_messages(account_id, chat_id, access_hash=None):
         await client.disconnect()
         
         db.update_account(account_id, last_used=datetime.utcnow())
-        db.increment_stats(account_id, "messages_sent")
+        db.increment_stat(account_id, "messages_sent")
         
         return {"success": True}
     except Exception as e:
         logger.error(f"Error forwarding from saved: {e}")
-        db.increment_stats(account_id, "messages_failed")
+        db.increment_stat(account_id, "messages_failed")
         return {"success": False, "error": str(e)}
 
 async def send_message_to_chat(account_id, chat_id, message, access_hash=None, use_forward=False):
@@ -327,11 +327,11 @@ async def send_message_to_chat(account_id, chat_id, message, access_hash=None, u
         await client.disconnect()
         
         db.update_account(account_id, last_used=datetime.utcnow())
-        db.increment_stats(account_id, "messages_sent")
+        db.increment_stat(account_id, "messages_sent")
         
         return {"success": True}
     except Exception as e:
-        db.increment_stats(account_id, "messages_failed")
+        db.increment_stat(account_id, "messages_failed")
         return {"success": False, "error": str(e)}
 
 async def save_message_to_saved(account_id, message):
@@ -395,11 +395,11 @@ async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, ac
         await client.disconnect()
         
         db.update_account(account_id, last_used=datetime.utcnow())
-        db.increment_stats(account_id, "messages_sent")
+        db.increment_stat(account_id, "messages_sent")
         
         return {"success": True}
     except Exception as e:
-        db.increment_stats(account_id, "messages_failed")
+        db.increment_stat(account_id, "messages_failed")
         return {"success": False, "error": str(e)}
 
 async def broadcast_to_target_groups(account_id, target_groups, message, delay=60, use_forward=False, logs_channel_id=None):
@@ -681,7 +681,7 @@ async def join_group_by_link(account_id, invite_link):
         await client.disconnect()
         
         db.log_group_join(account_id, group_id, group_title, invite_link)
-        db.increment_stats(account_id, "groups_joined")
+        db.increment_stat(account_id, "groups_joined")
         
         return {"success": True, "group_title": group_title, "group_id": group_id}
     except Exception as e:
@@ -716,7 +716,7 @@ async def send_auto_reply(account_id, to_user_id, reply_text):
         await client.disconnect()
         
         db.mark_user_replied(account_id, to_user_id)
-        db.increment_stats(account_id, "auto_replies_sent")
+        db.increment_stat(account_id, "auto_replies_sent")
         
         return {"success": True}
     except Exception as e:
@@ -907,7 +907,7 @@ async def start_auto_reply_listener(account_id, user_id, reply_text):
                             await event.respond(reply_text)
                             db.mark_user_replied(account_id, sender_id, sender_username)
                             db.log_auto_reply(account_id, sender_id, sender_username)
-                            db.increment_stats(account_id, "auto_replies_sent")
+                            db.increment_stat(account_id, "auto_replies_sent")
                             logger.info(f"Auto-replied to user {sender_id} from account {account_id}")
             except Exception as e:
                 logger.error(f"Error in auto-reply handler: {e}")
