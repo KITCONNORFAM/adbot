@@ -1078,3 +1078,10 @@ async def get_saved_message_id(account_id):
         messages = await client.get_messages(me, limit=1)
         
         await client.disconnect()
+        
+        if messages and len(messages) > 0:
+            return messages[0].id
+        return None
+    except Exception as e:
+        logger.error(f"Error getting saved message: {e}")
+        return None
