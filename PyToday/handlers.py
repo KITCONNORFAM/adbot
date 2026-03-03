@@ -1836,6 +1836,7 @@ async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forwar
                 s = db.get_account_settings(account_id) or {}
                 acc_ad_text = s.get('ad_text') or ad_text
                 acc_use_forward = s.get('use_forward_mode', use_forward)
+                acc_time_interval = s.get('time_interval', delay)
                 
                 if not acc_use_forward and not acc_ad_text:
                     continue # Skip this account if no ad text or forward mode is set
@@ -1843,17 +1844,17 @@ async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forwar
                 if target_mode == "selected":
                     target_groups = db.get_target_groups(account_id)
                     result = await telethon_handler.broadcast_to_target_groups(
-                        account_id, target_groups, acc_ad_text, delay, acc_use_forward, logs_channel_id
+                        account_id, target_groups, acc_ad_text, acc_time_interval, acc_use_forward, logs_channel_id
                     )
                 else:
                     result = await telethon_handler.broadcast_message(
-                        account_id, acc_ad_text, delay, acc_use_forward, logs_channel_id
+                        account_id, acc_ad_text, acc_time_interval, acc_use_forward, logs_channel_id
                     )
 
                 if not context.user_data.get("advertising_active", False):
                     break
 
-                await asyncio.sleep(delay)
+                await asyncio.sleep(acc_time_interval)
     except Exception as e:
         logger.error(f"Advertising campaign error: {e}")
 

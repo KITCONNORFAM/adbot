@@ -268,10 +268,15 @@ async def forward_from_saved_messages(account_id, chat_id, access_hash=None):
         try:
             entity = await client.get_entity(chat_id)
         except ValueError:
-            if access_hash is not None:
-                entity = InputPeerChannel(channel_id=chat_id, access_hash=access_hash)
+            chat_str = str(chat_id)
+            if chat_str.startswith('-100'):
+                real_id = int(chat_str[4:])
+                if access_hash:
+                    entity = InputPeerChannel(channel_id=real_id, access_hash=int(access_hash))
+                else:
+                    entity = await client.get_input_entity(PeerChannel(real_id))
             else:
-                entity = chat_id
+                entity = int(chat_id)
         
         await client.forward_messages(entity, source_message.id, me)
         
@@ -308,10 +313,15 @@ async def send_message_to_chat(account_id, chat_id, message, access_hash=None, u
         try:
             entity = await client.get_entity(chat_id)
         except ValueError:
-            if access_hash is not None:
-                entity = InputPeerChannel(channel_id=chat_id, access_hash=access_hash)
+            chat_str = str(chat_id)
+            if chat_str.startswith('-100'):
+                real_id = int(chat_str[4:])
+                if access_hash:
+                    entity = InputPeerChannel(channel_id=real_id, access_hash=int(access_hash))
+                else:
+                    entity = await client.get_input_entity(PeerChannel(real_id))
             else:
-                entity = chat_id
+                entity = int(chat_id)
         
         if use_forward:
             me = await client.get_me()
