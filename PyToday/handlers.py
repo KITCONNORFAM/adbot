@@ -1309,12 +1309,10 @@ async def load_default_groups(query, user_id, context):
         account = accounts[0]
         account_id = str(account["id"])
 
-        # Auto-join groups with user's logs channel (only this user's logs will be sent)
         result = await telethon_handler.auto_join_groups_from_file(
             account_id,
             group_links,
-            logs_channel_id=logs_channel_id,
-            user_id=user_id
+            logs_channel_id=logs_channel_id
         )
 
         result_text = f"""
