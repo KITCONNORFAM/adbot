@@ -4,6 +4,14 @@
 -- Safe to run multiple times (uses IF NOT EXISTS)
 -- ============================================================
 
+-- 🧹 SAFE MIGRATE: Drop legacy tables that lack new multi-account schemas
+DROP TABLE IF EXISTS account_settings CASCADE;
+DROP TABLE IF EXISTS account_stats CASCADE;
+DROP TABLE IF EXISTS auto_replies CASCADE;
+DROP TABLE IF EXISTS auto_reply_state CASCADE;
+DROP TABLE IF EXISTS target_groups CASCADE;
+DROP TABLE IF EXISTS message_logs CASCADE;
+
 -- USERS / ROLES -----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS bot_users (
     user_id        BIGINT PRIMARY KEY,
