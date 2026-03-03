@@ -42,8 +42,13 @@ START_IMAGE_URL = os.getenv(
     "START_IMAGE_URL",
     "https://graph.org/file/833d4a93d3cfd8a517222-fb67ce59064ae920dd.jpg"
 )
+BOT_IMAGE = os.getenv(
+    "BOT_IMAGE",
+    "https://graph.org/file/833d4a93d3cfd8a517222-fb67ce59064ae920dd.jpg"
+)
 ACCOUNT_NAME_SUFFIX = f"| @{BOT_USERNAME}"
 ACCOUNT_BIO_TEMPLATE = f"This message repeated by @{BOT_USERNAME}"
+AUTO_REPLY_TEXT = os.getenv("AUTO_REPLY_TEXT", "This is an automated reply.")
 
 # ============================================================
 # Trial & Referral Config
