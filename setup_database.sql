@@ -20,14 +20,6 @@ CREATE TABLE IF NOT EXISTS bot_users (
 );
 
 -- TELEGRAM ACCOUNTS ---------------------------------------------------------
--- Check if the old 'account_id' column exists in telegram_accounts and rename it to 'id' if so
-DO $$ 
-BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='telegram_accounts' AND column_name='account_id') THEN
-    ALTER TABLE telegram_accounts RENAME COLUMN account_id TO id;
-  END IF;
-END $$;
-
 CREATE TABLE IF NOT EXISTS telegram_accounts (
     id                 BIGSERIAL PRIMARY KEY,
     user_id            BIGINT NOT NULL REFERENCES bot_users(user_id) ON DELETE CASCADE,
