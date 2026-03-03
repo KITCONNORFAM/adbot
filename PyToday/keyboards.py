@@ -31,7 +31,7 @@ def accounts_menu_keyboard():
 
 def support_keyboard():
     keyboard = [
-        [InlineKeyboardButton("◈ ADMIN", url="https://t.me/Dev_X_0")],
+        [InlineKeyboardButton("◈ ADMIN", url="https://t.me/charliespringfam")],
         [InlineKeyboardButton("« BACK", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
