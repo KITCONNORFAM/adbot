@@ -7,7 +7,7 @@ from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.functions.messages import ForwardMessagesRequest, ImportChatInviteRequest
 from telethon.tl.functions.channels import JoinChannelRequest
-from telethon.tl.types import Channel, Chat, InputPeerChannel, InputPeerSelf
+from telethon.tl.types import Channel, Chat, InputPeerChannel, InputPeerSelf, PeerChannel
 from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError, PhoneCodeExpiredError, PasswordHashInvalidError, UserAlreadyParticipantError, InviteHashExpiredError, InviteHashInvalidError
 from datetime import datetime
 from PyToday import database as db   # new Supabase DB
@@ -395,10 +395,15 @@ async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, ac
         try:
             entity = await client.get_entity(chat_id)
         except ValueError:
-            if access_hash is not None:
-                entity = InputPeerChannel(channel_id=chat_id, access_hash=access_hash)
+            chat_str = str(chat_id)
+            if chat_str.startswith('-100'):
+                real_id = int(chat_str[4:])
+                if access_hash:
+                    entity = InputPeerChannel(channel_id=real_id, access_hash=int(access_hash))
+                else:
+                    entity = await client.get_input_entity(PeerChannel(real_id))
             else:
-                entity = chat_id
+                entity = int(chat_id)
         
         await client.forward_messages(entity, message_id, from_peer)
         
