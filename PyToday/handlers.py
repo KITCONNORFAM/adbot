@@ -1520,7 +1520,8 @@ async def set_time_interval(query, user_id, time_val):
         seconds = int(time_val)
         accounts = db.get_accounts(user_id, logged_in_only=True)
         if accounts:
-            db.update_account_settings(accounts[0]["id"], time_interval=seconds)
+            for acc in accounts:
+                db.update_account_settings(acc["id"], time_interval=seconds)
 
         if seconds < 60:
             time_display = f"{seconds} seconds"
@@ -1757,8 +1758,8 @@ async def start_advertising(query, user_id, context):
     use_forward = s.get('use_forward_mode', False)
     
     use_multiple = user.get('use_multiple_accounts', False)
-    time_interval = user.get('time_interval', 60)
-    target_mode = user.get('target_mode', 'all')
+    time_interval = s.get('time_interval', 60)
+    target_mode = s.get('target_mode', 'all')
 
     if not use_forward and not ad_text:
         await send_new_message(
@@ -2146,7 +2147,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 return
 
-            db.update_user(user_id, time_interval=seconds)
+            accounts = db.get_accounts(user_id, logged_in_only=True)
+            if accounts:
+                for acc in accounts:
+                    db.update_account_settings(acc["id"], time_interval=seconds)
 
             if user_id in user_states:
                 del user_states[user_id]
