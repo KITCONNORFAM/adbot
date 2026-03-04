@@ -1262,11 +1262,12 @@ async def load_default_groups(query, user_id, context):
         # Read group links from file (use bundled file)
         import os
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        group_file_path = os.path.join(script_dir, '..', 'group_mps.txt')
+        # File lives inside PyToday/ folder alongside handlers.py
+        group_file_path = os.path.join(script_dir, 'group_mps.txt')
         
-        # Also check in current directory
+        # Fall back to project root if not found in PyToday/
         if not os.path.exists(group_file_path):
-            group_file_path = 'group_mps.txt'
+            group_file_path = os.path.join(script_dir, '..', 'group_mps.txt')
         
         group_links = []
         try:
