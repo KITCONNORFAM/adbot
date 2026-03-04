@@ -156,7 +156,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Show referral notice first if it exists
     if referral_notice:
         try:
-            await update.message.reply_text(referral_notice, parse_mode="HTML")
+            await update.message.reply_text(referral_notice, parse_mode="ʜᴛᴍʟ")
         except Exception:
             pass
 
@@ -183,7 +183,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=kb,
             )
         except Exception:
-            await update.message.reply_text(text, parse_mode="HTML", reply_markup=kb)
+            await update.message.reply_text(text, parse_mode="ʜᴛᴍʟ", reply_markup=kb)
         return
 
     # ── Owner, Premium, Trial → main dashboard
@@ -220,7 +220,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=kb,
         )
     except Exception:
-        await update.message.reply_text(welcome, parse_mode="HTML", reply_markup=kb)
+        await update.message.reply_text(welcome, parse_mode="ʜᴛᴍʟ", reply_markup=kb)
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -230,7 +230,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cb_activate_trial(query, user_id: int, context):
     if db.has_used_trial(user_id):
         await query.answer(
-            "🎁 You have already used your free trial.\nUpgrade to Premium to continue.",
+            "🎁 ʏᴏᴜ ʜᴀᴠᴇ ᴀʟʀᴇᴀᴅʏ ᴜsᴇᴅ ʏᴏᴜʀ ꜰʀᴇᴇ ᴛʀɪᴀʟ.\ɴᴜᴘɢʀᴀᴅᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ ᴛᴏ ᴄᴏɴᴛɪɴᴜᴇ.",
             show_alert=True,
         )
         return
@@ -250,10 +250,10 @@ async def cb_activate_trial(query, user_id: int, context):
     )
     from PyToday.keyboards import premium_benefits_keyboard
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
+        await query.edit_message_caption(caption=text, parse_mode="ʜᴛᴍʟ",
                                          reply_markup=premium_benefits_keyboard())
     except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
+        await query.edit_message_text(text, parse_mode="ʜᴛᴍʟ",
                                       reply_markup=premium_benefits_keyboard())
 
 
@@ -276,10 +276,10 @@ async def cb_buy_premium(query, user_id: int, context):
         text += f"◈ {link}\n"
 
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
+        await query.edit_message_caption(caption=text, parse_mode="ʜᴛᴍʟ",
                                          reply_markup=back_to_menu_keyboard())
     except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
+        await query.edit_message_text(text, parse_mode="ʜᴛᴍʟ",
                                       reply_markup=back_to_menu_keyboard())
 
 
@@ -308,10 +308,10 @@ async def cb_referral_info(query, user_id: int, context):
     )
 
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
+        await query.edit_message_caption(caption=text, parse_mode="ʜᴛᴍʟ",
                                          reply_markup=referral_keyboard(invite_link))
     except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
+        await query.edit_message_text(text, parse_mode="ʜᴛᴍʟ",
                                       reply_markup=referral_keyboard(invite_link))
 
 
@@ -321,7 +321,7 @@ async def cb_referral_info(query, user_id: int, context):
 
 async def cb_owner_panel(query, user_id: int):
     if not db.is_owner(user_id):
-        await query.answer("👑 Owners only.", show_alert=True)
+        await query.answer("👑 ᴏᴡɴᴇʀs ᴏɴʟʏ.", show_alert=True)
         return
 
     stats = db.get_global_stats()
@@ -334,10 +334,10 @@ async def cb_owner_panel(query, user_id: int):
         f"<i>Use commands or buttons below:</i>"
     )
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
+        await query.edit_message_caption(caption=text, parse_mode="ʜᴛᴍʟ",
                                          reply_markup=owner_panel_keyboard())
     except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
+        await query.edit_message_text(text, parse_mode="ʜᴛᴍʟ",
                                       reply_markup=owner_panel_keyboard())
 
 
@@ -348,7 +348,7 @@ async def cb_owner_panel(query, user_id: int):
 async def cb_account_settings(query, account_id: str, user_id: int):
     account = db.get_account(account_id)
     if not account or account.get("user_id") != user_id:
-        await query.answer("❌ Account not found.", show_alert=True)
+        await query.answer("❌ ᴀᴄᴄᴏᴜɴᴛ ɴᴏᴛ ꜰᴏᴜɴᴅ.", show_alert=True)
         return
 
     settings = db.get_account_settings(account_id)
@@ -360,10 +360,10 @@ async def cb_account_settings(query, account_id: str, user_id: int):
         f"Changes apply to THIS account only."
     )
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
+        await query.edit_message_caption(caption=text, parse_mode="ʜᴛᴍʟ",
                                          reply_markup=account_settings_keyboard(account_id, settings))
     except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
+        await query.edit_message_text(text, parse_mode="ʜᴛᴍʟ",
                                       reply_markup=account_settings_keyboard(account_id, settings))
 
 
@@ -388,7 +388,7 @@ async def cb_accset_fwd(query, account_id: str, user_id: int):
 async def cb_acc_auto_reply(query, account_id: str, user_id: int):
     account = db.get_account(account_id)
     if not account or account.get("user_id") != user_id:
-        await query.answer("❌ Account not found.", show_alert=True)
+        await query.answer("❌ ᴀᴄᴄᴏᴜɴᴛ ɴᴏᴛ ꜰᴏᴜɴᴅ.", show_alert=True)
         return
 
     settings = db.get_account_settings(account_id)
@@ -405,10 +405,10 @@ async def cb_acc_auto_reply(query, account_id: str, user_id: int):
         f"Keyword replies trigger on matching words.</i>"
     )
     try:
-        await query.edit_message_caption(caption=text, parse_mode="HTML",
+        await query.edit_message_caption(caption=text, parse_mode="ʜᴛᴍʟ",
                                          reply_markup=auto_reply_advanced_keyboard(enabled, account_id))
     except Exception:
-        await query.edit_message_text(text, parse_mode="HTML",
+        await query.edit_message_text(text, parse_mode="ʜᴛᴍʟ",
                                       reply_markup=auto_reply_advanced_keyboard(enabled, account_id))
 
 
@@ -446,7 +446,7 @@ async def cb_view_all_replies(query, account_id: str):
     text = "\n".join(lines)
     from PyToday.keyboards import back_to_auto_reply_keyboard
     try:
-        await query.edit_message_text(text, parse_mode="HTML",
+        await query.edit_message_text(text, parse_mode="ʜᴛᴍʟ",
                                       reply_markup=back_to_auto_reply_keyboard())
     except Exception:
         pass
@@ -454,7 +454,7 @@ async def cb_view_all_replies(query, account_id: str):
 
 async def cb_clear_replies(query, account_id: str, user_id: int):
     db.clear_replies(account_id)
-    await query.answer("✅ All replies cleared.", show_alert=False)
+    await query.answer("✅ ᴀʟʟ ʀᴇᴘʟɪᴇs ᴄʟᴇᴀʀᴇᴅ.", show_alert=False)
     await cb_acc_auto_reply(query, account_id, user_id)
 
 
@@ -464,7 +464,7 @@ async def cb_clear_replies(query, account_id: str, user_id: int):
 
 async def cb_owner_stats(query, user_id: int):
     if not db.is_owner(user_id):
-        await query.answer("👑 Owners only.", show_alert=True)
+        await query.answer("👑 ᴏᴡɴᴇʀs ᴏɴʟʏ.", show_alert=True)
         return
     stats = db.get_global_stats()
     owners = db.get_all_owners()
@@ -483,14 +483,14 @@ async def cb_owner_stats(query, user_id: int):
         f"<b>Owners:</b>\n{owner_list}"
     )
     try:
-        await query.edit_message_text(text, parse_mode="HTML", reply_markup=owner_panel_keyboard())
+        await query.edit_message_text(text, parse_mode="ʜᴛᴍʟ", reply_markup=owner_panel_keyboard())
     except Exception:
         pass
 
 
 async def cb_owner_addprem(query, user_id: int):
     if not db.is_owner(user_id):
-        await query.answer("👑 Owners only.", show_alert=True)
+        await query.answer("👑 ᴏᴡɴᴇʀs ᴏɴʟʏ.", show_alert=True)
         return
     await query.answer()
     try:
@@ -505,7 +505,7 @@ async def cb_owner_addprem(query, user_id: int):
 
 async def cb_owner_ban(query, user_id: int):
     if not db.is_owner(user_id):
-        await query.answer("👑 Owners only.", show_alert=True)
+        await query.answer("👑 ᴏᴡɴᴇʀs ᴏɴʟʏ.", show_alert=True)
         return
     await query.answer()
     try:

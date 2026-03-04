@@ -4,7 +4,7 @@ def main_menu_keyboard():
     keyboard = [
         [InlineKeyboardButton("ᴀᴅᴠᴇʀᴛɪsɪɴɢ", callback_data="advertising_menu"),
          InlineKeyboardButton("ᴀᴄᴄᴏᴜɴᴛs", callback_data="accounts_menu")],
-        [InlineKeyboardButton("LOAD GCS/MPS", callback_data="load_groups"),
+        [InlineKeyboardButton("ʟᴏᴀᴅ ɢᴄs/ᴍᴘs", callback_data="load_groups"),
          InlineKeyboardButton("sᴇᴛ ᴀᴅ ᴛᴇxᴛ", callback_data="set_ad_text")],
         [InlineKeyboardButton("sᴇᴛᴛɪɴɢs", callback_data="settings"),
          InlineKeyboardButton("sᴜᴘᴘᴏʀᴛ", callback_data="support")]
@@ -15,7 +15,7 @@ def advertising_menu_keyboard():
     keyboard = [
         [InlineKeyboardButton("» sᴛᴀʀᴛ ᴀᴅᴠᴇʀᴛɪsɪɴɢ «", callback_data="start_advertising")],
         [InlineKeyboardButton("▣ sᴛᴏᴘ ᴀᴅᴠᴇʀᴛɪsɪɴɢ", callback_data="stop_advertising")],
-        [InlineKeyboardButton("◴ SET TIME", callback_data="set_time")],
+        [InlineKeyboardButton("◴ sᴇᴛ ᴛɪᴍᴇ", callback_data="set_time")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -23,7 +23,7 @@ def advertising_menu_keyboard():
 def accounts_menu_keyboard():
     keyboard = [
         [InlineKeyboardButton("＋ ᴀᴅᴅ ᴀᴄᴄᴏᴜɴᴛ", callback_data="add_account")],
-        [InlineKeyboardButton("✕ DELETE ACCOUNT", callback_data="delete_account")],
+        [InlineKeyboardButton("✕ ᴅᴇʟᴇᴛᴇ ᴀᴄᴄᴏᴜɴᴛ", callback_data="delete_account")],
         [InlineKeyboardButton("≡ ᴍʏ ᴀᴄᴄᴏᴜɴᴛs", callback_data="my_accounts")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
@@ -31,7 +31,7 @@ def accounts_menu_keyboard():
 
 def support_keyboard():
     keyboard = [
-        [InlineKeyboardButton("◈ ADMIN", url="https://t.me/charliespringfam")],
+        [InlineKeyboardButton("◈ ᴀᴅᴍɪɴ", url="https://t.me/charliespringfam")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -44,17 +44,17 @@ def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, a
     force_sub_status = "[ON]" if force_sub else "[OFF]"
     
     keyboard = [
-        [InlineKeyboardButton("◇ SINGLE ACCOUNT", callback_data="single_mode"),
-         InlineKeyboardButton("◆ MULTIPLE", callback_data="multiple_mode")],
+        [InlineKeyboardButton("◇ sɪɴɢʟᴇ ᴀᴄᴄᴏᴜɴᴛ", callback_data="single_mode"),
+         InlineKeyboardButton("◆ ᴍᴜʟᴛɪᴘʟᴇ", callback_data="multiple_mode")],
         [InlineKeyboardButton("▤ sᴛᴀᴛɪsᴛɪᴄs", callback_data="statistics")],
         [InlineKeyboardButton(f"✉ {forward_mode} {forward_status}", callback_data="toggle_forward_mode"),
          InlineKeyboardButton(f"⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ {auto_reply_status}", callback_data="auto_reply_menu")],
-        [InlineKeyboardButton(f"⊕ AUTO JOIN {auto_join_status}", callback_data="toggle_auto_group_join")],
-        [InlineKeyboardButton("◉ LOGS CHANNEL", callback_data="logs_channel_menu")]
+        [InlineKeyboardButton(f"⊕ ᴀᴜᴛᴏ ᴊᴏɪɴ {auto_join_status}", callback_data="toggle_auto_group_join")],
+        [InlineKeyboardButton("◉ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="logs_channel_menu")]
     ]
     
     if is_owner:
-        keyboard.append([InlineKeyboardButton(f"⊗ FORCE SUB {force_sub_status}", callback_data="force_sub_menu")])
+        keyboard.append([InlineKeyboardButton(f"⊗ ꜰᴏʀᴄᴇ sᴜʙ {force_sub_status}", callback_data="force_sub_menu")])
     
     keyboard.append([InlineKeyboardButton("◎ ᴛᴀʀɢᴇᴛɪɴɢ", callback_data="target_adv")])
     keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")])
@@ -403,7 +403,7 @@ def logs_channel_keyboard(has_channel=False, verified=False):
             ]
     else:
         keyboard = [
-            [InlineKeyboardButton("＋ sᴇᴛ LOGS CHANNEL", callback_data="set_logs_channel")],
+            [InlineKeyboardButton("＋ sᴇᴛ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="set_logs_channel")],
             [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
         ]
     return InlineKeyboardMarkup(keyboard)
@@ -517,8 +517,8 @@ def owner_panel_keyboard():
          InlineKeyboardButton("📢 ʙʀᴏᴀᴅᴄᴀsᴛ", callback_data="owner_broadcast")],
         [InlineKeyboardButton("💎 ᴀᴅᴅ ᴘʀᴇᴍɪᴜᴍ", callback_data="owner_addprem"),
          InlineKeyboardButton("🚫 ʙᴀɴ ᴜsᴇʀ", callback_data="owner_ban")],
-        [InlineKeyboardButton("⊗ FORCE SUB", callback_data="force_sub_menu"),
-         InlineKeyboardButton("◉ LOGS CHANNEL", callback_data="logs_channel_menu")],
+        [InlineKeyboardButton("⊗ ꜰᴏʀᴄᴇ sᴜʙ", callback_data="force_sub_menu"),
+         InlineKeyboardButton("◉ ʟᴏɢs ᴄʜᴀɴɴᴇʟ", callback_data="logs_channel_menu")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
