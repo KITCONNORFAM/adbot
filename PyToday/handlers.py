@@ -1726,8 +1726,24 @@ async def start_advertising(query, user_id, context):
         )
         return
 
-    # Logs channel is optional - only used for logging, not required to start
+    # Check logs channel (required to start advertising)
     logs_channel = db.get_logs_channel(user_id)
+    if not logs_channel or not logs_channel.get('verified'):
+        has_channel = bool(logs_channel and logs_channel.get('channel_id'))
+        await send_new_message(
+            query,
+            "<b>⚠️ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
+            "<i>You must set up a logs channel before starting advertising.</i>\n\n"
+            "<b>How to set up:</b>\n"
+            "1. Create a new Telegram channel\n"
+            "2. Add this bot as <b>admin</b> with permission to post\n"
+            "3. Click <b>＋ sᴇᴛ LOGS CHANNEL</b> below and send the channel link or ID\n"
+            "4. Click <b>↻ ᴠᴇʀɪғʏ</b> to confirm\n\n"
+            "<i>Supported formats: @username, https://t.me/name, -1001234567890</i>",
+            logs_channel_keyboard(has_channel=has_channel, verified=False)
+        )
+        return
+
     accounts = db.get_accounts(user_id, logged_in_only=True)
 
     if not accounts:
