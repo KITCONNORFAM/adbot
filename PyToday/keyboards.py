@@ -412,7 +412,7 @@ def logs_channel_keyboard(has_channel=False, verified=False):
 def load_groups_options_keyboard():
     keyboard = [
         [InlineKeyboardButton("◈ ʟᴏᴀᴅ ᴍʏ ɢʀᴏᴜᴘs", callback_data="load_my_groups")],
-        [InlineKeyboardButton("◉ ʟᴏᴀᴅ ᴅᴇғᴀᴜʟᴛ ɢʀᴏᴜᴘs", callback_data="load_default_groups")],
+        [InlineKeyboardButton("◉ ʟᴏᴀᴅᴅᴇғᴀᴜʟᴛ ɢʀᴏᴜᴘs", callback_data="load_default_groups")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -461,7 +461,7 @@ def premium_benefits_keyboard():
 # ─────────────────────────────────────────
 def referral_keyboard(invite_link: str):
     keyboard = [
-        [InlineKeyboardButton("🔗 sʜᴀʀᴇ ᴍʏ ʀᴇғᴇʀʀᴀʟ ʟɪɴᴋ", url=f"https://t.me/share/url?url={invite_link}&text=Join%20using%20my%20link%20and%20get%20rewards!")],
+        [InlineKeyboardButton("🔗 sʜᴀʀᴇ ᴍʏ ʀᴇғᴇʀʀᴀʟʟɪɴᴋ", url=f"https://t.me/share/url?url={invite_link}&text=Join%20using%20my%20link%20and%20get%20rewards!")],
         [InlineKeyboardButton("↻ ʀᴇғʀᴇsʜ ᴘʀᴏɢʀᴇss", callback_data="referral_info")],
         [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
     ]
