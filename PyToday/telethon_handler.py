@@ -190,12 +190,8 @@ async def get_groups_and_marketplaces(account_id):
         
         await client.disconnect()
         
-        db.create_or_update_stats(
-            account_id,
-            groups_count=len(groups),
-            marketplaces_count=len(marketplaces)
-        )
-        
+
+
         return {
             "success": True,
             "groups": groups,
