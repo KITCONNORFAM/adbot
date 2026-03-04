@@ -76,7 +76,7 @@ async def safe_edit_caption(query, text, parse_mode="HTML", reply_markup=None):
 
 async def send_notification(query, text, reply_markup=None):
     try:
-        await query.message.reply_text(text, parse_mode="ʜᴛᴍʟ", reply_markup=reply_markup)
+        await query.message.reply_text(text, parse_mode="HTML", reply_markup=reply_markup)
     except Exception as e:
         logger.error(f"Failed to send notification: {e}")
 
@@ -87,7 +87,7 @@ async def send_new_message(query, text, reply_markup=None):
 
         if has_media:
             try:
-                await query.edit_message_caption(caption=text, parse_mode="ʜᴛᴍʟ", reply_markup=reply_markup)
+                await query.edit_message_caption(caption=text, parse_mode="HTML", reply_markup=reply_markup)
                 return
             except BadRequest as e:
                 error_msg = str(e)
@@ -202,7 +202,7 @@ async def send_force_sub_message(update: Update, context: ContextTypes.DEFAULT_T
     keyboard.append([InlineKeyboardButton("🔄 ᴄʜᴇᴄᴋ ᴀɢᴀɪɴ", callback_data="check_force_sub")])
 
     if update.message:
-        await update.message.reply_text(force_text, parse_mode="ʜᴛᴍʟ", reply_markup=InlineKeyboardMarkup(keyboard))
+        await update.message.reply_text(force_text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
     elif update.callback_query:
         await send_new_message(update.callback_query, force_text, InlineKeyboardMarkup(keyboard))
 
@@ -2628,7 +2628,7 @@ async def prompt_set_logs_channel(query, user_id):
 <b>ᴇxᴀᴍᴘʟᴇs:</b>
 <code>-1001234567890</code>
 ᴏʀ
-<code>ʜᴛᴛᴘs://ᴛ.ᴍᴇ/ʏᴏᴜʀᴄʜᴀɴɴᴇʟ</code>
+<code>https://t.me/ʏᴏᴜʀᴄʜᴀɴɴᴇʟ</code>
 """
     await send_new_message(query, prompt_text, back_to_settings_keyboard())
 
