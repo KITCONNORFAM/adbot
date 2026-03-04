@@ -670,8 +670,17 @@ def increment_stat(account_id, field: str, amount: int = 1):
         db.table("account_stats").insert({"account_id": int(account_id), field: amount}).execute()
 
 
+def create_or_update_stats(account_id, **kwargs):
+    """Upsert account stats with any given fields (e.g. groups_count, last_broadcast)."""
+    db = get_client()
+    stats = get_account_stats(account_id)
+    if stats:
+        db.table("account_stats").update(kwargs).eq("account_id", int(account_id)).execute()
+    else:
+        db.table("account_stats").insert({"account_id": int(account_id), **kwargs}).execute()
+
+
 # ══════════════════════════════════════════════════════════════════════════════
-# AUTO REPLY SYSTEM
 # ══════════════════════════════════════════════════════════════════════════════
 
 def get_sequential_replies(account_id) -> List[Dict]:

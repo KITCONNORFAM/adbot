@@ -1242,16 +1242,18 @@ async def load_default_groups(query, user_id, context):
         # Check if user has logs channel set and verified
         logs_channel = db.get_logs_channel(user_id)
         if not logs_channel or not logs_channel.get('verified'):
+            has_channel = bool(logs_channel and logs_channel.get('channel_id'))
             await send_new_message(
                 query,
-                "<b>⚠️  ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
-                "<blockquote>ʏ ᴏ ᴜ ᴍ ᴜsᴛ sᴇᴛ ᴜᴘ ᴀɴᴅ ᴠᴇʀɪғʏ  ᴀ ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏ ʀᴇ ᴀᴜᴛᴏ -ᴊᴏ ɪɴɪɴɢ ɢʀᴏ ᴜᴘs.</blockquote>\n\n"
-                "<b>ʜᴏ ᴡ ᴛᴏ  sᴇᴛ ᴜᴘ:</b>\n"
-                "1. CREATE A NEW CHANNEL\n"
-                "2. ᴀᴅᴅ ᴛʜɪs ʙᴏ ᴛ ᴀs ᴀᴅᴍ ɪɴ\n"
-                "3. ɢᴏ  ᴛᴏ  sᴇᴛᴛɪɴɢs → ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ\n"
-                "4. SEND THE CHANNEL ID OR LINK .",
-                back_to_menu_keyboard()
+                "<b>⚠️ Logs Channel Required</b>\n\n"
+                "<i>You must set up and verify a logs channel before auto-joining groups.</i>\n\n"
+                "<b>How to set up:</b>\n"
+                "1. Create a new Telegram channel\n"
+                "2. Add this bot as <b>admin</b> with permission to post\n"
+                "3. Click <b>+ Set Logs Channel</b> below and send the channel link or ID\n"
+                "4. Click <b>Verify</b> to confirm\n\n"
+                "<i>Supported formats: @username, https://t.me/name, -1001234567890</i>",
+                logs_channel_keyboard(has_channel=has_channel, verified=False)
             )
             return
 
