@@ -1726,22 +1726,8 @@ async def start_advertising(query, user_id, context):
         )
         return
 
-    # Check if logs channel is set (required)
+    # Logs channel is optional - only used for logging, not required to start
     logs_channel = db.get_logs_channel(user_id)
-    if not logs_channel or not logs_channel.get('verified'):
-        await send_new_message(
-            query,
-            "<b>⚠️  ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ ʀᴇǫᴜɪʀᴇᴅ</b>\n\n"
-            "<blockquote>ʏ ᴏ ᴜ ᴍ ᴜsᴛ sᴇᴛ ᴜᴘ ᴀ ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ ʙᴇғᴏ ʀᴇ sᴛᴀʀᴛɪɴɢ ADVERTISING.</blockquote>\n\n"
-            "<b>ʜᴏ ᴡ ᴛᴏ  sᴇᴛ ᴜᴘ:</b>\n"
-            "1. CREATE A NEW CHANNEL\n"
-            "2. ᴀᴅᴅ ᴛʜɪs ʙᴏ ᴛ ᴀs ᴀᴅᴍ ɪɴ\n"
-            "3. ɢᴏ  ᴛᴏ  sᴇᴛᴛɪɴɢs → ʟᴏ ɢs ᴄʜᴀɴɴᴇʟ\n"
-            "4. sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪᴅ ᴏ ʀ ʟɪɴᴋ",
-            back_to_menu_keyboard()
-        )
-        return
-
     accounts = db.get_accounts(user_id, logged_in_only=True)
 
     if not accounts:
