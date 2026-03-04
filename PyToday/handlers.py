@@ -33,6 +33,7 @@ from PyToday.new_handlers import (
 
 logger = logging.getLogger(__name__)
 user_states = {}
+cancel_auto_join_flags = {}  # user_id -> True if user requested cancel
 
 WELCOME_TEXT_TEMPLATE = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 
@@ -405,6 +406,12 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data == "load_default_groups":
         await load_default_groups(query, user_id, context)
+
+    elif data == "cancel_auto_join":
+        from PyToday.handlers import cancel_auto_join_flags
+        cancel_auto_join_flags[user_id] = True
+        await query.answer("✖ Cancelling...", show_alert=False)
+        await send_new_message(query, "<b>✖ Auto-join cancelled.</b>\n\n<i>The join process has been stopped.</i>", main_menu_keyboard())
 
     elif data.startswith("grp_page_"):
         parts = data.split("_")
@@ -1302,20 +1309,44 @@ async def load_default_groups(query, user_id, context):
             )
             return
 
+        # Reset cancel flag for this user
+
+        cancel_auto_join_flags[user_id] = False
+
+
+
+        from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+
+        cancel_kb = InlineKeyboardMarkup([[InlineKeyboardButton("✖ Cancel Joining", callback_data="cancel_auto_join")]])
+
         await send_new_message(
+
             query,
+
             f"<b>⏳ Auto-joining groups...</b>\n\n<i>Found {len(group_links)} groups to join. This may take a while.</i>",
-            None
+            cancel_kb
+
         )
+
+
 
         # Join groups using the first account with user's logs channel
         account = accounts[0]
         account_id = str(account["id"])
 
+
         result = await telethon_handler.auto_join_groups_from_file(
+
             account_id,
+
             group_links,
-            logs_channel_id=logs_channel_id
+
+            logs_channel_id=logs_channel_id,
+
+            cancel_flag=cancel_auto_join_flags,
+
+            cancel_user_id=user_id
+
         )
 
         result_text = f"""

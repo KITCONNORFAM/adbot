@@ -824,6 +824,13 @@ def add_target_group(account_id, group_id: int, group_title: str = None) -> bool
         return False  # UNIQUE constraint - already exists
 
 
+def log_group_join(account_id, group_id, group_title, invite_link=None) -> bool:
+    """Record a joined group in target_groups table."""
+    if not group_id:
+        return False
+    return add_target_group(account_id, int(group_id), group_title)
+
+
 def remove_target_group(account_id, group_id: int) -> bool:
     db = get_client()
     db.table("target_groups").delete().eq("account_id", int(account_id)).eq("group_id", group_id).execute()

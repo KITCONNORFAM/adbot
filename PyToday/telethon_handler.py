@@ -685,6 +685,9 @@ async def join_group_by_link(account_id, invite_link):
             except UserAlreadyParticipantError:
                 await client.disconnect()
                 return {"success": False, "error": "Already a member of this group"}
+            except Exception as e:
+                await client.disconnect()
+                return {"success": False, "error": f"Could not resolve group: {str(e)}"}
         else:
             await client.disconnect()
             return {"success": False, "error": "Invalid invite link format"}
@@ -993,7 +996,7 @@ async def stop_all_auto_reply_listeners(user_id):
         return 0
 
 # Auto Join Groups from File
-async def auto_join_groups_from_file(account_id, group_links, logs_channel_id=None, user_id=None):
+async def auto_join_groups_from_file(account_id, group_links, logs_channel_id=None, user_id=None, cancel_flag=None, cancel_user_id=None):
     """Auto join multiple groups from a list of links with user-specific logs"""
     joined = 0
     failed = 0
@@ -1006,6 +1009,10 @@ async def auto_join_groups_from_file(account_id, group_links, logs_channel_id=No
     account_name = account.get('account_first_name', 'Unknown') if account else 'Unknown'
     
     for link in group_links:
+        # Check if user requested cancel
+        if cancel_flag is not None and cancel_user_id is not None:
+            if cancel_flag.get(cancel_user_id):
+                break
         try:
             result = await join_group_by_link(account_id, link)
             if result["success"]:
