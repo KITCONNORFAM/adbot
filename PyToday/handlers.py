@@ -37,9 +37,9 @@ cancel_auto_join_flags = {}  # user_id -> True if user requested cancel
 
 WELCOME_TEXT_TEMPLATE = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 
-ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ADVERTISING ʙᴏᴛ
+ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ʙᴏᴛ
 
-<blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ADVERTISING ɪɴ ɢʀᴏᴜᴘs
+<blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ɪɴ ɢʀᴏᴜᴘs
 💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴛᴏ ᴅɪʀᴇᴄᴛ ᴍᴇssᴀɢᴇs
 🔗 ᴀᴜᴛᴏ ᴊᴏɪɴ ɢʀᴏᴜᴘs ᴠɪᴀ ʟɪɴᴋs
 📊 ᴅᴇᴛᴀɪʟᴇᴅ sᴛᴀᴛɪsᴛɪᴄs ᴛʀᴀᴄᴋɪɴɢ
@@ -476,7 +476,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["advertising_active"] = False
         await send_new_message(
             query,
-            "<b>⏹ ADVERTISING sᴛᴏᴘᴘᴇᴅ</b>\n\n✅ <i>ʙᴏᴜʀ ᴄᴀᴏᴘᴀɪɢɴ ʜᴀs ʙᴇᴇɴ sᴛᴏᴘᴘᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ.</i>",
+            "<b>⏹ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sᴛᴏᴘᴘᴇᴅ</b>\n\n✅ <i>ʙᴏᴜʀ ᴄᴀᴏᴘᴀɪɢɴ ʜᴀs ʙᴇᴇɴ sᴛᴏᴘᴘᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ.</i>",
             advertising_menu_keyboard()
         )
 
@@ -676,10 +676,10 @@ async def show_main_menu(query, context=None):
 
 async def show_advertising_menu(query):
     adv_text = """
-<b>◈ ADVERTISING ᴏᴇɴᴜ</b>
+<b>◈ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ᴏᴇɴᴜ</b>
 
-▶ <b>sᴛᴀʀᴛ</b> - ʙᴇɢɪɴ ADVERTISING
-⏹ <b>sᴛᴏᴘ</b> - sᴛᴏᴘ ADVERTISING
+▶ <b>sᴛᴀʀᴛ</b> - ʙᴇɢɪɴ ᴀᴅᴠᴇʀᴛɪsɪɴɢ
+⏹ <b>sᴛᴏᴘ</b> - sᴛᴏᴘ ᴀᴅᴠᴇʀᴛɪsɪɴɢ
 ⏱ <b>sᴇᴛ ᴛɪᴏᴇ</b> - ᴄʜᴀɴɢᴇ ɪɴᴛᴇʀᴠᴀʟ
 
 <i>sᴇʟᴇᴄᴛ ᴀɴ ᴏᴘᴛɪᴏɴ:</i>
@@ -711,7 +711,7 @@ async def show_support(query):
 • ɢᴇᴛᴛɪɴɢ sᴛᴀʀᴛᴇᴅ: ᴀᴅᴅ ʏᴏᴜʀ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴄᴄᴏᴜɴᴛ ғɪʀsᴛ
 • ᴀᴘɪ ᴄʀᴇᴅᴇɴᴛɪᴀʟs: ɢᴇᴛ ғʀᴏᴍ ᴍʏ.ᴛᴇʟᴇɢʀᴀᴍ.ᴏʀɢ
 • ᴀᴜᴛᴏ ʀᴇᴘʟʏ: ᴇɴᴀʙʟᴇ ɪɴ sᴇᴛᴛɪɴɢs ᴛᴏ ᴀᴜᴛᴏ-ʀᴇsᴘᴏɴᴅ
-• ADVERTISING: sᴇᴛ AD TEXT, ᴛʜᴇɴ sᴛᴀʀᴛ ᴄᴀᴍᴘᴀɪɢɴ
+• ᴀᴅᴠᴇʀᴛɪsɪɴɢ: sᴇᴛ AD TEXT, ᴛʜᴇɴ sᴛᴀʀᴛ ᴄᴀᴍᴘᴀɪɢɴ
 
 📞 <b>ᴄᴏɴᴛᴀᴄᴛ ᴏᴘᴛɪᴏɴs:</b>
 • ᴀᴅᴍɪɴ sᴜᴘᴘᴏʀᴛ: ᴅɪʀᴇᴄᴛ ʜᴇʟᴘ ғʀᴏᴍ ᴅᴇᴠᴇʟᴏᴘᴇʀ
@@ -1783,7 +1783,7 @@ async def start_advertising(query, user_id, context):
     if not accounts:
         await send_new_message(
             query,
-            "<b> ✅ No logged in accounts</b>\n\n<i>Please add and login to an account first.</i>",
+            "<b>⚠️ ɴᴏ ʟᴏɢɢᴇᴅ-ɪɴ ᴀᴄᴄᴏᴜɴᴛs</b>\n\n<i>Please add and login to an account first.</i>",
             advertising_menu_keyboard()
         )
         return
@@ -1800,7 +1800,7 @@ async def start_advertising(query, user_id, context):
     if not use_forward and not ad_text:
         await send_new_message(
             query,
-            "<b> ✅ No ad text set</b>\n\n<i>Please set your ad text first or enable forward mode to forward from Saved Messages.</i>",
+            "<b>⚠️ ɴᴏ ᴀᴅ ᴛᴇxᴛ sᴇᴛ</b>\n\n<i>Please set your ad text first or enable forward mode to forward from Saved Messages.</i>",
             advertising_menu_keyboard()
         )
         return
@@ -1842,7 +1842,7 @@ async def start_advertising(query, user_id, context):
     target_text = f"Selected ({len(target_groups) if target_mode == 'selected' else 0} groups)" if target_mode == "selected" else "All Groups"
 
     start_text = f"""
-<b>▶ ADVERTISING sᴛᴀʀᴛᴇᴅ</b>
+<b>▶ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sᴛᴀʀᴛᴇᴅ</b>
 
 💎 <b>Accounts:</b> <code>{len(active_accounts)}</code>
 📨 <b>Mode:</b> <code>{mode_text}</code>
@@ -2710,7 +2710,7 @@ async def toggle_force_join_callback(query, user_id):
     await query.answer(f"Force Join: {status_text}", show_alert=True)
     await send_new_message(
         query,
-        f"<b>⚙️ ғᴏʀᴄᴇ ᴊᴏɪɴ</b>\n\nStatus: <b>{status_text}</b>",
+        f"<b>⚙️ ғᴏʀᴄᴇ ᴊᴏɪɴ</b>\n\nStatus: <b>{status_text}</b>",
         force_join_keyboard(new_status)
     )
 

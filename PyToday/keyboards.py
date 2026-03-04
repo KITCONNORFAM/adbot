@@ -2,37 +2,37 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 def main_menu_keyboard():
     keyboard = [
-        [InlineKeyboardButton("ADVERTISING", callback_data="advertising_menu"),
-         InlineKeyboardButton("ACCOUNTS", callback_data="accounts_menu")],
+        [InlineKeyboardButton("ᴀᴅᴠᴇʀᴛɪsɪɴɢ", callback_data="advertising_menu"),
+         InlineKeyboardButton("ᴀᴄᴄᴏᴜɴᴛs", callback_data="accounts_menu")],
         [InlineKeyboardButton("LOAD GCS/MPS", callback_data="load_groups"),
-         InlineKeyboardButton("SET AD TEXT", callback_data="set_ad_text")],
-        [InlineKeyboardButton("SETTINGS", callback_data="settings"),
-         InlineKeyboardButton("SUPPORT", callback_data="support")]
+         InlineKeyboardButton("sᴇᴛ ᴀᴅ ᴛᴇxᴛ", callback_data="set_ad_text")],
+        [InlineKeyboardButton("sᴇᴛᴛɪɴɢs", callback_data="settings"),
+         InlineKeyboardButton("sᴜᴘᴘᴏʀᴛ", callback_data="support")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 def advertising_menu_keyboard():
     keyboard = [
-        [InlineKeyboardButton("» sᴛᴀʀᴛ ADVERTISING «", callback_data="start_advertising")],
-        [InlineKeyboardButton("▣ sᴛᴏᴘ ADVERTISING", callback_data="stop_advertising")],
+        [InlineKeyboardButton("» sᴛᴀʀᴛ ᴀᴅᴠᴇʀᴛɪsɪɴɢ «", callback_data="start_advertising")],
+        [InlineKeyboardButton("▣ sᴛᴏᴘ ᴀᴅᴠᴇʀᴛɪsɪɴɢ", callback_data="stop_advertising")],
         [InlineKeyboardButton("◴ SET TIME", callback_data="set_time")],
-        [InlineKeyboardButton("« BACK", callback_data="main_menu")]
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 def accounts_menu_keyboard():
     keyboard = [
-        [InlineKeyboardButton("＋ ADD ACCOUNT", callback_data="add_account")],
+        [InlineKeyboardButton("＋ ᴀᴅᴅ ᴀᴄᴄᴏᴜɴᴛ", callback_data="add_account")],
         [InlineKeyboardButton("✕ DELETE ACCOUNT", callback_data="delete_account")],
-        [InlineKeyboardButton("≡ ᴍʏ ACCOUNTS", callback_data="my_accounts")],
-        [InlineKeyboardButton("« BACK", callback_data="main_menu")]
+        [InlineKeyboardButton("≡ ᴍʏ ᴀᴄᴄᴏᴜɴᴛs", callback_data="my_accounts")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 def support_keyboard():
     keyboard = [
         [InlineKeyboardButton("◈ ADMIN", url="https://t.me/charliespringfam")],
-        [InlineKeyboardButton("« BACK", callback_data="main_menu")]
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -46,9 +46,9 @@ def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, a
     keyboard = [
         [InlineKeyboardButton("◇ SINGLE ACCOUNT", callback_data="single_mode"),
          InlineKeyboardButton("◆ MULTIPLE", callback_data="multiple_mode")],
-        [InlineKeyboardButton("▤ STATISTICS", callback_data="statistics")],
+        [InlineKeyboardButton("▤ sᴛᴀᴛɪsᴛɪᴄs", callback_data="statistics")],
         [InlineKeyboardButton(f"✉ {forward_mode} {forward_status}", callback_data="toggle_forward_mode"),
-         InlineKeyboardButton(f"⟐ AUTO REPLY {auto_reply_status}", callback_data="auto_reply_menu")],
+         InlineKeyboardButton(f"⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ {auto_reply_status}", callback_data="auto_reply_menu")],
         [InlineKeyboardButton(f"⊕ AUTO JOIN {auto_join_status}", callback_data="toggle_auto_group_join")],
         [InlineKeyboardButton("◉ LOGS CHANNEL", callback_data="logs_channel_menu")]
     ]
@@ -56,8 +56,8 @@ def settings_keyboard(use_multiple=False, use_forward=False, auto_reply=False, a
     if is_owner:
         keyboard.append([InlineKeyboardButton(f"⊗ FORCE SUB {force_sub_status}", callback_data="force_sub_menu")])
     
-    keyboard.append([InlineKeyboardButton("◎ TARGETING", callback_data="target_adv")])
-    keyboard.append([InlineKeyboardButton("« BACK", callback_data="main_menu")])
+    keyboard.append([InlineKeyboardButton("◎ ᴛᴀʀɢᴇᴛɪɴɢ", callback_data="target_adv")])
+    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")])
     return InlineKeyboardMarkup(keyboard)
 
 def force_sub_keyboard(force_sub_enabled=False):
@@ -69,8 +69,8 @@ def force_sub_keyboard(force_sub_enabled=False):
         [InlineKeyboardButton(f"{toggle_text}", callback_data="toggle_force_sub")],
         [InlineKeyboardButton("◈ sᴇᴛ ᴄʜᴀɴɴᴇʟ ɪᴅ", callback_data="set_force_channel"),
          InlineKeyboardButton("◉ sᴇᴛ ɢʀᴏᴜᴘ ɪᴅ", callback_data="set_force_group")],
-        [InlineKeyboardButton("◐ ᴠɪᴇᴡ SETTINGS", callback_data="view_force_sub")],
-        [InlineKeyboardButton("« BACK", callback_data="settings")]
+        [InlineKeyboardButton("◐ ᴠɪᴇᴡ sᴇᴛᴛɪɴɢs", callback_data="view_force_sub")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -93,7 +93,7 @@ def auto_reply_settings_keyboard(auto_reply_enabled=False):
          InlineKeyboardButton("＋ ᴀᴅᴅ ᴛᴇxᴛ", callback_data="add_reply_text")],
         [InlineKeyboardButton("✕ ᴅᴇʟᴇᴛᴇ ᴛᴇxᴛ", callback_data="delete_reply_text"),
          InlineKeyboardButton("◐ ᴠɪᴇᴡ ᴛᴇxᴛ", callback_data="view_reply_text")],
-        [InlineKeyboardButton("« BACK", callback_data="settings")]
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -104,7 +104,7 @@ def target_adv_keyboard(target_mode="all"):
     keyboard = [
         [InlineKeyboardButton(f"{all_check} ᴀʟʟ ɢʀᴏᴜᴘs", callback_data="target_all_groups"),
          InlineKeyboardButton(f"{selected_check} sᴇʟᴇᴄᴛᴇᴅ", callback_data="target_selected_groups")],
-        [InlineKeyboardButton("« BACK", callback_data="settings")]
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -114,7 +114,7 @@ def selected_groups_keyboard():
          InlineKeyboardButton("－ ʀᴇᴍᴏᴠᴇ", callback_data="remove_target_group")],
         [InlineKeyboardButton("✕ ᴄʟᴇᴀʀ ᴀʟʟ", callback_data="clear_target_groups"),
          InlineKeyboardButton("≡ ᴠɪᴇᴡ ɢʀᴏᴜᴘs", callback_data="view_target_groups")],
-        [InlineKeyboardButton("« BACK", callback_data="target_adv")]
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="target_adv")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -167,7 +167,7 @@ def accounts_keyboard(accounts, page=0, per_page=5):
     if nav_buttons:
         keyboard.append(nav_buttons)
     
-    keyboard.append([InlineKeyboardButton("« BACK", callback_data="accounts_menu")])
+    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="accounts_menu")])
     return InlineKeyboardMarkup(keyboard)
 
 def groups_keyboard(groups, account_id, page=0, per_page=10):
@@ -221,7 +221,7 @@ def delete_accounts_keyboard(accounts, page=0, per_page=5):
     if nav_buttons:
         keyboard.append(nav_buttons)
     
-    keyboard.append([InlineKeyboardButton("« BACK", callback_data="accounts_menu")])
+    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="accounts_menu")])
     return InlineKeyboardMarkup(keyboard)
 
 def confirm_delete_keyboard(account_id):
@@ -242,7 +242,7 @@ def time_keyboard():
         [InlineKeyboardButton("◴ 30 ᴍɪɴ", callback_data="time_1800"),
          InlineKeyboardButton("◴ 1 ʜᴏᴜʀ", callback_data="time_3600"),
          InlineKeyboardButton("◈ ᴄᴜsᴛᴏᴍ", callback_data="time_custom")],
-        [InlineKeyboardButton("« BACK", callback_data="advertising_menu")]
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="advertising_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -251,11 +251,11 @@ def back_to_menu_keyboard():
     return InlineKeyboardMarkup(keyboard)
 
 def back_to_settings_keyboard():
-    keyboard = [[InlineKeyboardButton("« BACK", callback_data="settings")]]
+    keyboard = [[InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]]
     return InlineKeyboardMarkup(keyboard)
 
 def back_to_auto_reply_keyboard():
-    keyboard = [[InlineKeyboardButton("« BACK", callback_data="auto_reply_menu")]]
+    keyboard = [[InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="auto_reply_menu")]]
     return InlineKeyboardMarkup(keyboard)
 
 def ad_text_menu_keyboard():
@@ -263,12 +263,12 @@ def ad_text_menu_keyboard():
         [InlineKeyboardButton("≡ sᴀᴠᴇᴅ ᴛᴇxᴛ", callback_data="ad_saved_text")],
         [InlineKeyboardButton("＋ ᴀᴅᴅ ᴛᴇxᴛ", callback_data="ad_add_text"),
          InlineKeyboardButton("✕ ᴅᴇʟᴇᴛᴇ ᴛᴇxᴛ", callback_data="ad_delete_text")],
-        [InlineKeyboardButton("« BACK", callback_data="main_menu")]
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
 def ad_text_back_keyboard():
-    keyboard = [[InlineKeyboardButton("« BACK", callback_data="set_ad_text")]]
+    keyboard = [[InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="set_ad_text")]]
     return InlineKeyboardMarkup(keyboard)
 
 def account_selection_keyboard(accounts, selected_ids=None, page=0, per_page=5):
@@ -302,7 +302,7 @@ def account_selection_keyboard(accounts, selected_ids=None, page=0, per_page=5):
         keyboard.append(nav_buttons)
     
     keyboard.append([InlineKeyboardButton("✓ ᴄᴏɴғɪʀᴍ sᴇʟᴇᴄᴛɪᴏɴ", callback_data="confirm_selection")])
-    keyboard.append([InlineKeyboardButton("« BACK", callback_data="settings")])
+    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")])
     return InlineKeyboardMarkup(keyboard)
 
 def target_groups_list_keyboard(groups, page=0, per_page=5):
@@ -327,7 +327,7 @@ def target_groups_list_keyboard(groups, page=0, per_page=5):
     if nav_buttons:
         keyboard.append(nav_buttons)
     
-    keyboard.append([InlineKeyboardButton("« BACK", callback_data="target_selected_groups")])
+    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="target_selected_groups")])
     return InlineKeyboardMarkup(keyboard)
 
 def remove_groups_keyboard(groups, page=0, per_page=5):
@@ -352,7 +352,7 @@ def remove_groups_keyboard(groups, page=0, per_page=5):
     if nav_buttons:
         keyboard.append(nav_buttons)
     
-    keyboard.append([InlineKeyboardButton("« BACK", callback_data="target_selected_groups")])
+    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="target_selected_groups")])
     return InlineKeyboardMarkup(keyboard)
 
 def single_account_selection_keyboard(accounts, page=0, per_page=5):
@@ -379,7 +379,7 @@ def single_account_selection_keyboard(accounts, page=0, per_page=5):
     if nav_buttons:
         keyboard.append(nav_buttons)
     
-    keyboard.append([InlineKeyboardButton("« BACK", callback_data="settings")])
+    keyboard.append([InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")])
     return InlineKeyboardMarkup(keyboard)
 
 
@@ -391,7 +391,7 @@ def logs_channel_keyboard(has_channel=False, verified=False):
             keyboard = [
                 [InlineKeyboardButton(status, callback_data="logs_status")],
                 [InlineKeyboardButton("✕ ʀᴇᴍᴏᴠᴇ ᴄʜᴀɴɴᴇʟ", callback_data="remove_logs_channel")],
-                [InlineKeyboardButton("« BACK", callback_data="settings")]
+                [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
             ]
         else:
             status = "⏳ ᴘᴇɴᴅɪɴɢ"
@@ -399,21 +399,21 @@ def logs_channel_keyboard(has_channel=False, verified=False):
                 [InlineKeyboardButton(status, callback_data="logs_status")],
                 [InlineKeyboardButton("↻ ᴠᴇʀɪғʏ", callback_data="verify_logs_channel")],
                 [InlineKeyboardButton("✕ ʀᴇᴍᴏᴠᴇ ᴄʜᴀɴɴᴇʟ", callback_data="remove_logs_channel")],
-                [InlineKeyboardButton("« BACK", callback_data="settings")]
+                [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
             ]
     else:
         keyboard = [
             [InlineKeyboardButton("＋ sᴇᴛ LOGS CHANNEL", callback_data="set_logs_channel")],
-            [InlineKeyboardButton("« BACK", callback_data="settings")]
+            [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
         ]
     return InlineKeyboardMarkup(keyboard)
 
 # Load Groups Options Keyboard
 def load_groups_options_keyboard():
     keyboard = [
-        [InlineKeyboardButton("◈ LOAD MY GROUPS", callback_data="load_my_groups")],
+        [InlineKeyboardButton("◈ ʟᴏᴀᴅ ᴍʏ ɢʀᴏᴜᴘs", callback_data="load_my_groups")],
         [InlineKeyboardButton("◉ ʟᴏᴀᴅ ᴅᴇғᴀᴜʟᴛ ɢʀᴏᴜᴘs", callback_data="load_default_groups")],
-        [InlineKeyboardButton("« BACK", callback_data="main_menu")]
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -425,7 +425,7 @@ def force_join_keyboard(enabled=False):
     keyboard = [
         [InlineKeyboardButton(f"sᴛᴀᴛᴜs: {status}", callback_data="force_join_status")],
         [InlineKeyboardButton(f"{toggle_text}", callback_data="toggle_force_join")],
-        [InlineKeyboardButton("« BACK", callback_data="settings")]
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -451,7 +451,7 @@ def premium_benefits_keyboard():
     keyboard = [
         [InlineKeyboardButton("✅ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ", callback_data="buy_premium")],
         [InlineKeyboardButton("🔥 ɪɴᴠɪᴛᴇ & ᴇᴀʀɴ", callback_data="referral_info")],
-        [InlineKeyboardButton("« BACK", callback_data="main_menu")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -463,7 +463,7 @@ def referral_keyboard(invite_link: str):
     keyboard = [
         [InlineKeyboardButton("🔗 sʜᴀʀᴇ ᴍʏ ʀᴇғᴇʀʀᴀʟ ʟɪɴᴋ", url=f"https://t.me/share/url?url={invite_link}&text=Join%20using%20my%20link%20and%20get%20rewards!")],
         [InlineKeyboardButton("↻ ʀᴇғʀᴇsʜ ᴘʀᴏɢʀᴇss", callback_data="referral_info")],
-        [InlineKeyboardButton("« BACK", callback_data="main_menu")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -480,7 +480,7 @@ def auto_reply_advanced_keyboard(auto_reply_enabled: bool = False, account_id=No
          InlineKeyboardButton("🔑 ᴋᴇʏᴡᴏʀᴅ ʀᴇᴘʟʏ", callback_data=f"add_kw_reply{acc_suffix}")],
         [InlineKeyboardButton("👁 ᴠɪᴇᴡ ʀᴇᴘʟɪᴇs", callback_data=f"view_all_replies{acc_suffix}"),
          InlineKeyboardButton("✕ ᴄʟᴇᴀʀ ᴀʟʟ", callback_data=f"clear_replies{acc_suffix}")],
-        [InlineKeyboardButton("« BACK", callback_data="settings")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="settings")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -502,8 +502,8 @@ def account_settings_keyboard(account_id, settings: dict = None):
          InlineKeyboardButton(f"🔄 ʀᴏᴜɴᴅ ᴅᴇʟᴀʏ: {delay}s", callback_data=f"accset_rdelay_{account_id}")],
         [InlineKeyboardButton(f"😴 ᴀᴜᴛᴏ sʟᴇᴇᴘ ⟨{sleep_status}⟩", callback_data=f"accset_sleep_{account_id}"),
          InlineKeyboardButton(f"✉ ғᴡᴅ ᴍᴏᴅᴇ ⟨{forward_status}⟩", callback_data=f"accset_fwd_{account_id}")],
-        [InlineKeyboardButton("⟐ AUTO REPLY", callback_data=f"acc_auto_reply_{account_id}")],
-        [InlineKeyboardButton("« BACK", callback_data="my_accounts")],
+        [InlineKeyboardButton("⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ", callback_data=f"acc_auto_reply_{account_id}")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="my_accounts")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -519,6 +519,6 @@ def owner_panel_keyboard():
          InlineKeyboardButton("🚫 ʙᴀɴ ᴜsᴇʀ", callback_data="owner_ban")],
         [InlineKeyboardButton("⊗ FORCE SUB", callback_data="force_sub_menu"),
          InlineKeyboardButton("◉ LOGS CHANNEL", callback_data="logs_channel_menu")],
-        [InlineKeyboardButton("« BACK", callback_data="main_menu")],
+        [InlineKeyboardButton("« ʙᴀᴄᴋ", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)

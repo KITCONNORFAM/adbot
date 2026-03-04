@@ -42,13 +42,13 @@ PREMIUM_SECTION_TEXT = """⭐️ ᴘʀᴇᴍɪᴜᴍ ━━━━━━━━━
 
 WELCOME_TEXT = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 
-ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ADVERTISING ʙᴏᴛ
+ʜᴇʏ <code>{first_name}</code> ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ʙᴏᴛ
 
-<blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ADVERTISING ɪɴ ɢʀᴏᴜᴘs
-💬 AUTO REPLY ᴛᴏ ᴅɪʀᴇᴄᴛ ᴍᴇssᴀɢᴇs
+<blockquote>📢 ᴀᴜᴛᴏᴍᴀᴛᴇᴅ ᴀᴅᴠᴇʀᴛɪsɪɴɢ ɪɴ ɢʀᴏᴜᴘs
+💬 ᴀᴜᴛᴏ ʀᴇᴘʟʏ ᴛᴏ ᴅɪʀᴇᴄᴛ ᴍᴇssᴀɢᴇs
 🔗 AUTO JOIN ɢʀᴏᴜᴘs ᴠɪᴀ ʟɪɴᴋs
-📊 ᴅᴇᴛᴀɪʟᴇᴅ STATISTICS ᴛʀᴀᴄᴋɪɴɢ
-👤 MULTIPLE ᴀᴄᴄᴏᴜɴᴛ SUPPORT
+📊 ᴅᴇᴛᴀɪʟᴇᴅ sᴛᴀᴛɪsᴛɪᴄs ᴛʀᴀᴄᴋɪɴɢ
+👤 MULTIPLE ᴀᴄᴄᴏᴜɴᴛ sᴜᴘᴘᴏʀᴛ
 ⏰ sᴄʜᴇᴅᴜʟᴇᴅ ᴍᴇssᴀɢᴇ SENDɪɴɢ</blockquote>
 {expiry_line}
 <i>ᴄʜᴏᴏsᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ:</i>"""
@@ -354,7 +354,7 @@ async def cb_account_settings(query, account_id: str, user_id: int):
     settings = db.get_account_settings(account_id)
     name = account.get("account_first_name") or account.get("phone", "Account")
     text = (
-        f"<b>⚙️ ᴀᴄᴄᴏᴜɴᴛ SETTINGS</b>\n"
+        f"<b>⚙️ ᴀᴄᴄᴏᴜɴᴛ sᴇᴛᴛɪɴɢs</b>\n"
         f"<code>{name}</code>\n\n"
         f"Configure settings for this account individually.\n"
         f"Changes apply to THIS account only."
@@ -397,7 +397,7 @@ async def cb_acc_auto_reply(query, account_id: str, user_id: int):
     kw_replies = db.get_keyword_replies(account_id)
 
     text = (
-        f"<b>⟐ AUTO REPLY</b>\n\n"
+        f"<b>⟐ ᴀᴜᴛᴏ ʀᴇᴘʟʏ</b>\n\n"
         f"Status: {'🟢 ON' if enabled else '🔴 OFF'}\n"
         f"Sequential Replies: <b>{len(seq_replies)}</b>\n"
         f"Keyword Replies: <b>{len(kw_replies)}</b>\n\n"
@@ -473,7 +473,7 @@ async def cb_owner_stats(query, user_id: int):
         for o in owners
     ]) or "  None"
     text = (
-        f"<b>▤ ʙᴏᴛ STATISTICS</b>\n\n"
+        f"<b>▤ ʙᴏᴛ sᴛᴀᴛɪsᴛɪᴄs</b>\n\n"
         f"👥 Total: <b>{stats['total_users']}</b>\n"
         f"👑 Owners: <b>{stats['owners']}</b>\n"
         f"💎 Premium: <b>{stats['premium']}</b>\n"

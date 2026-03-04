@@ -55,6 +55,15 @@ async def error_handler(update, context):
             logger.error(f"Telegram error: {e}")
     except Exception as e:
         logger.error(f"Unexpected error: {e}", exc_info=True)
+        try:
+            if update:
+                err_msg = "<b>❌ ᴀɴ ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ, ᴘʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ. ɪꜰ ᴛʜɪs ᴘᴇʀsɪsᴛs, ᴄᴏɴᴛᴀᴄᴛ sᴜᴘᴘᴏʀᴛ.</b>"
+                if update.effective_message:
+                    await update.effective_message.reply_html(err_msg)
+                elif update.callback_query:
+                    await update.callback_query.answer("❌ ᴀɴ ᴜɴᴇxᴘᴇᴄᴛᴇᴅ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ.", show_alert=True)
+        except Exception as inner_e:
+            logger.error(f"Failed to send error message to user: {inner_e}")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
