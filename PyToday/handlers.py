@@ -1894,17 +1894,26 @@ async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forwar
                 if target_mode == "selected":
                     target_groups = db.get_target_groups(account_id)
                     result = await telethon_handler.broadcast_to_target_groups(
-                        account_id, target_groups, acc_ad_text, acc_time_interval, acc_use_forward, logs_channel_id
+                        account_id, target_groups, acc_ad_text, acc_time_interval, acc_use_forward, logs_channel_id,
+                        cancel_user_id=user_id, cancel_flags=advertising_flags
                     )
                 else:
                     result = await telethon_handler.broadcast_message(
-                        account_id, acc_ad_text, acc_time_interval, acc_use_forward, logs_channel_id
+                        account_id, acc_ad_text, acc_time_interval, acc_use_forward, logs_channel_id,
+                        cancel_user_id=user_id, cancel_flags=advertising_flags
                     )
 
                 if not advertising_flags.get(user_id, False):
                     break
 
-                await asyncio.sleep(acc_time_interval)
+                # Sleep in small chunks so we can interrupt immediately if stopped
+                time_slept = 0
+                while time_slept < acc_time_interval:
+                    if not advertising_flags.get(user_id, False):
+                        break
+                    await asyncio.sleep(1)
+                    time_slept += 1
+
     except Exception as e:
         logger.error(f"Advertising campaign error: {e}")
     finally:

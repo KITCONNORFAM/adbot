@@ -427,7 +427,7 @@ async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, ac
         db.increment_stat(account_id, "messages_failed")
         return {"success": False, "error": str(e)}
 
-async def broadcast_to_target_groups(account_id, target_groups, message, delay=60, use_forward=False, logs_channel_id=None):
+async def broadcast_to_target_groups(account_id, target_groups, message, delay=60, use_forward=False, logs_channel_id=None, cancel_user_id=None, cancel_flags=None):
     """Broadcast message to target groups with user-specific logs"""
     sent = 0
     failed = 0
@@ -451,17 +451,32 @@ async def broadcast_to_target_groups(account_id, target_groups, message, delay=6
             
             if result["success"]:
                 sent += 1
-                # Log successful message to user's logs channel only
                 if logs_channel_id:
                     await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, True)
             else:
                 failed += 1
                 logger.error(f"Failed to send to group {group_id}: {result.get('error')}")
-                # Log failed message to user's logs channel only
                 if logs_channel_id:
                     await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, False, result.get('error'))
             
-            await asyncio.sleep(delay)
+            # Check for cancellation before sleep
+            if cancel_flags is not None and cancel_user_id is not None:
+                if not cancel_flags.get(cancel_user_id, False):
+                    break
+
+            # Sleep in 1s chunks
+            time_slept = 0
+            while time_slept < delay:
+                if cancel_flags is not None and cancel_user_id is not None:
+                    if not cancel_flags.get(cancel_user_id, False):
+                        break
+                await asyncio.sleep(1)
+                time_slept += 1
+
+            if cancel_flags is not None and cancel_user_id is not None:
+                if not cancel_flags.get(cancel_user_id, False):
+                    break
+
         except Exception as e:
             logger.error(f"Broadcast error for group: {e}")
             failed += 1
@@ -477,7 +492,7 @@ async def broadcast_to_target_groups(account_id, target_groups, message, delay=6
         "total": len(target_groups)
     }
 
-async def broadcast_message(account_id, message, delay=60, use_forward=False, logs_channel_id=None):
+async def broadcast_message(account_id, message, delay=60, use_forward=False, logs_channel_id=None, cancel_user_id=None, cancel_flags=None):
     """Broadcast message to all groups with user-specific logs"""
     result = await get_groups_and_marketplaces(account_id)
     if not result["success"]:
@@ -502,16 +517,31 @@ async def broadcast_message(account_id, message, delay=60, use_forward=False, lo
             
             if send_result["success"]:
                 sent += 1
-                # Log successful message to user's logs channel only
                 if logs_channel_id:
                     await log_message_to_channel(logs_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], True)
             else:
                 failed += 1
-                # Log failed message to user's logs channel only
                 if logs_channel_id:
                     await log_message_to_channel(logs_channel_id, account_name, chat.get('title', 'Unknown'), chat["id"], False, send_result.get('error'))
             
-            await asyncio.sleep(delay)
+            # Check for cancellation before sleep
+            if cancel_flags is not None and cancel_user_id is not None:
+                if not cancel_flags.get(cancel_user_id, False):
+                    break
+
+            # Sleep in 1s chunks
+            time_slept = 0
+            while time_slept < delay:
+                if cancel_flags is not None and cancel_user_id is not None:
+                    if not cancel_flags.get(cancel_user_id, False):
+                        break
+                await asyncio.sleep(1)
+                time_slept += 1
+
+            if cancel_flags is not None and cancel_user_id is not None:
+                if not cancel_flags.get(cancel_user_id, False):
+                    break
+
         except Exception as e:
             logger.error(f"Broadcast error: {e}")
             failed += 1
