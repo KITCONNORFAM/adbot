@@ -34,6 +34,7 @@ from PyToday.new_handlers import (
 logger = logging.getLogger(__name__)
 user_states = {}
 cancel_auto_join_flags = {}  # user_id -> True if user requested cancel
+advertising_flags = {}        # user_id -> True while campaign is running
 
 WELCOME_TEXT_TEMPLATE = """<b>◈ ᴛᴇʟᴇɢʀᴀᴍ ᴀᴅ ʙᴏᴛ ◈</b>
 
@@ -313,7 +314,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "twofa_cancel":
         if user_id in user_states:
             del user_states[user_id]
-        await send_new_message(query, "<b>✅ 2ғᴀ ᴏ ᴇʀɪғɪᴄᴀᴛɪᴏɴ ᴄᴀɴᴄᴇʟʟᴇᴅ.</b>\ɴ\ɴ<i>ʀᴇᴛᴜʀɴɪɴɢ ᴛᴏ ᴏᴀɪɴ ᴏᴇɴᴜ...</i>", main_menu_keyboard())
+        await send_new_message(query, "<b>✅ 2ғᴀ ᴏ ᴇʀɪғɪᴄᴀᴛɪᴏɴ ᴄᴀɴᴄᴇʟʟᴇᴅ.</b>\n\n<i>ʀᴇᴛᴜʀɴɪɴɢ ᴛᴏ ᴏᴀɪɴ ᴏᴇɴᴜ...</i>", main_menu_keyboard())
         return
 
     if data == "main_menu":
@@ -411,7 +412,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         from PyToday.handlers import cancel_auto_join_flags
         cancel_auto_join_flags[user_id] = True
         await query.answer("✖ ᴄᴀɴᴄᴇʟʟɪɴɢ...", show_alert=False)
-        await send_new_message(query, "<b>✖ ᴀᴜᴛᴏ-ᴊᴏɪɴ ᴄᴀɴᴄᴇʟʟᴇᴅ.</b>\ɴ\ɴ<i>ᴛʜᴇ ᴊᴏɪɴ ᴘʀᴏᴄᴇss ʜᴀs ʙᴇᴇɴ sᴛᴏᴘᴘᴇᴅ.</i>", main_menu_keyboard())
+        await send_new_message(query, "<b>✖ ᴀᴜᴛᴏ-ᴊᴏɪɴ ᴄᴀɴᴄᴇʟʟᴇᴅ.</b>\n\n<i>ᴛʜᴇ ᴊᴏɪɴ ᴘʀᴏᴄᴇss ʜᴀs ʙᴇᴇɴ sᴛᴏᴘᴘᴇᴅ.</i>", main_menu_keyboard())
 
     elif data.startswith("grp_page_"):
         parts = data.split("_")
@@ -473,6 +474,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await start_advertising(query, user_id, context)
 
     elif data == "stop_advertising":
+        advertising_flags[user_id] = False
         context.user_data["advertising_active"] = False
         await send_new_message(
             query,
@@ -584,17 +586,17 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data.startswith("accset_interval_"):
         account_id = data.split("accset_interval_")[1]
         user_states[user_id] = {"state": "awaiting_accset_interval", "account_id": account_id}
-        await query.message.reply_text("⏸ <b>sᴇᴛ ᴛɪᴍᴇ ɪɴᴛᴇʀᴠᴀʟ</b>\ɴ\ɴsᴇɴᴅ ᴛʜᴇ ᴅᴇʟᴀʏ ɪɴ sᴇᴄᴏɴᴅs (ᴇ.ɢ. <code>60</code>):", ᴘᴀʀsᴇ_ᴍᴏᴅᴇ="ʜᴛᴍʟ")
+        await query.message.reply_text("⏸ <b>sᴇᴛ ᴛɪᴍᴇ ɪɴᴛᴇʀᴠᴀʟ</b>\n\nsᴇɴᴅ ᴛʜᴇ ᴅᴇʟᴀʏ ɪɴ sᴇᴄᴏɴᴅs (ᴇ.ɢ. <code>60</code>):", ᴘᴀʀsᴇ_ᴍᴏᴅᴇ="ʜᴛᴍʟ")
 
     elif data.startswith("accset_gap_"):
         account_id = data.split("accset_gap_")[1]
         user_states[user_id] = {"state": "awaiting_accset_gap", "account_id": account_id}
-        await query.message.reply_text("⏸ <b>sᴇᴛ ɢᴀᴘ</b>\ɴ\ɴsᴇɴᴅ ᴛʜᴇ ɢᴀᴘ ɪɴ sᴇᴄᴏɴᴅs ʙᴇᴛᴡᴇᴇɴ ᴍᴇssᴀɢᴇs (ᴇ.ɢ. <code>5</code>):", ᴘᴀʀsᴇ_ᴍᴏᴅᴇ="ʜᴛᴍʟ")
+        await query.message.reply_text("⏸ <b>sᴇᴛ ɢᴀᴘ</b>\n\nsᴇɴᴅ ᴛʜᴇ ɢᴀᴘ ɪɴ sᴇᴄᴏɴᴅs ʙᴇᴛᴡᴇᴇɴ ᴍᴇssᴀɢᴇs (ᴇ.ɢ. <code>5</code>):", ᴘᴀʀsᴇ_ᴍᴏᴅᴇ="ʜᴛᴍʟ")
 
     elif data.startswith("accset_rdelay_"):
         account_id = data.split("accset_rdelay_")[1]
         user_states[user_id] = {"state": "awaiting_accset_rdelay", "account_id": account_id}
-        await query.message.reply_text("🔄 <b>sᴇᴛ ʀᴏᴜɴᴅ ᴅᴇʟᴀʏ</b>\ɴ\ɴsᴇɴᴅ ᴛʜᴇ ʀᴏᴜɴᴅ ᴅᴇʟᴀʏ ɪɴ sᴇᴄᴏɴᴅs (ᴇ.ɢ. <code>30</code>):", ᴘᴀʀsᴇ_ᴍᴏᴅᴇ="ʜᴛᴍʟ")
+        await query.message.reply_text("🔄 <b>sᴇᴛ ʀᴏᴜɴᴅ ᴅᴇʟᴀʏ</b>\n\nsᴇɴᴅ ᴛʜᴇ ʀᴏᴜɴᴅ ᴅᴇʟᴀʏ ɪɴ sᴇᴄᴏɴᴅs (ᴇ.ɢ. <code>30</code>):", ᴘᴀʀsᴇ_ᴍᴏᴅᴇ="ʜᴛᴍʟ")
 
     # — Per-account auto-reply advanced callbacks ”---------------------—
     elif data.startswith("acc_auto_reply_"):
@@ -882,7 +884,7 @@ async def prompt_add_reply_text(query, user_id):
 
 async def delete_reply_text(query, user_id):
     user = db.get_user(user_id)
-    current_text = user.get('ᴀᴜᴛᴏ_ʀᴇᴘʟʏ_ᴛᴇxᴛ', '') if user else ''
+    current_text = user.get('auto_reply_text', '') if user else ''
     auto_reply = user.get('auto_reply_enabled', False) if user else False
 
     if not current_text:
@@ -995,7 +997,7 @@ async def set_target_all_groups(query, user_id):
 
 <i>ᴍᴇssᴀɢᴇs ᴡɪʟʟ ʙᴇ sᴇɴᴛ ᴛᴏ ᴀʟʟ ɢʀᴏᴜᴘs</i>
 """
-    await send_new_message(query, result_text, target_adv_keyboard("ᴀʟʟ"))
+    await send_new_message(query, result_text, target_adv_keyboard("all"))
 
 
 async def show_selected_groups_menu(query, user_id):
@@ -1007,7 +1009,7 @@ async def show_selected_groups_menu(query, user_id):
     target_groups = db.get_target_groups(account_id)
 
     menu_text = f"""
-<b>🕐¯ sᴇʟᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs</b>
+<b>🎯 sᴇʟᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs</b>
 
 <b>📊 sᴇʟᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs:</b> <code>{len(target_groups)}</code>
 
@@ -1286,7 +1288,7 @@ async def load_default_groups(query, user_id, context):
         except FileNotFoundError:
             await send_new_message(
                 query,
-                "<b>✅ Error</b>\n\n<i>Group links file not found. Please contact admin.</i>",
+                "<b>✅ Error</b>\n\n<i>Group links file not found. Please contact admin.</i>",
                 main_menu_keyboard()
             )
             return
@@ -1294,7 +1296,7 @@ async def load_default_groups(query, user_id, context):
         if not group_links:
             await send_new_message(
                 query,
-                "<b>✅ No groups found</b>\n\n<i>No valid group links found in the file.</i>",
+                "<b>✅ No groups found</b>\n\n<i>No valid group links found in the file.</i>",
                 main_menu_keyboard()
             )
             return
@@ -1304,7 +1306,7 @@ async def load_default_groups(query, user_id, context):
         if not accounts:
             await send_new_message(
                 query,
-                "<b>✅ No logged in accounts</b>\n\n<i>Please add and login to an account first.</i>",
+                "<b>✅ No logged in accounts</b>\n\n<i>Please add and login to an account first.</i>",
                 main_menu_keyboard()
             )
             return
@@ -1323,7 +1325,7 @@ async def load_default_groups(query, user_id, context):
 
             query,
 
-            f"<b>⏳ Auto-joining groups...</b>\n\n<i>Found {len(group_links)} groups to join. This may take a while.</i>",
+            f"<b>⏳ Auto-joining groups...</b>\n\n<i>Found {len(group_links)} groups to join. This may take a while.</i>",
             cancel_kb
 
         )
@@ -1350,12 +1352,12 @@ async def load_default_groups(query, user_id, context):
         )
 
         result_text = f"""
-<b>✅ ᴀᴜᴛᴏ-ᴊᴏɪɴ ᴄᴏᴏᴘʟᴇᴛᴇ</b>
+<b>✅ ᴀᴜᴛᴏ-ᴊᴏɪɴ ᴄᴏᴏᴘʟᴇᴛᴇ</b>
 
 📊 <b>ʀᴇsᴜʟᴛs:</b>
 ✅ ᴊᴏɪɴᴇᴅ: <code>{result['joined']}</code>
-⚠️ ᴀʟʀᴇᴀᴅʏ ᴍᴇᴍʙᴇʀ: <code>{result['already_member']}</code>
-❌ ꜰᴀɪʟᴇᴅ: <code>{result['failed']}</code>
+⚠️ ᴀʟʀᴇᴀᴅʏ ᴍᴇᴍʙᴇʀ: <code>{result['already_member']}</code>
+❌ ꜰᴀɪʟᴇᴅ: <code>{result['failed']}</code>
 📊 ᴛᴏᴛᴀʟ: <code>{result['total']}</code>
 
 <i>ᴀʟʟ ʟᴏɢs sᴇɴᴛ ᴛᴏ ʏᴏᴜʀ ʟᴏɢs ᴄʜᴀɴɴᴇʟ ᴏɴʟʏ.</i>
@@ -1596,7 +1598,7 @@ async def set_single_mode(query, user_id):
 
     if len(accounts) == 1:
         result_text = """
-<b>✅ sɪɴɢʟᴇ ᴏ ᴏ ᴅᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ</b>
+<b>✅ sɪɴɢʟᴇ ᴍᴏᴅᴇ ᴀᴄᴛɪᴠᴀᴛᴇᴅ</b>
 
 💎 ᴜsɪɴɢ ʏᴏᴜʀ ᴏɴʟʏ ᴀᴄᴄᴏᴜɴᴛ ꜰᴏʀ ᴀᴅᴠᴇʀᴛɪsɪɴɢ.
 """
@@ -1805,15 +1807,23 @@ async def start_advertising(query, user_id, context):
         )
         return
 
+    import json as _json
     if use_multiple:
-        selected_accounts = user.get('selected_accounts', [])
+        # selected_accounts stored in context (from toggle) or DB as JSON string
+        selected_accounts = context.user_data.get("selected_accounts", [])
+        if not selected_accounts:
+            raw = user.get('selected_accounts', '[]') or '[]'
+            try:
+                selected_accounts = _json.loads(raw) if isinstance(raw, str) else raw
+            except Exception:
+                selected_accounts = []
         if not selected_accounts:
             selected_accounts = [str(acc["id"]) for acc in accounts]
-        active_accounts = [acc for acc in accounts if str(acc["id"]) in selected_accounts]
+        active_accounts = [acc for acc in accounts if str(acc["id"]) in [str(x) for x in selected_accounts]]
     else:
-        single_account = user.get('selected_single_account')
+        single_account = context.user_data.get("selected_single_account") or user.get('selected_single_account')
         if single_account:
-            active_accounts = [acc for acc in accounts if str(acc["id"]) == single_account]
+            active_accounts = [acc for acc in accounts if str(acc["id"]) == str(single_account)]
         else:
             active_accounts = [accounts[0]] if accounts else []
 
@@ -1836,10 +1846,13 @@ async def start_advertising(query, user_id, context):
             )
             return
 
+    # Set running flag in GLOBAL dict so background task can read it
+    advertising_flags[user_id] = True
     context.user_data["advertising_active"] = True
 
     mode_text = "Forward from Saved Messages" if use_forward else "Direct Send"
-    target_text = f"Selected ({len(target_groups) if target_mode == 'selected' else 0} groups)" if target_mode == "selected" else "All Groups"
+    target_groups_count = len(db.get_target_groups(active_accounts[0]["id"])) if (target_mode == "selected" and active_accounts) else 0
+    target_text = f"sᴇʟᴇᴄᴛᴇᴅ ({target_groups_count} ɢʀᴏᴜᴘs)" if target_mode == "selected" else "ᴀʟʟ ɢʀᴏᴜᴘs"
 
     start_text = f"""
 <b>▶ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sᴛᴀʀᴛᴇᴅ</b>
@@ -1854,17 +1867,17 @@ async def start_advertising(query, user_id, context):
 
     await send_new_message(query, start_text, advertising_menu_keyboard())
 
-    asyncio.create_task(run_advertising_campaign(user_id, active_accounts, ad_text, time_interval, use_forward, target_mode, context))
+    asyncio.create_task(run_advertising_campaign(user_id, active_accounts, ad_text, time_interval, use_forward, target_mode))
 
 
-async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forward, target_mode, context):
+async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forward, target_mode):
     try:
         logs_channel = db.get_logs_channel(user_id)
         logs_channel_id = logs_channel.get('channel_id') if logs_channel else None
 
-        while context.user_data.get("advertising_active", False):
+        while advertising_flags.get(user_id, False):
             for account in accounts:
-                if not context.user_data.get("advertising_active", False):
+                if not advertising_flags.get(user_id, False):
                     break
 
                 account_id = str(account["id"])
@@ -1888,12 +1901,14 @@ async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forwar
                         account_id, acc_ad_text, acc_time_interval, acc_use_forward, logs_channel_id
                     )
 
-                if not context.user_data.get("advertising_active", False):
+                if not advertising_flags.get(user_id, False):
                     break
 
                 await asyncio.sleep(acc_time_interval)
     except Exception as e:
         logger.error(f"Advertising campaign error: {e}")
+    finally:
+        advertising_flags.pop(user_id, None)
 
 
 async def handle_otp_input(query, user_id, data, context):

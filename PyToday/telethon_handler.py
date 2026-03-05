@@ -126,6 +126,53 @@ async def verify_2fa_password(api_id, api_hash, password, session_string, user_i
         await client.disconnect()
         return {"success": False, "error": str(e)}
 
+async def _resolve_entity(client, chat_id, access_hash=None):
+    """Resolve a Telethon entity for a chat/group/channel ID robustly.
+
+    Groups from get_groups_and_marketplaces() are stored as positive Telethon
+    channel IDs (without the -100 prefix).  Passing a bare positive int to
+    get_entity() makes Telethon do a PeerUser lookup which always fails.
+    This helper uses InputPeerChannel(id, access_hash) first when possible.
+    """
+    from telethon.tl.types import InputPeerChannel, InputPeerChat
+    from telethon.tl.types import PeerChannel, PeerChat
+
+    chat_str = str(chat_id)
+
+    # Strategy 1: access_hash available -> build InputPeerChannel directly
+    if access_hash:
+        try:
+            # Strip -100 prefix if present, otherwise use abs value
+            if chat_str.startswith('-100'):
+                raw_id = int(chat_str[4:])
+            else:
+                raw_id = abs(int(chat_str))
+            return InputPeerChannel(channel_id=raw_id, access_hash=int(access_hash))
+        except Exception:
+            pass
+
+    # Strategy 2: get_entity (works if dialogs cached)
+    try:
+        return await client.get_entity(chat_id)
+    except Exception:
+        pass
+
+    # Strategy 3: manual peer construction
+    try:
+        if chat_str.startswith('-100'):
+            return await client.get_input_entity(PeerChannel(int(chat_str[4:])))
+        elif chat_str.startswith('-'):
+            return await client.get_input_entity(PeerChat(abs(int(chat_str))))
+        else:
+            # Positive ID without access_hash -> try as channel anyway
+            return await client.get_input_entity(PeerChannel(abs(int(chat_str))))
+    except Exception:
+        pass
+
+    # Last resort: return raw int (Telethon will try its best)
+    return int(chat_id)
+
+
 async def get_groups_and_marketplaces(account_id):
     try:
         if isinstance(account_id, str):
@@ -261,23 +308,7 @@ async def forward_from_saved_messages(account_id, chat_id, access_hash=None):
         
         source_message = messages[0]
         
-        try:
-            entity = await client.get_entity(chat_id)
-        except Exception:
-            chat_str = str(chat_id)
-            try:
-                if chat_str.startswith('-100'):
-                    real_id = int(chat_str[4:])
-                    if access_hash:
-                        entity = InputPeerChannel(channel_id=real_id, access_hash=int(access_hash))
-                    else:
-                        entity = await client.get_input_entity(PeerChannel(real_id))
-                elif chat_str.startswith('-'):
-                    entity = await client.get_input_entity(PeerChat(abs(int(chat_str))))
-                else:
-                    entity = int(chat_id)
-            except Exception:
-                entity = int(chat_id)
+        entity = await _resolve_entity(client, chat_id, access_hash)
         
         await client.forward_messages(entity, source_message.id, me)
         
@@ -311,25 +342,7 @@ async def send_message_to_chat(account_id, chat_id, message, access_hash=None, u
             await client.disconnect()
             return {"success": False, "error": "Session expired"}
         
-        try:
-            entity = await client.get_entity(chat_id)
-        except Exception:
-            chat_str = str(chat_id)
-            try:
-                if chat_str.startswith('-100'):
-                    real_id = int(chat_str[4:])
-                    if access_hash:
-                        entity = InputPeerChannel(channel_id=real_id, access_hash=int(access_hash))
-                    else:
-                        entity = await client.get_input_entity(PeerChannel(real_id))
-                elif chat_str.startswith('-'):
-                    # regular group
-                    entity = await client.get_input_entity(PeerChat(abs(int(chat_str))))
-                else:
-                    entity = int(chat_id)
-            except Exception:
-                # Last resort: just pass the raw id and hope Telethon resolves it
-                entity = int(chat_id)
+        entity = await _resolve_entity(client, chat_id, access_hash)
         
         if use_forward:
             me = await client.get_me()
@@ -400,18 +413,7 @@ async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, ac
             await client.disconnect()
             return {"success": False, "error": "Session expired"}
         
-        try:
-            entity = await client.get_entity(chat_id)
-        except ValueError:
-            chat_str = str(chat_id)
-            if chat_str.startswith('-100'):
-                real_id = int(chat_str[4:])
-                if access_hash:
-                    entity = InputPeerChannel(channel_id=real_id, access_hash=int(access_hash))
-                else:
-                    entity = await client.get_input_entity(PeerChannel(real_id))
-            else:
-                entity = int(chat_id)
+        entity = await _resolve_entity(client, chat_id, access_hash)
         
         await client.forward_messages(entity, message_id, from_peer)
         

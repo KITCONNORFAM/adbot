@@ -14,17 +14,20 @@ DROP TABLE IF EXISTS message_logs CASCADE;
 
 -- USERS / ROLES -----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS bot_users (
-    user_id        BIGINT PRIMARY KEY,
-    first_name     TEXT,
-    username       TEXT,
-    role           TEXT NOT NULL DEFAULT 'user',   -- 'owner' | 'premium' | 'trial' | 'user'
-    trial_used     BOOLEAN NOT NULL DEFAULT FALSE,
-    trial_expiry   TIMESTAMPTZ,
-    premium_expiry TIMESTAMPTZ,
-    banned         BOOLEAN NOT NULL DEFAULT FALSE,
-    referred_by    BIGINT,
-    referral_count INT NOT NULL DEFAULT 0,
-    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    user_id                BIGINT PRIMARY KEY,
+    first_name             TEXT,
+    username               TEXT,
+    role                   TEXT NOT NULL DEFAULT 'user',   -- 'owner' | 'premium' | 'trial' | 'user'
+    trial_used             BOOLEAN NOT NULL DEFAULT FALSE,
+    trial_expiry           TIMESTAMPTZ,
+    premium_expiry         TIMESTAMPTZ,
+    banned                 BOOLEAN NOT NULL DEFAULT FALSE,
+    referred_by            BIGINT,
+    referral_count         INT NOT NULL DEFAULT 0,
+    selected_single_account TEXT,          -- stores account id chosen in single mode
+    selected_accounts       TEXT,          -- stores JSON array of account ids for multiple mode
+    use_multiple_accounts  BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- TELEGRAM ACCOUNTS ---------------------------------------------------------
