@@ -7,7 +7,7 @@ from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.functions.messages import ForwardMessagesRequest, ImportChatInviteRequest
 from telethon.tl.functions.channels import JoinChannelRequest
-from telethon.tl.types import Channel, Chat, InputPeerChannel, InputPeerSelf, PeerChannel
+from telethon.tl.types import Channel, Chat, InputPeerChannel, InputPeerSelf, PeerChannel, PeerChat
 from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError, PhoneCodeExpiredError, PasswordHashInvalidError, UserAlreadyParticipantError, InviteHashExpiredError, InviteHashInvalidError
 from datetime import datetime
 from PyToday import database as db   # new Supabase DB
@@ -263,22 +263,27 @@ async def forward_from_saved_messages(account_id, chat_id, access_hash=None):
         
         try:
             entity = await client.get_entity(chat_id)
-        except ValueError:
+        except Exception:
             chat_str = str(chat_id)
-            if chat_str.startswith('-100'):
-                real_id = int(chat_str[4:])
-                if access_hash:
-                    entity = InputPeerChannel(channel_id=real_id, access_hash=int(access_hash))
+            try:
+                if chat_str.startswith('-100'):
+                    real_id = int(chat_str[4:])
+                    if access_hash:
+                        entity = InputPeerChannel(channel_id=real_id, access_hash=int(access_hash))
+                    else:
+                        entity = await client.get_input_entity(PeerChannel(real_id))
+                elif chat_str.startswith('-'):
+                    entity = await client.get_input_entity(PeerChat(abs(int(chat_str))))
                 else:
-                    entity = await client.get_input_entity(PeerChannel(real_id))
-            else:
+                    entity = int(chat_id)
+            except Exception:
                 entity = int(chat_id)
         
         await client.forward_messages(entity, source_message.id, me)
         
         await client.disconnect()
         
-        db.update_account(account_id, last_used=datetime.utcnow())
+        db.update_account(account_id, last_used=datetime.utcnow().isoformat())
         db.increment_stat(account_id, "messages_sent")
         
         return {"success": True}
@@ -308,15 +313,22 @@ async def send_message_to_chat(account_id, chat_id, message, access_hash=None, u
         
         try:
             entity = await client.get_entity(chat_id)
-        except ValueError:
+        except Exception:
             chat_str = str(chat_id)
-            if chat_str.startswith('-100'):
-                real_id = int(chat_str[4:])
-                if access_hash:
-                    entity = InputPeerChannel(channel_id=real_id, access_hash=int(access_hash))
+            try:
+                if chat_str.startswith('-100'):
+                    real_id = int(chat_str[4:])
+                    if access_hash:
+                        entity = InputPeerChannel(channel_id=real_id, access_hash=int(access_hash))
+                    else:
+                        entity = await client.get_input_entity(PeerChannel(real_id))
+                elif chat_str.startswith('-'):
+                    # regular group
+                    entity = await client.get_input_entity(PeerChat(abs(int(chat_str))))
                 else:
-                    entity = await client.get_input_entity(PeerChannel(real_id))
-            else:
+                    entity = int(chat_id)
+            except Exception:
+                # Last resort: just pass the raw id and hope Telethon resolves it
                 entity = int(chat_id)
         
         if use_forward:
@@ -332,7 +344,7 @@ async def send_message_to_chat(account_id, chat_id, message, access_hash=None, u
         
         await client.disconnect()
         
-        db.update_account(account_id, last_used=datetime.utcnow())
+        db.update_account(account_id, last_used=datetime.utcnow().isoformat())
         db.increment_stat(account_id, "messages_sent")
         
         return {"success": True}
@@ -405,7 +417,7 @@ async def forward_message_to_chat(account_id, chat_id, from_peer, message_id, ac
         
         await client.disconnect()
         
-        db.update_account(account_id, last_used=datetime.utcnow())
+        db.update_account(account_id, last_used=datetime.utcnow().isoformat())
         db.increment_stat(account_id, "messages_sent")
         
         return {"success": True}
@@ -454,7 +466,7 @@ async def broadcast_to_target_groups(account_id, target_groups, message, delay=6
             if logs_channel_id:
                 await log_message_to_channel(logs_channel_id, account_name, group_title, group_id, False, str(e))
     
-    db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
+    db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow().isoformat())
     
     return {
         "success": True,
@@ -506,7 +518,7 @@ async def broadcast_message(account_id, message, delay=60, use_forward=False, lo
     
     if isinstance(account_id, str):
         account_id = int(account_id)
-    db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow())
+    db.create_or_update_stats(account_id, last_broadcast=datetime.utcnow().isoformat())
     
     return {
         "success": True,
