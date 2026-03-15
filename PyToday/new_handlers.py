@@ -423,7 +423,17 @@ async def cb_view_all_replies(query, account_id: str):
     seq = db.get_sequential_replies(account_id)
     kw = db.get_keyword_replies(account_id)
 
+    # Also get the basic auto-reply text from account_settings
+    settings = db.get_account_settings(account_id)
+    basic_reply_text = settings.get("auto_reply_text") if settings else None
+
     lines = ["<b>📋 ᴀᴜᴛᴏ ʀᴇᴘʟɪᴇs</b>\n"]
+
+    if basic_reply_text:
+        lines.append("<b>Basic Auto-Reply:</b>")
+        preview = basic_reply_text[:100]
+        lines.append(f"  💬 {preview}")
+        lines.append("")
 
     if seq:
         lines.append("<b>Sequential:</b>")

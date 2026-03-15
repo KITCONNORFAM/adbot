@@ -1106,7 +1106,37 @@ async def view_target_groups(query, user_id, page=0):
     )
 
 
+
+async def clear_all_target_groups(query, user_id):
+    """Clear all target groups for all of the user's accounts."""
+    accounts = db.get_accounts(user_id, logged_in_only=True)
+    total_cleared = 0
+    for acc in accounts:
+        cleared = db.clear_target_groups(acc["id"])
+        total_cleared += cleared
+
+    await send_new_message(
+        query,
+        f"<b>✅ ᴀʟʟ ᴛᴀʀɢᴇᴛ ɢʀᴏᴜᴘs ᴄʟᴇᴀʀᴇᴅ</b>\n\n"
+        f"<i>Removed {total_cleared} target group(s) from {len(accounts)} account(s).</i>",
+        target_adv_keyboard()
+    )
+
 async def start_add_account(query, user_id):
+    # ── Account limit: free/trial = 1, premium/owner = unlimited ──
+    role = db.get_user_role(user_id)
+    if role in (None, "user", "trial"):
+        existing_accounts = db.get_accounts(user_id)
+        if len(existing_accounts) >= 1:
+            await send_new_message(
+                query,
+                "<b>⚠️ ᴀᴄᴄᴏᴜɴᴛ ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ</b>\n\n"
+                "<i>ꜰʀᴇᴇ/ᴛʀɪᴀʟ ᴜsᴇʀs ᴄᴀɴ ᴀᴅᴅ ᴏɴʟʏ 1 ᴀᴄᴄᴏᴜɴᴛ.</i>\n\n"
+                "💎 <b>ᴜᴘɢʀᴀᴅᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ</b> ᴛᴏ ᴀᴅᴅ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴏᴜɴᴛs.",
+                accounts_menu_keyboard()
+            )
+            return
+
     user_states[user_id] = {"state": "awaiting_api_id", "data": {}}
 
     prompt_text = """
@@ -1795,7 +1825,12 @@ async def start_advertising(query, user_id, context):
     ad_text = s.get('ad_text')
     use_forward = s.get('use_forward_mode', False)
     
-    use_multiple = user.get('use_multiple_accounts', False)
+    # Premium-only: multi-account advertising
+    role = db.get_user_role(user_id)
+    if role in (None, "user", "trial"):
+        use_multiple = False  # free/trial can only use single account
+    else:
+        use_multiple = user.get('use_multiple_accounts', False)
     time_interval = s.get('time_interval', 60)
     target_mode = s.get('target_mode', 'all')
 

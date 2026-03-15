@@ -154,14 +154,8 @@ class AccountWorker:
             if not await self.ensure_connected():
                 return {"success": False, "error": "Cannot connect"}
             try:
-                # Watermark for free users
-                if _is_free_tier(self.user_id):
-                    text_to_send = text + FREE_WATERMARK
-                else:
-                    text_to_send = text
-
                 entity = await _resolve_entity(self.client, chat_id, access_hash)
-                await self.client.send_message(entity, text_to_send)
+                await self.client.send_message(entity, text)
 
                 db.update_account(self.account_id, last_used=datetime.utcnow().isoformat())
                 db.increment_stat(self.account_id, "messages_sent")
@@ -198,13 +192,7 @@ class AccountWorker:
 
                 entity = await _resolve_entity(self.client, chat_id, access_hash)
 
-                # For forwards: add watermark as a separate message if free tier
                 await self.client.forward_messages(entity, messages[0].id, me)
-                if _is_free_tier(self.user_id):
-                    try:
-                        await self.client.send_message(entity, FREE_WATERMARK.strip())
-                    except Exception:
-                        pass
 
                 db.update_account(self.account_id, last_used=datetime.utcnow().isoformat())
                 db.increment_stat(self.account_id, "messages_sent")
