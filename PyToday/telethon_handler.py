@@ -8,7 +8,7 @@ from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.functions.messages import ForwardMessagesRequest, ImportChatInviteRequest
 from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Channel, Chat, InputPeerChannel, InputPeerSelf, PeerChannel, PeerChat
-from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError, PhoneCodeExpiredError, PasswordHashInvalidError, UserAlreadyParticipantError, InviteHashExpiredError, InviteHashInvalidError
+from telethon.errors import SessionPasswordNeededError, FloodWaitError, PhoneCodeInvalidError, PhoneCodeExpiredError, PasswordHashInvalidError, UserAlreadyParticipantError, InviteHashExpiredError, InviteHashInvalidError
 from datetime import datetime
 from PyToday import database as db   # new Supabase DB
 from PyToday.encryption import encrypt_data, decrypt_data
@@ -697,7 +697,7 @@ async def join_group_by_link(account_id, invite_link):
             return {"success": False, "error": "Session expired"}
         
         hash_pattern = re.compile(r'(?:https?://)?(?:t\.me|telegram\.me)/(?:joinchat/|\+)([a-zA-Z0-9_-]+)')
-        username_pattern = re.compile(r'(?:https?://)?(?:t\.me|telegram\.me)/([a-zA-Z][a-zA-Z0-9_]{4,})')
+        username_pattern = re.compile(r'(?:https?://)?(?:t\.me|telegram\.me)/([a-zA-Z][\w]{3,})')
         
         hash_match = hash_pattern.search(invite_link)
         username_match = username_pattern.search(invite_link)
@@ -719,6 +719,27 @@ async def join_group_by_link(account_id, invite_link):
             except (InviteHashExpiredError, InviteHashInvalidError):
                 await client.disconnect()
                 return {"success": False, "error": "Invalid or expired invite link"}
+            except FloodWaitError as e:
+                import asyncio as _aio
+                wait = e.seconds + 5
+                logger.warning(f"FloodWait on join: sleeping {wait}s")
+                await _aio.sleep(wait)
+                # Retry after wait
+                try:
+                    if hash_match:
+                        result = await client(ImportChatInviteRequest(hash_match.group(1)))
+                        if hasattr(result, 'chats') and result.chats:
+                            chat = result.chats[0]
+                            group_title = getattr(chat, 'title', None)
+                            group_id = chat.id
+                    elif username_match:
+                        entity = await client.get_entity(username_match.group(1))
+                        await client(JoinChannelRequest(entity))
+                        group_title = getattr(entity, 'title', None)
+                        group_id = entity.id
+                except Exception as retry_err:
+                    await client.disconnect()
+                    return {"success": False, "error": f"Retry failed: {str(retry_err)}"}
         elif username_match:
             username = username_match.group(1)
             try:

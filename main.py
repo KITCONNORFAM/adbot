@@ -74,6 +74,57 @@ async def post_init(application):
     await database.init_db()
     logger.info("✅ Database initialized")
 
+    # Auto-start auto-reply listeners for all accounts with auto_reply enabled
+    asyncio.create_task(_auto_reply_watchdog())
+    logger.info("✅ Auto-reply watchdog started")
+
+
+async def _auto_reply_watchdog():
+    """Periodically check and restart auto-reply listeners that have died."""
+    from PyToday.account_worker import worker_pool
+    from PyToday import telethon_handler
+
+    await asyncio.sleep(5)  # Let the bot fully start first
+
+    while True:
+        try:
+            # Get all users who have auto-reply enabled
+            all_users = database.get_all_users_with_auto_reply() if hasattr(database, 'get_all_users_with_auto_reply') else []
+            
+            for user_data in all_users:
+                user_id = user_data.get('user_id')
+                if not user_id:
+                    continue
+                    
+                accounts = database.get_accounts(user_id, logged_in_only=True)
+                for account in accounts:
+                    account_id = account["id"]
+                    settings = database.get_account_settings(str(account_id)) or {}
+                    auto_reply_enabled = settings.get('auto_reply', False)
+                    reply_text = settings.get('auto_reply_text') or config.AUTO_REPLY_TEXT
+                    
+                    if auto_reply_enabled:
+                        client_key = str(account_id)
+                        adv_key = f"adv_{account_id}"
+                        
+                        # Check if listener is already running
+                        if client_key not in telethon_handler.active_clients and adv_key not in telethon_handler.active_clients:
+                            try:
+                                worker = await worker_pool.get_worker(int(account_id), user_id)
+                                if worker:
+                                    success = await worker.start_auto_reply(reply_text)
+                                    if success:
+                                        telethon_handler.active_clients[adv_key] = worker.client
+                                        asyncio.create_task(worker.client.run_until_disconnected())
+                                        logger.info(f"Watchdog: restarted auto-reply for account {account_id}")
+                            except Exception as e:
+                                logger.error(f"Watchdog: failed to restart auto-reply for {account_id}: {e}")
+        except Exception as e:
+            logger.error(f"Auto-reply watchdog error: {e}")
+
+        await asyncio.sleep(60)  # Check every 60 seconds
+
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Expiry Scheduler (runs every 30 minutes via PTB JobQueue)

@@ -1850,7 +1850,7 @@ async def start_advertising(query, user_id, context):
     advertising_flags[user_id] = True
     context.user_data["advertising_active"] = True
 
-    mode_text = "Forward from Saved Messages" if use_forward else "Direct Send"
+    mode_text = "ꜰᴏʀᴡᴀʀᴅ ꜰʀᴏᴍ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs" if use_forward else "ᴅɪʀᴇᴄᴛ sᴇɴᴅ"
     target_groups_count = len(db.get_target_groups(active_accounts[0]["id"])) if (target_mode == "selected" and active_accounts) else 0
     target_text = f"sᴇʟᴇᴄᴛᴇᴅ ({target_groups_count} ɢʀᴏᴜᴘs)" if target_mode == "selected" else "ᴀʟʟ ɢʀᴏᴜᴘs"
 
@@ -1871,49 +1871,73 @@ async def start_advertising(query, user_id, context):
 
 
 async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forward, target_mode):
-    try:
+    """
+    Concurrent multi-account advertising campaign.
+    Each account runs its own independent broadcast task via asyncio.gather.
+    Uses the new AccountWorker system for persistent connections.
+    """
+    from PyToday.account_worker import worker_pool
+
+    advertising_flags[user_id] = True
+
+    async def _single_account_campaign(account):
+        """One account's independent broadcast loop."""
+        account_id = str(account["id"])
+        worker = await worker_pool.get_worker(int(account_id), user_id)
+        if not worker:
+            logger.error(f"Campaign: cannot get worker for account {account_id}")
+            return
+
         logs_channel = db.get_logs_channel(user_id)
-        logs_channel_id = logs_channel.get('channel_id') if logs_channel else None
+        logs_channel_id = logs_channel.get("channel_id") if logs_channel else None
 
         while advertising_flags.get(user_id, False):
-            for account in accounts:
+            # Fetch fresh per-account settings each round
+            s = db.get_account_settings(account_id) or {}
+            acc_ad_text = s.get("ad_text") or ad_text
+            acc_use_forward = s.get("use_forward_mode", use_forward)
+            acc_time_interval = s.get("time_interval", delay)
+
+            if not acc_use_forward and not acc_ad_text:
+                await asyncio.sleep(5)
+                continue
+
+            # Determine target groups — ONLY send to selected if target_mode == "selected"
+            if target_mode == "selected":
+                tg = db.get_target_groups(int(account_id))
+                if not tg:
+                    logger.warning(f"Campaign account {account_id}: no target groups, skipping round")
+                    await asyncio.sleep(5)
+                    continue
+            else:
+                tg = None  # Worker will fetch all groups from dialogs
+
+            try:
+                await worker.broadcast(
+                    message=acc_ad_text,
+                    delay=acc_time_interval,
+                    use_forward=acc_use_forward,
+                    target_groups=tg,
+                    logs_channel_id=logs_channel_id,
+                    cancel_flags=advertising_flags,
+                    cancel_user_id=user_id,
+                )
+            except Exception as e:
+                logger.error(f"Campaign account {account_id} error: {e}")
+
+            if not advertising_flags.get(user_id, False):
+                break
+
+            # Inter-round pause (interruptible)
+            for _ in range(delay):
                 if not advertising_flags.get(user_id, False):
                     break
+                await asyncio.sleep(1)
 
-                account_id = str(account["id"])
-                
-                # Fetch fresh settings precisely for this specific account
-                s = db.get_account_settings(account_id) or {}
-                acc_ad_text = s.get('ad_text') or ad_text
-                acc_use_forward = s.get('use_forward_mode', use_forward)
-                acc_time_interval = s.get('time_interval', delay)
-                
-                if not acc_use_forward and not acc_ad_text:
-                    continue # Skip this account if no ad text or forward mode is set
-
-                if target_mode == "selected":
-                    target_groups = db.get_target_groups(account_id)
-                    result = await telethon_handler.broadcast_to_target_groups(
-                        account_id, target_groups, acc_ad_text, acc_time_interval, acc_use_forward, logs_channel_id,
-                        cancel_user_id=user_id, cancel_flags=advertising_flags
-                    )
-                else:
-                    result = await telethon_handler.broadcast_message(
-                        account_id, acc_ad_text, acc_time_interval, acc_use_forward, logs_channel_id,
-                        cancel_user_id=user_id, cancel_flags=advertising_flags
-                    )
-
-                if not advertising_flags.get(user_id, False):
-                    break
-
-                # Sleep in small chunks so we can interrupt immediately if stopped
-                time_slept = 0
-                while time_slept < acc_time_interval:
-                    if not advertising_flags.get(user_id, False):
-                        break
-                    await asyncio.sleep(1)
-                    time_slept += 1
-
+    try:
+        # Launch ALL accounts concurrently
+        tasks = [asyncio.create_task(_single_account_campaign(acc)) for acc in accounts]
+        await asyncio.gather(*tasks, return_exceptions=True)
     except Exception as e:
         logger.error(f"Advertising campaign error: {e}")
     finally:

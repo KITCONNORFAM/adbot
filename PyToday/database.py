@@ -314,6 +314,32 @@ def get_users_count() -> int:
     return len(get_all_users())
 
 
+def get_all_users_with_auto_reply() -> List[Dict]:
+    """Return users who have at least one account with auto_reply enabled."""
+    try:
+        db = get_client()
+        # Get all account_settings with auto_reply = True
+        result = db.table("account_settings").select("account_id").eq("auto_reply", True).execute()
+        if not result.data:
+            return []
+
+        # Get unique user_ids from those accounts
+        account_ids = [r["account_id"] for r in result.data]
+        users_seen = set()
+        user_list = []
+        
+        for acc_id in account_ids:
+            acc = get_account(int(acc_id) if isinstance(acc_id, str) else acc_id)
+            if acc and acc.get("user_id") and acc["user_id"] not in users_seen:
+                users_seen.add(acc["user_id"])
+                user_list.append({"user_id": acc["user_id"]})
+        
+        return user_list
+    except Exception as e:
+        logger.error(f"get_all_users_with_auto_reply error: {e}")
+        return []
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # OWNER MANAGEMENT
 # ══════════════════════════════════════════════════════════════════════════════
