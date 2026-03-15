@@ -1802,7 +1802,7 @@ async def start_advertising(query, user_id, context):
     if not use_forward and not ad_text:
         await send_new_message(
             query,
-            "<b>⚠️ ɴᴏ ᴀᴅ ᴛᴇxᴛ sᴇᴛ</b>\n\n<i>Please set your ad text first or enable forward mode to forward from Saved Messages.</i>",
+            "<b>⚠️ ɴᴏ ᴀᴅ ᴛᴇxᴛ sᴇᴛ</b>\n\n<i>ᴘʟᴇᴀsᴇ sᴇᴛ ʏᴏᴜʀ ᴀᴅ ᴛᴇxᴛ ꜰɪʀsᴛ ᴏʀ ᴇɴᴀʙʟᴇ ꜰᴏʀᴡᴀʀᴅ ᴍᴏᴅᴇ.</i>",
             advertising_menu_keyboard()
         )
         return
@@ -1836,8 +1836,7 @@ async def start_advertising(query, user_id, context):
         return
 
     if target_mode == "selected":
-        accounts = db.get_accounts(user_id, logged_in_only=True)
-        target_groups = db.get_target_groups(accounts[0]["id"]) if accounts else []
+        target_groups = db.get_target_groups(active_accounts[0]["id"]) if active_accounts else []
         if not target_groups:
             await send_new_message(
                 query,
@@ -1862,7 +1861,7 @@ async def start_advertising(query, user_id, context):
 🎯 <b>ᴛᴀʀɢᴇᴛ:</b> <code>{target_text}</code>
 ⏱ <b>ɪɴᴛᴇʀᴠᴀʟ:</b> <code>{time_interval}s</code>
 
-<i>ᴄᴀᴍᴘᴀɪɢɴ ɪs ʀᴜɴɴɪɴɢ...</i>
+<i>ᴄᴀᴍᴘᴀɪɢɴ ɪs ʀᴜɴɴɪɴɢ... ᴛᴀᴘ ▣ sᴛᴏᴘ ᴛᴏ ᴄᴀɴᴄᴇʟ</i>
 """
 
     await send_new_message(query, start_text, advertising_menu_keyboard())
