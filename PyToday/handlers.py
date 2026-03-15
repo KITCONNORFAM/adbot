@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 import logging
 from datetime import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -733,17 +733,17 @@ async def show_settings(query, user_id):
     use_multiple = len(accounts) > 1
     use_forward = False
     auto_reply = False
-    auto_group_join = False
+    auto_join = False
     if accounts:
         s = db.get_account_settings(accounts[0]["id"]) or {}
         use_forward = s.get("use_forward_mode", False)
         auto_reply = s.get("auto_reply_enabled", False)
-        auto_group_join = s.get("auto_group_join", False)
+        auto_join = s.get("auto_join", False)
 
     mode_text = "💎💎 Multiple" if use_multiple else "💎 Single"
     forward_text = "📨 Forward" if use_forward else "📤 Send"
     auto_reply_text = "✅ ON" if auto_reply else "⏸ OFF"
-    auto_join_text = "✅ ON" if auto_group_join else "⏸ OFF"
+    auto_join_text = "✅ ON" if auto_join else "⏸ OFF"
 
     settings_text = f"""
 <b>⚙️ sᴇᴛᴛɪɴɢs</b>
@@ -762,7 +762,7 @@ async def show_settings(query, user_id):
     force_sub_settings = db.get_force_sub_settings()
     force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
 
-    await send_new_message(query, settings_text, settings_keyboard(use_multiple, use_forward, auto_reply, auto_group_join, force_sub_enabled, db.is_owner(user_id)))
+    await send_new_message(query, settings_text, settings_keyboard(use_multiple, use_forward, auto_reply, auto_join, force_sub_enabled, db.is_owner(user_id)))
 
 
 async def toggle_forward_mode(query, user_id):
@@ -802,7 +802,9 @@ async def show_auto_reply_menu(query, user_id):
     if accounts:
         s = db.get_account_settings(accounts[0]["id"]) or {}
         auto_reply = s.get("auto_reply_enabled", False)
-        is_custom = bool(s.get("sequential_replies") or s.get("keyword_replies"))
+        seq_replies = db.get_sequential_replies(accounts[0]["id"])
+        kw_replies = db.get_keyword_replies(accounts[0]["id"])
+        is_custom = bool(seq_replies or kw_replies)
 
     status = "✅ ON" if auto_reply else "⏸ OFF"
     text_type = "Custom" if is_custom else "Default"
@@ -915,14 +917,28 @@ async def view_reply_text(query, user_id):
     auto_reply = False
     custom_text = ""
     if accounts:
-        s = db.get_account_settings(accounts[0]["id"]) or {}
+        account_id = accounts[0]["id"]
+        s = db.get_account_settings(account_id) or {}
         auto_reply = s.get("auto_reply_enabled", False)
-        replies = s.get("sequential_replies") or []
-        custom_text = replies[0].get("text", "") if replies else ""
+        # Read from the auto_replies table (sequential replies)
+        seq_replies = db.get_sequential_replies(account_id)
+        if seq_replies:
+            custom_text = seq_replies[0].get("message_text", "") or ""
 
     if custom_text:
         text_type = "Custom"
-        display_text = custom_text
+        # Show all sequential replies if there are multiple
+        if accounts:
+            all_replies = db.get_sequential_replies(accounts[0]["id"])
+            if len(all_replies) > 1:
+                display_text = ""
+                for i, r in enumerate(all_replies, 1):
+                    msg = r.get("message_text", "")
+                    display_text += f"\n{i}. {msg}"
+            else:
+                display_text = custom_text
+        else:
+            display_text = custom_text
     else:
         text_type = "Default"
         display_text = config.AUTO_REPLY_TEXT
@@ -945,9 +961,14 @@ async def toggle_auto_group_join(query, user_id):
         return
     acc = accounts[0]
     s = db.get_account_settings(acc["id"]) or {}
-    current_mode = s.get("auto_group_join", False)
+    current_mode = s.get('auto_join', False)
     new_mode = not current_mode
-    db.update_account_settings(acc["id"], auto_group_join=new_mode)
+    try:
+        db.update_account_settings(acc["id"], auto_join=new_mode)
+    except Exception as e:
+        logger.error(f"toggle_auto_group_join DB error: {e}")
+        await query.answer("⚠️ Failed to update setting.", show_alert=True)
+        return
 
     accounts_all = db.get_accounts(user_id, logged_in_only=True)
     use_multiple = len(accounts_all) > 1
@@ -1635,7 +1656,7 @@ async def set_single_mode(query, user_id):
         s = db.get_account_settings(accounts[0]["id"]) or {}
         use_forward = s.get('use_forward_mode', False)
         auto_reply = s.get('auto_reply_enabled', False)
-        auto_group_join = s.get('auto_group_join', False)
+        auto_group_join = s.get('auto_join', False)
 
         force_sub_settings = db.get_force_sub_settings()
         force_sub_enabled = force_sub_settings.get('enabled', False) if force_sub_settings else False
@@ -1757,7 +1778,7 @@ async def select_single_account(query, user_id, account_id):
     s = db.get_account_settings(account_id) or {}
     use_forward = s.get('use_forward_mode', False)
     auto_reply = s.get('auto_reply_enabled', False)
-    auto_group_join = s.get('auto_group_join', False)
+    auto_group_join = s.get('auto_join', False)
 
     result_text = f"""
 <b>✅ ᴀᴄᴄᴏᴜɴᴛ sᴇʟᴇᴄᴛᴇᴅ</b>
@@ -1825,12 +1846,10 @@ async def start_advertising(query, user_id, context):
     ad_text = s.get('ad_text')
     use_forward = s.get('use_forward_mode', False)
     
-    # Premium-only: multi-account advertising
+    # Premium/Owner: always use ALL logged-in accounts
+    # Trial/Free: single account only
     role = db.get_user_role(user_id)
-    if role in (None, "user", "trial"):
-        use_multiple = False  # free/trial can only use single account
-    else:
-        use_multiple = user.get('use_multiple_accounts', False)
+    use_multiple = role in ("premium", "owner")
     time_interval = s.get('time_interval', 60)
     target_mode = s.get('target_mode', 'all')
 
@@ -1844,7 +1863,8 @@ async def start_advertising(query, user_id, context):
 
     import json as _json
     if use_multiple:
-        # selected_accounts stored in context (from toggle) or DB as JSON string
+        # Premium/Owner: use ALL logged-in accounts by default
+        # Check if user has specifically selected accounts
         selected_accounts = context.user_data.get("selected_accounts", [])
         if not selected_accounts:
             raw = user.get('selected_accounts', '[]') or '[]'
@@ -1853,8 +1873,13 @@ async def start_advertising(query, user_id, context):
             except Exception:
                 selected_accounts = []
         if not selected_accounts:
-            selected_accounts = [str(acc["id"]) for acc in accounts]
-        active_accounts = [acc for acc in accounts if str(acc["id"]) in [str(x) for x in selected_accounts]]
+            # Default: use ALL logged-in accounts for premium/owner
+            active_accounts = list(accounts)
+        else:
+            active_accounts = [acc for acc in accounts if str(acc["id"]) in [str(x) for x in selected_accounts]]
+            # Fallback: if no selected accounts match, use all
+            if not active_accounts:
+                active_accounts = list(accounts)
     else:
         single_account = context.user_data.get("selected_single_account") or user.get('selected_single_account')
         if single_account:

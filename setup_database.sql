@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS account_settings (
     auto_sleep       BOOLEAN NOT NULL DEFAULT FALSE,
     use_forward_mode BOOLEAN NOT NULL DEFAULT FALSE,
     auto_reply_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    auto_join        BOOLEAN NOT NULL DEFAULT FALSE,
     target_mode      TEXT NOT NULL DEFAULT 'all',
     selected_groups  TEXT NOT NULL DEFAULT '[]'
 );

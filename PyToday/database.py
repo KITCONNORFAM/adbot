@@ -1032,6 +1032,35 @@ def sweep_expired_roles() -> Dict:
 
     return result
 
+
+def has_replied_to_user(account_id, from_user_id: int) -> bool:
+    db = get_client()
+    try:
+        result = db.table("auto_reply_state").select("id").eq("account_id", int(account_id)).eq("from_user_id", from_user_id).execute()
+        return bool(result.data)
+    except Exception as e:
+        logger.error(f"has_replied_to_user error for account {account_id}, user {from_user_id}: {e}")
+        return False
+
+def mark_user_replied(account_id, from_user_id: int, username: str = None) -> bool:
+    db = get_client()
+    try:
+        # Check if exists first
+        if has_replied_to_user(account_id, from_user_id):
+            return True
+            
+        db.table("auto_reply_state").insert({
+            "account_id": int(account_id),
+            "from_user_id": from_user_id,
+            "next_index": 0,
+            "replied_at": _now_iso()
+        }).execute()
+        return True
+    except Exception as e:
+        logger.error(f"mark_user_replied error for account {account_id}, user {from_user_id}: {e}")
+        return False
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # SHIM FUNCTIONS
 # ══════════════════════════════════════════════════════════════════════════════
