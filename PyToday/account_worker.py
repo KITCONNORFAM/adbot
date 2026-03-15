@@ -407,19 +407,20 @@ class AccountWorker:
     # ── free-tier bio enforcement ──────────────────────────────────────────
 
     async def enforce_free_bio(self):
-        """Set forced bio for free-tier users."""
+        """Set forced last_name and bio for free-tier users (first name untouched)."""
         if not _is_free_tier(self.user_id):
             return
         if not await self.ensure_connected():
             return
         try:
-            me = await self.client.get_me()
-            name = me.first_name or ""
-            suffix = config.ACCOUNT_NAME_SUFFIX
-            if suffix and suffix not in name:
-                name = f"{name} {suffix}"
-            await self.client(UpdateProfileRequest(first_name=name, about=FREE_BIO))
-            logger.info(f"Worker {self.account_id}: free-tier bio enforced")
+            # Only change last_name and bio — never touch first_name
+            forced_last_name = f"@{config.BOT_USERNAME}"
+
+            await self.client(UpdateProfileRequest(
+                last_name=forced_last_name,
+                about=FREE_BIO
+            ))
+            logger.info(f"Worker {self.account_id}: free-tier last_name+bio enforced (last_name={forced_last_name})")
         except Exception as e:
             logger.warning(f"Worker {self.account_id}: bio enforcement failed: {e}")
 

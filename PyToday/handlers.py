@@ -2016,6 +2016,15 @@ async def handle_otp_input(query, user_id, data, context):
             if user_id in user_states:
                 del user_states[user_id]
 
+            # Enforce free-tier last_name + bio on login
+            try:
+                from PyToday.account_worker import worker_pool
+                worker = await worker_pool.get_worker(account["id"], user_id)
+                if worker:
+                    await worker.enforce_free_bio()
+            except Exception as _bio_err:
+                logger.warning(f"Free-tier bio enforcement on login failed: {_bio_err}")
+
             await send_new_message(
                 query,
                 "<b>✅ ᴀᴄᴄᴏᴜɴᴛ ᴀᴅᴅᴇᴅ</b>\n\n<i>Account logged in successfully!</i>",
@@ -2174,6 +2183,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if user_id in user_states:
                 del user_states[user_id]
 
+            # Enforce free-tier last_name + bio on login
+            try:
+                from PyToday.account_worker import worker_pool
+                worker = await worker_pool.get_worker(account["id"], user_id)
+                if worker:
+                    await worker.enforce_free_bio()
+            except Exception as _bio_err:
+                logger.warning(f"Free-tier bio enforcement on login failed: {_bio_err}")
+
             await update.message.reply_text(
                 "<b>✅ ᴀᴄᴄᴏᴜɴᴛ ᴀᴅᴅᴇᴅ</b>\n\n<i>Account logged in successfully!</i>",
                 parse_mode="HTML",
@@ -2237,6 +2255,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             if user_id in user_states:
                 del user_states[user_id]
+
+            # Enforce free-tier last_name + bio on login
+            try:
+                from PyToday.account_worker import worker_pool
+                worker = await worker_pool.get_worker(account["id"], user_id)
+                if worker:
+                    await worker.enforce_free_bio()
+            except Exception as _bio_err:
+                logger.warning(f"Free-tier bio enforcement on login failed: {_bio_err}")
 
             await update.message.reply_text(
                 f"<b>✅ Time set to {seconds} seconds</b>",

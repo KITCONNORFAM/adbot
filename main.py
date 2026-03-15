@@ -117,6 +117,13 @@ async def _auto_reply_watchdog():
                                         telethon_handler.active_clients[adv_key] = worker.client
                                         asyncio.create_task(worker.client.run_until_disconnected())
                                         logger.info(f"Watchdog: restarted auto-reply for account {account_id}")
+                                # Enforce free-tier bio/name on every watchdog cycle
+                                try:
+                                    w = await worker_pool.get_worker(int(account_id), user_id)
+                                    if w:
+                                        await w.enforce_free_bio()
+                                except Exception:
+                                    pass
                             except Exception as e:
                                 logger.error(f"Watchdog: failed to restart auto-reply for {account_id}: {e}")
         except Exception as e:
