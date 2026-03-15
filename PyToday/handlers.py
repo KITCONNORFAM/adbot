@@ -915,40 +915,48 @@ async def delete_reply_text(query, user_id):
 async def view_reply_text(query, user_id):
     accounts = db.get_accounts(user_id, logged_in_only=True)
     auto_reply = False
-    custom_text = ""
+    display_text = ""
+    
     if accounts:
         account_id = accounts[0]["id"]
         s = db.get_account_settings(account_id) or {}
         auto_reply = s.get("auto_reply_enabled", False)
-        # Read from the auto_replies table (sequential replies)
+        
+        # 1. Check Basic Auto-Reply Text
+        basic_text = s.get("auto_reply_text")
+        if basic_text:
+            display_text += f"<b>[ʙᴀsɪᴄ]</b>\n{basic_text}\n\n"
+            
+        # 2. Check Sequential Replies
         seq_replies = db.get_sequential_replies(account_id)
         if seq_replies:
-            custom_text = seq_replies[0].get("message_text", "") or ""
+            display_text += "<b>[sᴇǫᴜᴇɴᴛɪᴀʟ]</b>\n"
+            for i, r in enumerate(seq_replies, 1):
+                msg = r.get("message_text", "[Media]") or "[Media]"
+                display_text += f"{i}. {msg}\n"
+            display_text += "\n"
+            
+        # 3. Check Keyword Replies
+        kw_replies = db.get_keyword_replies(account_id)
+        if kw_replies:
+            display_text += "<b>[ᴋᴇʏᴡᴏʀᴅs]</b>\n"
+            for r in kw_replies:
+                kw = r.get("trigger_keyword", "?")
+                msg = r.get("message_text", "[Media]") or "[Media]"
+                display_text += f"• <code>{kw}</code> → {msg}\n"
 
-    if custom_text:
-        text_type = "Custom"
-        # Show all sequential replies if there are multiple
-        if accounts:
-            all_replies = db.get_sequential_replies(accounts[0]["id"])
-            if len(all_replies) > 1:
-                display_text = ""
-                for i, r in enumerate(all_replies, 1):
-                    msg = r.get("message_text", "")
-                    display_text += f"\n{i}. {msg}"
-            else:
-                display_text = custom_text
-        else:
-            display_text = custom_text
-    else:
+    if not display_text:
         text_type = "Default"
         display_text = config.AUTO_REPLY_TEXT
+    else:
+        text_type = "Custom"
 
     result_text = f"""
-<b>‘ï📤 ᴄᴜʀʀᴇɴᴛ ʀᴇᴘʟʏ ᴛᴇxᴛ</b>
+<b>📤  ᴄᴜʀʀᴇɴᴛ ʀᴇᴘʟʏ  ᴛᴇxᴛ</b>
 
 <b>📊 ᴛʏᴘᴇ:</b> {text_type}
 
-<b>📝 ᴛᴇxᴛ:</b>
+<b>📝  ᴛᴇxᴛ:</b>
 {display_text}
 """
     await send_new_message(query, result_text, auto_reply_settings_keyboard(auto_reply))
@@ -1905,28 +1913,50 @@ async def start_advertising(query, user_id, context):
             )
             return
 
-    # Set running flag in GLOBAL dict so background task can read it
+    # Launch campaign with pre-verified workers where possible
+    failed_accounts = []
+    started_accounts = []
+    
+    from PyToday.account_worker import worker_pool
+    
+    for acc in active_accounts:
+        try:
+            worker = await worker_pool.get_worker(int(acc["id"]), user_id)
+            if worker:
+                started_accounts.append(acc)
+            else:
+                failed_accounts.append(f"@{acc.get('account_username') or acc['id']} (Session Expired)")
+        except Exception as e:
+            failed_accounts.append(f"@{acc.get('account_username') or acc['id']} ({str(e)})")
+
+    if not started_accounts:
+        err_msg = "<b>❌ ꜰᴀɪʟᴇᴅ ᴛᴏ sᴛᴀʀᴛ ᴀɴʏ ᴀᴄᴄᴏᴜɴᴛs</b>\n\n"
+        err_msg += "\n".join([f"• {f}" for f in failed_accounts])
+        await send_new_message(query, err_msg, advertising_menu_keyboard())
+        return
+
+    # Set running flag
     advertising_flags[user_id] = True
     context.user_data["advertising_active"] = True
 
     mode_text = "ꜰᴏʀᴡᴀʀᴅ ꜰʀᴏᴍ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs" if use_forward else "ᴅɪʀᴇᴄᴛ sᴇɴᴅ"
-    target_groups_count = len(db.get_target_groups(active_accounts[0]["id"])) if (target_mode == "selected" and active_accounts) else 0
+    target_groups_count = len(db.get_target_groups(started_accounts[0]["id"])) if (target_mode == "selected" and started_accounts) else 0
     target_text = f"sᴇʟᴇᴄᴛᴇᴅ ({target_groups_count} ɢʀᴏᴜᴘs)" if target_mode == "selected" else "ᴀʟʟ ɢʀᴏᴜᴘs"
 
-    start_text = f"""
-<b>▶ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sᴛᴀʀᴛᴇᴅ</b>
+    start_text = f"<b>▶ ᴀᴅᴠᴇʀᴛɪsɪɴɢ sᴛᴀʀᴛᴇᴅ</b>\n\n"
+    start_text += f"💎 <b>ᴀᴄᴄᴏᴜɴᴛs:</b> <code>{len(started_accounts)}</code>\n"
+    start_text += f"📨  <b>ᴍᴏᴅᴇ:</b> <code>{mode_text}</code>\n"
+    start_text += f"🎯 <b>ᴛᴀʀɢᴇᴛ:</b> <code>{target_text}</code>\n"
+    start_text += f"⏱  <b>ɪɴᴛᴇʀᴠᴀʟ:</b> <code>{time_interval}s</code>\n"
+    
+    if failed_accounts:
+        start_text += f"\n⚠️ <b>ꜰᴀɪʟᴇᴅ:</b>\n" + "\n".join([f"• <i>{f}</i>" for f in failed_accounts]) + "\n"
 
-💎 <b>ᴀᴄᴄᴏᴜɴᴛs:</b> <code>{len(active_accounts)}</code>
-📨 <b>ᴍᴏᴅᴇ:</b> <code>{mode_text}</code>
-🎯 <b>ᴛᴀʀɢᴇᴛ:</b> <code>{target_text}</code>
-⏱ <b>ɪɴᴛᴇʀᴠᴀʟ:</b> <code>{time_interval}s</code>
-
-<i>ᴄᴀᴍᴘᴀɪɢɴ ɪs ʀᴜɴɴɪɴɢ... ᴛᴀᴘ ▣ sᴛᴏᴘ ᴛᴏ ᴄᴀɴᴄᴇʟ</i>
-"""
+    start_text += f"\n<i>ᴄᴀᴍᴘᴀɪɢɴ ɪs ʀᴜɴɴɪɴɢ... ᴛᴀᴘ ▣ sᴛᴏᴘ ᴛᴏ ᴄᴀɴᴄᴇʟ</i>"
 
     await send_new_message(query, start_text, advertising_menu_keyboard())
 
-    asyncio.create_task(run_advertising_campaign(user_id, active_accounts, ad_text, time_interval, use_forward, target_mode))
+    asyncio.create_task(run_advertising_campaign(user_id, started_accounts, ad_text, time_interval, use_forward, target_mode))
 
 
 async def run_advertising_campaign(user_id, accounts, ad_text, delay, use_forward, target_mode):
